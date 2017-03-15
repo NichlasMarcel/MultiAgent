@@ -102,7 +102,7 @@ public class Client {
 
     public static void main( String[] args ){
         System.err.println( "Hello from Client. I am sending this using the error outputstream" );
-
+        System.err.println( "Bitch" );
 
         try{
             Client cc = new Client();

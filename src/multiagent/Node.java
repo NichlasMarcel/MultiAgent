@@ -115,6 +115,12 @@ public class Node {
     }
 */
 
+    /**
+     * Test this shit out!!!!
+     * @param row this is the x coordinate
+     * @param col this is the y coordinate
+     * @return
+     */
     private boolean cellIsFree(int row, int col) {
         return !Client.walls[row][col] && this.boxes[row][col] == 0 && this.agents[row][col] == 0;
     }

@@ -17,7 +17,6 @@ public class Client {
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
     public static char[][] goals; // Taget fra node
-    public static char[][] agents; // Taget fra node
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
     public static int MAX_COL;
@@ -33,7 +32,6 @@ public class Client {
             }
 
         }
-
     }
 
 
@@ -73,7 +71,6 @@ public class Client {
 
         goals = new char[MAX_ROW][MAX_COL];
         walls = new boolean[MAX_ROW][MAX_COL];
-        agents = new char[MAX_ROW][MAX_COL];
 
 
         initialState = new Node(null);

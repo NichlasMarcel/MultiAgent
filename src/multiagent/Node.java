@@ -52,7 +52,7 @@ public class Node {
             for (int col = 1; col < Client.MAX_COL - 1; col++) {
                 char g = Client.goals[row][col];
                 char b = Character.toLowerCase(boxes[row][col]);
-                if (g > 0 && b != g && Client.colors.get(g).equals(Client.colors.get(b))) {
+                if (g > 0 && b != g) {
                     return false;
                 }
             }

@@ -305,6 +305,7 @@ public class CentralPlanner {
                     }
                 }
             }
+            //
             // Check this code;
             else if (node.action.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going

@@ -268,54 +268,58 @@ public class CentralPlanner {
             int newAgentCol = node.agentCol + Command.dirToColChange(node.action.dir1);
 
             if (node.action.actionType == Command.Type.Move) {
+                //if(node.parent.agentRow == 1 && node.parent.agentCol == 13){
+                //    System.err.println("Agent found! " + agents[node.agentRow][node.agentCol]);
+                //}
                 // Check if there's a wall or box on the cell to which the agent is moving
-                if (IsCellFree(newAgentRow, newAgentCol)) {
-                    System.err.println("Row: " + node.agentRow);
-                    System.err.println("Col: " + node.agentCol);
+                if (IsCellFree(node.agentRow, node.agentCol)) {
+                   // System.err.println("Row: " + node.agentRow);
+                    //System.err.println("Col: " + node.agentCol);
 
 
-                    char agent = agents[node.agentRow][node.agentCol];
-                    agents[node.agentRow][node.agentCol] = ' ';
-                    agents[newAgentRow][newAgentCol] = agent;
-
+                    char agent = agents[node.parent.agentRow][node.parent.agentCol];
+                    agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                    agents[node.agentRow][node.agentCol] = agent;
 
                     //System.err.println("AGE " + agent);
                     //System.err.println("NRow: " + newAgentRow);
                     //System.err.println("NCol: " + newAgentCol);
                 }
-                else
-                    System.err.println(this);
+                //else
+                    //System.err.println(this);
             } else if (node.action.actionType == Command.Type.Push) {
                 // Make sure that there's actually a box to move
-                if (boxAt(newAgentRow, newAgentCol)) {
-                    int newBoxRow = newAgentRow + Command.dirToRowChange(node.action.dir2);
-                    int newBoxCol = newAgentCol + Command.dirToColChange(node.action.dir2);
+                if (boxAt(node.agentRow, node.agentCol)) {
+                    int newBoxRow = node.agentRow + Command.dirToRowChange(node.action.dir2);
+                    int newBoxCol = node.agentCol + Command.dirToColChange(node.action.dir2);
                     // .. and that new cell of box is free
                     if (IsCellFree(newBoxRow, newBoxCol)) {
-                        char agent = agents[node.agentRow][node.agentCol];
-                        agents[node.agentRow][node.agentCol] = ' ';
-                        agents[newAgentRow][newAgentCol] = agent;
+                        char agent = agents[node.parent.agentRow][node.parent.agentCol];
+                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        agents[node.agentRow][node.agentCol] = agent;
 
-                        char box = boxes[newAgentRow][newAgentCol];
-                        boxes[newAgentRow][newAgentCol] = ' ';
+                        char box = boxes[node.agentRow][node.agentCol];
+                        boxes[node.agentRow][node.agentCol] = ' ';
                         boxes[newBoxRow][newBoxCol] = box;
 
                     }
                 }
-            } else if (node.action.actionType == Command.Type.Pull) {
+            }
+            // Check this code;
+            else if (node.action.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going
-                if (IsCellFree(newAgentRow, newAgentCol)) {
-                    int boxRow = node.agentRow + Command.dirToRowChange(node.action.dir2);
-                    int boxCol = node.agentCol + Command.dirToColChange(node.action.dir2);
+                if (IsCellFree(node.agentRow, node.agentCol)) {
+                    int boxRow = node.parent.agentRow + Command.dirToRowChange(node.action.dir2);
+                    int boxCol = node.parent.agentCol + Command.dirToColChange(node.action.dir2);
                     // .. and there's a box in "dir2" of the agent
                     if (boxAt(boxRow, boxCol)) {
-                        char agent = agents[node.agentRow][node.agentCol];
-                        agents[node.agentRow][node.agentCol] = ' ';
-                        agents[newAgentRow][newAgentCol] = agent;
+                        char agent = agents[node.parent.agentRow][node.parent.agentCol];
+                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        agents[node.agentRow][node.agentCol] = agent;
 
                         char box = boxes[boxRow][boxCol];
                         boxes[boxRow][boxCol] = ' ';
-                        boxes[node.agentRow][node.agentCol] = box;
+                        boxes[node.parent.agentRow][node.parent.agentCol] = box;
                     }
                 }
                 //else if (node.action.actionType == Command.Type.NoOp)

@@ -12,9 +12,9 @@ public class CentralPlanner {
     private BufferedReader in;
 
     //private List< Agent > agents = new ArrayList< Agent >();
-    public Node initialState;
+    public Node state;
     public char[][] goals; // Taget fra node
-    public char[][] agents; // Taget fra node
+    public static char[][] agents; // Taget fra node
     public char[][] boxes;
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
@@ -98,21 +98,30 @@ public class CentralPlanner {
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
         CentralPlanner c = new CentralPlanner(serverMessages);
         c.LoadMap();
+        c.Run();
+    }
+
+
+    public void Run(){
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
         List<Client> agentList = new ArrayList<>();
         // Read level and create the initial state of the problem
-        for (int ax = 0; ax < c.agents.length; ax++) {
-            for (int ay = 0; ay < c.agents[0].length; ay++) {
-                if ('0' <= c.agents[ax][ay] && c.agents[ax][ay] <= '9') {
+        for (int ax = 0; ax < agents.length; ax++) {
+            for (int ay = 0; ay < agents[0].length; ay++) {
+                if ('0' <= agents[ax][ay] && agents[ax][ay] <= '9') {
                     Client agent = new Client();
+                    agent.color = colors.get(agents[ax][ay]);
+
                     Node initialNode = new Node(null, agent);
                     initialNode.agentRow = ax;
                     initialNode.agentCol = ay;
                     agent.initialState = initialNode;
-                    agent.color = colors.get(c.agents[ax][ay]);
-                    System.err.println(agent.color);
+
+                    System.err.println("COL " + agent.color);
                     agentList.add(agent);
+
+
                 }
             }
         }
@@ -121,17 +130,18 @@ public class CentralPlanner {
             char[][] aGoals = new char[MAX_ROW][MAX_COL];
             char[][] aBoxes = new char[MAX_ROW][MAX_COL];
 
-            for (int gx = 0; gx < c.goals.length; gx++) {
-                for (int gy = 0; gy < c.goals[0].length; gy++) {
-                    if ('a' <= c.goals[gx][gy] && c.goals[gx][gy] <= 'z') {
-                        for (int bx = 0; bx < c.boxes.length; bx++) {
-                            for (int by = 0; by < c.boxes[0].length; by++) {
-                                if (Character.toLowerCase(c.boxes[bx][by]) == c.goals[gx][gy]) {
+            for (int gx = 0; gx < goals.length; gx++) {
+                for (int gy = 0; gy < goals[0].length; gy++) {
+                    if ('a' <= goals[gx][gy] && goals[gx][gy] <= 'z') {
+                        for (int bx = 0; bx < boxes.length; bx++) {
+                            for (int by = 0; by < boxes[0].length; by++) {
+                                if (Character.toLowerCase(boxes[bx][by]) == goals[gx][gy]) {
                                     if (agent.color.equals(
                                             colors.get
-                                                    (c.boxes[bx][by]))) {
-                                        aGoals[gx][gy] = c.goals[gx][gy];
-                                        aBoxes[bx][by] = c.boxes[bx][by];
+                                                    (boxes[bx][by]))) {
+                                        aGoals[gx][gy] = goals[gx][gy];
+                                        aBoxes[bx][by] = boxes[bx][by];
+                                        System.err.println("Hey " + aGoals[gx][gy] + " " + aBoxes[bx][by]);
                                     }
                                 }
                             }
@@ -140,17 +150,18 @@ public class CentralPlanner {
 
                 }
             }
-
             agent.initialState.boxes = aBoxes;
             agent.goals = aGoals;
 
+            System.err.println("INIT: " + agent.initialState.toString());
         }
 
 
-        // Get plans from agents
-        ArrayList<LinkedList<Node>> joinPlan = new ArrayList<>();
-        for (Client agent : agentList) {
 
+        // Get plans from agents
+        HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
+        for (Client agent : agentList) {
+            System.err.println("AGENT: " + agent.initialState.toString());
 
             // One agent
             LinkedList<Node> solution;
@@ -171,30 +182,154 @@ public class CentralPlanner {
                 System.err.println("Found solution of length " + solution.size());
                 System.err.println(strategy.searchStatus());
 
-                joinPlan.add(solution);
+                joinPlan.put(agent,solution);
+                //System.err.println(solution.toString());
+            }
+
+            for (Node n : solution){
+                if(n.action.actionType == Command.Type.Push)
+                    System.err.println(n.action);
+
             }
         }
 
         while (true) {
+
             String joinedAction = "[";
-            for (LinkedList<Node> plan : joinPlan) {
-                if (joinedAction.equals("["))
-                    joinedAction += plan.getFirst().action.toString();
-                else
-                    joinedAction += plan.getFirst().action.toString() + ",";
+            // for(int i = 0; i < joinPlan.size(); i++){
+
+            //}
+            HashMap<Client, Node> cmdForClients = new HashMap<>();
+
+            for (Client cP : joinPlan.keySet()) {
+                LinkedList<Node> plan = joinPlan.get(cP);
+                if(plan.size() == 0)
+                    continue;
+
+                Node n = plan.removeFirst();
+                cmdForClients.put(cP, n);
+                joinedAction += n.action.toString() + ",";
+
             }
 
-            joinedAction = joinedAction.substring(0, joinedAction.length() - 2);
+
+            if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
+                joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
+
+            ApplyAction(cmdForClients);
+
             joinedAction += "]";
 
-            System.out.println(joinedAction);
+            System.err.println(this);
 
-            String response = serverMessages.readLine();
-            if (response.contains("false")) {
-                System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, joinedAction);
-                break;
+            System.out.println(joinedAction);
+            try{
+                String response = in.readLine();
+                if (response.contains("false")) {
+                    System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, joinedAction);
+                    break;
+                }
+            }catch (Exception e){
+
+            }
+
+        }
+    }
+
+    public boolean IsCellFree(int row, int col){
+        return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0 && !('0' <= CentralPlanner.agents[row][col] && CentralPlanner.agents[row][col] <= '9');
+    }
+
+    public boolean boxAt(int row, int col) {
+        return ('A' <= this.boxes[row][col] && this.boxes[row][col] <= 'Z');
+    }
+
+    public void ApplyAction(HashMap<Client,Node> cmds){
+
+
+        for (Client c : cmds.keySet()) {
+            Node node = cmds.get(c);
+
+            // Determine applicability of action
+            int newAgentRow = node.agentRow + Command.dirToRowChange(node.action.dir1);
+            int newAgentCol = node.agentCol + Command.dirToColChange(node.action.dir1);
+
+            if (node.action.actionType == Command.Type.Move) {
+                // Check if there's a wall or box on the cell to which the agent is moving
+                if (IsCellFree(newAgentRow, newAgentCol)) {
+                    System.err.println("Row: " + node.agentRow);
+                    System.err.println("Col: " + node.agentCol);
+
+                    char agent = agents[node.agentRow][node.agentCol];
+                    agents[node.agentRow][node.agentCol] = ' ';
+                    agents[newAgentRow][newAgentCol] = agent;
+
+                    System.err.println("AGE " + agent);
+                    System.err.println("NRow: " + newAgentRow);
+                    System.err.println("NCol: " + newAgentCol);
+                }
+                else
+                    System.err.println("Cell not free");
+            } else if (node.action.actionType == Command.Type.Push) {
+                // Make sure that there's actually a box to move
+                if (boxAt(newAgentRow, newAgentCol)) {
+                    int newBoxRow = newAgentRow + Command.dirToRowChange(node.action.dir2);
+                    int newBoxCol = newAgentCol + Command.dirToColChange(node.action.dir2);
+                    // .. and that new cell of box is free
+                    if (IsCellFree(newBoxRow, newBoxCol)) {
+                        char agent = agents[node.agentRow][node.agentCol];
+                        agents[node.agentRow][node.agentCol] = ' ';
+                        agents[newAgentRow][newAgentCol] = agent;
+
+                        char box = boxes[newAgentRow][newAgentCol];
+                        boxes[newAgentRow][newAgentCol] = ' ';
+                        boxes[newBoxRow][newBoxCol] = box;
+
+                    }
+                }
+            } else if (node.action.actionType == Command.Type.Pull) {
+                // Cell is free where agent is going
+                if (IsCellFree(newAgentRow, newAgentCol)) {
+                    int boxRow = node.agentRow + Command.dirToRowChange(node.action.dir2);
+                    int boxCol = node.agentCol + Command.dirToColChange(node.action.dir2);
+                    // .. and there's a box in "dir2" of the agent
+                    if (boxAt(boxRow, boxCol)) {
+                        char agent = agents[node.agentRow][node.agentCol];
+                        agents[node.agentRow][node.agentCol] = ' ';
+                        agents[newAgentRow][newAgentCol] = agent;
+
+                        char box = boxes[boxRow][boxCol];
+                        boxes[boxRow][boxCol] = ' ';
+                        boxes[node.agentRow][node.agentCol] = box;
+                    }
+                }
+                //else if (node.action.actionType == Command.Type.NoOp)
             }
         }
     }
 
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
+            if (!CentralPlanner.walls[row][0]) {
+                break;
+            }
+            for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
+                if (this.boxes[row][col] > 0) {
+                    s.append(this.boxes[row][col]);
+                } else if (goals[row][col] > 0) {
+                    s.append(goals[row][col]);
+                } else if (CentralPlanner.walls[row][col]) {
+                    s.append("+");
+                } else if ('0' <= agents[row][col] && agents[row][col] <= '9') {
+                    s.append(agents[row][col]);
+                } else {
+                    s.append(" ");
+                }
+            }
+            s.append("\n");
+        }
+        return s.toString();
+    }
 }

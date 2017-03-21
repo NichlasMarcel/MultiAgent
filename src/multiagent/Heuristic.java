@@ -12,8 +12,8 @@ public abstract class Heuristic implements Comparator<Node> {
 	public int h(Node n) {
 			int sum = 0;
 
-			for(int g_x = 1; g_x < Client.MAX_ROW - 1; g_x++){
-				for(int g_y = 1; g_y < Client.MAX_COL - 1; g_y++){
+			for(int g_x = 1; g_x < CentralPlanner.MAX_ROW - 1; g_x++){
+				for(int g_y = 1; g_y < CentralPlanner.MAX_COL - 1; g_y++){
 					if(initialState.c.goals[g_x][g_y] != ' '){
 						if(n.boxes[g_x][g_y] == Character.toUpperCase(initialState.c.goals[g_x][g_y])){
 							sum += 1;

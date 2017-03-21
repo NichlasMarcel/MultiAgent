@@ -17,8 +17,8 @@ public class Client {
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
     public char[][] goals; // Taget fra node
-    public static int MAX_ROW;
-    public static int MAX_COL;
+   /* public static int MAX_ROW;
+    public static int MAX_COL;*/
     public String color;
     static Map< Character, String > colors = new HashMap< Character, String >();
 

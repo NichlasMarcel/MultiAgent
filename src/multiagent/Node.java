@@ -25,7 +25,7 @@ public class Node {
 	//
 	
 
-	public char[][] boxes = new char[Client.MAX_ROW][Client.MAX_COL];
+	public char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 	
 
 	public Node parent;
@@ -54,8 +54,8 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
-		for (int row = 1; row < Client.MAX_ROW - 1; row++) {
-			for (int col = 1; col < Client.MAX_COL - 1; col++) {
+		for (int row = 1; row < CentralPlanner.MAX_ROW - 1; row++) {
+			for (int col = 1; col < CentralPlanner.MAX_COL - 1; col++) {
 				char g = c.goals[row][col];
 				char b = Character.toLowerCase(boxes[row][col]);
 				if (g > 0 && b != g) {
@@ -120,18 +120,18 @@ public class Node {
 		return expandedNodes;
 	}
 
-	private boolean cellIsFree(int row, int col) {
+	public boolean cellIsFree(int row, int col) {
 		return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0;
 	}
 
-	private boolean boxAt(int row, int col) {
+	public boolean boxAt(int row, int col) {
 		return this.boxes[row][col] > 0;
 	}
 
-	private Node ChildNode() {
+	public Node ChildNode() {
 		Node copy = new Node(this,c);
-		for (int row = 0; row < Client.MAX_ROW; row++) {
-			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, Client.MAX_COL);
+		for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
+			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, CentralPlanner.MAX_COL);
 		}
 		return copy;
 	}
@@ -181,11 +181,11 @@ public class Node {
 	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
-		for (int row = 0; row < Client.MAX_ROW; row++) {
+		for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
 			if (!CentralPlanner.walls[row][0]) {
 				break;
 			}
-			for (int col = 0; col < Client.MAX_COL; col++) {
+			for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
 				if (this.boxes[row][col] > 0) {
 					s.append(this.boxes[row][col]);
 				} else if (c.goals[row][col] > 0) {
@@ -193,7 +193,7 @@ public class Node {
 				} else if (CentralPlanner.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
-					s.append("0");
+					s.append('0');
 				} else {
 					s.append(" ");
 				}

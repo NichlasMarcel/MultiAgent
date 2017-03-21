@@ -14,7 +14,7 @@ public class CentralPlanner {
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node state;
     public char[][] goals; // Taget fra node
-    public static char[][] agents; // Taget fra node
+    public char[][] agents; // Taget fra node
     public char[][] boxes;
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
@@ -193,12 +193,24 @@ public class CentralPlanner {
             }
         }
 
+        int maximumLength = 0;
+
+        for (LinkedList<Node> p : joinPlan.values())
+            maximumLength = Integer.max(maximumLength, p.size());
+
+        for (LinkedList<Node> p : joinPlan.values()){
+            int s = p.size();
+            while (p.size() < maximumLength){
+                Node copy = p.get(s-1).ChildNode();
+                Command c = new Command();
+                copy.action = c;
+                p.addLast(copy);
+            }
+        }
+
         while (true) {
 
             String joinedAction = "[";
-            // for(int i = 0; i < joinPlan.size(); i++){
-
-            //}
             HashMap<Client, Node> cmdForClients = new HashMap<>();
 
             for (Client cP : joinPlan.keySet()) {
@@ -237,7 +249,7 @@ public class CentralPlanner {
     }
 
     public boolean IsCellFree(int row, int col){
-        return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0 && !('0' <= CentralPlanner.agents[row][col] && CentralPlanner.agents[row][col] <= '9');
+        return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0 && !('0' <= this.agents[row][col] && this.agents[row][col] <= '9');
     }
 
     public boolean boxAt(int row, int col) {
@@ -246,10 +258,11 @@ public class CentralPlanner {
 
     public void ApplyAction(HashMap<Client,Node> cmds){
 
-
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
 
+            if(node.action.actionType == Command.Type.NoOp)
+                continue;
             // Determine applicability of action
             int newAgentRow = node.agentRow + Command.dirToRowChange(node.action.dir1);
             int newAgentCol = node.agentCol + Command.dirToColChange(node.action.dir1);
@@ -260,16 +273,18 @@ public class CentralPlanner {
                     System.err.println("Row: " + node.agentRow);
                     System.err.println("Col: " + node.agentCol);
 
+
                     char agent = agents[node.agentRow][node.agentCol];
                     agents[node.agentRow][node.agentCol] = ' ';
                     agents[newAgentRow][newAgentCol] = agent;
 
-                    System.err.println("AGE " + agent);
-                    System.err.println("NRow: " + newAgentRow);
-                    System.err.println("NCol: " + newAgentCol);
+
+                    //System.err.println("AGE " + agent);
+                    //System.err.println("NRow: " + newAgentRow);
+                    //System.err.println("NCol: " + newAgentCol);
                 }
                 else
-                    System.err.println("Cell not free");
+                    System.err.println(this);
             } else if (node.action.actionType == Command.Type.Push) {
                 // Make sure that there's actually a box to move
                 if (boxAt(newAgentRow, newAgentCol)) {

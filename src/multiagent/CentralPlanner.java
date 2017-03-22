@@ -12,7 +12,6 @@ public class CentralPlanner {
     private BufferedReader in;
 
     //private List< Agent > agents = new ArrayList< Agent >();
-    public Node state;
     public char[][] goals; // Taget fra node
     public char[][] agents; // Taget fra node
     public char[][] boxes;
@@ -141,7 +140,6 @@ public class CentralPlanner {
                                                     (boxes[bx][by]))) {
                                         aGoals[gx][gy] = goals[gx][gy];
                                         aBoxes[bx][by] = boxes[bx][by];
-                                        System.err.println("Hey " + aGoals[gx][gy] + " " + aBoxes[bx][by]);
                                     }
                                 }
                             }
@@ -153,7 +151,7 @@ public class CentralPlanner {
             agent.initialState.boxes = aBoxes;
             agent.goals = aGoals;
 
-            System.err.println("INIT: " + agent.initialState.toString());
+
         }
 
 
@@ -161,7 +159,6 @@ public class CentralPlanner {
         // Get plans from agents
         HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
         for (Client agent : agentList) {
-            System.err.println("AGENT: " + agent.initialState.toString());
 
             // One agent
             LinkedList<Node> solution;
@@ -187,32 +184,45 @@ public class CentralPlanner {
             }
         }
 
-        int maximumLength = 0;
+        PlanGenerator.FillWithNoOp(joinPlan);
 
-        for (LinkedList<Node> p : joinPlan.values())
-            maximumLength = Integer.max(maximumLength, p.size());
-
-        for (LinkedList<Node> p : joinPlan.values()){
-            int s = p.size();
-            while (p.size() < maximumLength){
-                Node copy = p.get(s-1).ChildNode();
-                Command c = new Command();
-                copy.action = c;
-                p.addLast(copy);
-            }
-        }
-
+        // Execute plans from agents
         while (true) {
 
             String joinedAction = "[";
             HashMap<Client, Node> cmdForClients = new HashMap<>();
-
+            List<Node> actions = new ArrayList<>();
             for (Client cP : joinPlan.keySet()) {
                 LinkedList<Node> plan = joinPlan.get(cP);
                 if(plan.size() == 0)
                     continue;
 
                 Node n = plan.removeFirst();
+                actions.add(n);
+
+
+                // This client action is not possible to apply.
+                // We continue to replan until we get a plan with a first action that can be applied
+                while(!Bartek.CheckIfActionCanBeApplied(actions, this)){
+                    actions.remove(n);
+                    // Recalculate a new goal for the client and make the client replan.
+                    // or we can give the client a state where where the cell which the client tried to move it, now would be a wall
+                    // or we could add the NoOp operation to the agent
+
+                    cP.initialState = n;
+
+                    // This line, might fuck up stuff because we are looping through the keySet which cp is a part of.
+                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+                    plan = joinPlan.get(cP);
+                    if(plan.size() == 0)
+                        continue;
+
+                    n = plan.removeFirst();
+                    actions.add(n);
+                }
+
+                PlanGenerator.FillWithNoOp(joinPlan);
+
                 cmdForClients.put(cP, n);
                 joinedAction += n.action.toString() + ",";
 

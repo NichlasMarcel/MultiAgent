@@ -189,52 +189,68 @@ public class CentralPlanner {
         // Execute plans from agents
         while (true) {
 
+
             String joinedAction = "[";
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
+
             for (Client cP : joinPlan.keySet()) {
-                LinkedList<Node> plan = joinPlan.get(cP);
-                if(plan.size() == 0)
+
+                if(joinPlan.get(cP).size() == 0)
                     continue;
 
-                Node n = plan.removeFirst();
+                Node n = joinPlan.get(cP).removeFirst();
                 actions.add(n);
 
 
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
                 while(!Bartek.CheckIfActionCanBeApplied(actions, this)){
+                //while(count == 2 || count == 5 || count == 7 ){ was used for testing
+
                     actions.remove(n);
                     // Recalculate a new goal for the client and make the client replan.
-                    // or we can give the client a state where where the cell which the client tried to move it, now would be a wall
+                    // or we can give the client a state where the cell which the client tried to move it, now would be a wall
                     // or we could add the NoOp operation to the agent
 
-                    cP.initialState = n;
+                    // Determine what the agent should plan for
+                    // 1. Tell the agent to find a new plan.
+                    // 2. Tell the agent to stay and continue with their plan afterwards
 
-                    // This line, might fuck up stuff because we are looping through the keySet which cp is a part of.
-                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
-                    plan = joinPlan.get(cP);
-                    if(plan.size() == 0)
-                        continue;
+                    if(false) {
+                        // 1. Tell the agent to find a new plan
+                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+                    } else {
+                        // 2. Tell the agent to stay and continue with their plan afterwards
+                        Node nnode = n.parent.ChildNode();
+                        nnode.action = new Command(); // Adding NoOp
+                        joinPlan.get(cP).addFirst(n);
+                        n = nnode;
+                        actions.add(nnode);
+                    }
 
-                    n = plan.removeFirst();
-                    actions.add(n);
                 }
+
+
 
                 PlanGenerator.FillWithNoOp(joinPlan);
 
+                System.err.println("Clients: " + joinPlan.keySet().size());
+                for (List<Node> l : joinPlan.values()){
+                    System.err.println(l.size());
+                }
+
                 cmdForClients.put(cP, n);
                 joinedAction += n.action.toString() + ",";
-
             }
-
-
             if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
                 joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
 
             ApplyAction(cmdForClients);
 
             joinedAction += "]";
+
+            System.err.println(joinedAction);
 
             System.err.println(this);
 

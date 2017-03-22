@@ -185,12 +185,6 @@ public class CentralPlanner {
                 joinPlan.put(agent,solution);
                 //System.err.println(solution.toString());
             }
-
-            for (Node n : solution){
-                if(n.action.actionType == Command.Type.Push)
-                    System.err.println(n.action);
-
-            }
         }
 
         int maximumLength = 0;
@@ -280,6 +274,7 @@ public class CentralPlanner {
                     char agent = agents[node.parent.agentRow][node.parent.agentCol];
                     agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                     agents[node.agentRow][node.agentCol] = agent;
+                    System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
 
                     //System.err.println("AGE " + agent);
                     //System.err.println("NRow: " + newAgentRow);
@@ -295,12 +290,18 @@ public class CentralPlanner {
                     // .. and that new cell of box is free
                     if (IsCellFree(newBoxRow, newBoxCol)) {
                         char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
-                        agents[node.agentRow][node.agentCol] = agent;
-
                         char box = boxes[node.agentRow][node.agentCol];
-                        boxes[node.agentRow][node.agentCol] = ' ';
+
+                        agents[node.agentRow][node.agentCol] = agent;
                         boxes[newBoxRow][newBoxCol] = box;
+
+                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        boxes[node.agentRow][node.agentCol] = 0;
+
+                        System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
+                        System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
+                        System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);                        boxes[newBoxRow][newBoxCol] = box;
+
 
                     }
                 }
@@ -319,7 +320,7 @@ public class CentralPlanner {
                         agents[node.agentRow][node.agentCol] = agent;
 
                         char box = boxes[boxRow][boxCol];
-                        boxes[boxRow][boxCol] = ' ';
+                        boxes[boxRow][boxCol] = 0;
                         boxes[node.parent.agentRow][node.parent.agentCol] = box;
                     }
                 }
@@ -331,19 +332,19 @@ public class CentralPlanner {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
-            if (!CentralPlanner.walls[row][0]) {
+        for (int row = 0; row < MAX_ROW; row++) {
+            if (!this.walls[row][0]) {
                 break;
             }
-            for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
+            for (int col = 0; col < MAX_COL; col++) {
                 if (this.boxes[row][col] > 0) {
                     s.append(this.boxes[row][col]);
-                } else if (goals[row][col] > 0) {
-                    s.append(goals[row][col]);
-                } else if (CentralPlanner.walls[row][col]) {
+                } else if (this.goals[row][col] > 0) {
+                    s.append(this.goals[row][col]);
+                } else if (this.walls[row][col]) {
                     s.append("+");
-                } else if ('0' <= agents[row][col] && agents[row][col] <= '9') {
-                    s.append(agents[row][col]);
+                } else if ('0' <= this.agents[row][col] && this.agents[row][col] <= '9') {
+                    s.append(this.agents[row][col]);
                 } else {
                     s.append(" ");
                 }

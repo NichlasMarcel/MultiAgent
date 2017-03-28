@@ -223,11 +223,16 @@ public class CentralPlanner {
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
               //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this));
-                while(!CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this))
-                {
+                while(!CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this)){
                 //while(true){
                 //while(count == 2 || count == 5 || count == 7 ){ was used for testing
-//                    actions.remove(n);
+                    actions.remove(n);
+                    Node nnode = n.parent.ChildNode();
+                        nnode.action = new Command(); // Adding NoOp
+                        joinPlan.get(cP).addFirst(n);
+                        n = nnode;
+                        actions.add(nnode);
+
                     // Recalculate a new goal for the client and make the client replan.
                     // or we can give the client a state where the cell which the client tried to move it, now would be a wall
                     // or we could add the NoOp operation to the agent
@@ -236,8 +241,6 @@ public class CentralPlanner {
                     // 1. Tell the agent to find a new plan.
                     // 2. Tell the agent to stay and continue with their plan afterwards
                     //System.err.println("CHECK ACTION WHILE INSIDE");
-
-
 //                    if(true) {
 //                        // 1. Tell the agent to find a new plan
 //
@@ -260,12 +263,6 @@ public class CentralPlanner {
 //                                    Node nop = n.parent.ChildNode();
 //                                    nop.action = new Command();
 //                                    p.add(nop);
-//                                    actions.add(nop);
-//                                }
-//                                joinPlan.put(cP, p);
-//
-//                                //System.err.println(joinPlan);
-//                                PlanGenerator.FillWithNoOp(joinPlan);
 //                                //System.err.println(joinPlan);
 //                                n = joinPlan.get(cP).removeFirst();
 //
@@ -294,8 +291,8 @@ public class CentralPlanner {
 //                        n = nnode;
 //                        actions.add(nnode);
 //                    }
-//
-               }
+
+                }
 
 
 

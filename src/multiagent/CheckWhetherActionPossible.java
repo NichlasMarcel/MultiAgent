@@ -30,46 +30,24 @@ public class CheckWhetherActionPossible {
         char[][] agents = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
         char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 
-        System.arraycopy(cp.agents,0,agents,0,cp.agents.length);
-        System.arraycopy(cp.boxes,0,boxes,0,cp.boxes.length);
+        for (int i=0; i<agents.length; i++)
+            for (int j=0; j<agents[i].length; j++)
+            {
+                agents[i][j] = cp.agents[i][j];
+                boxes[i][j] =  cp.boxes[i][j];
+            }
+
+
 
         /*for (int i = 0; i < agents.length; i++){
             for (int j = 0; j < agents[i].length; j++ ){
                 System.err.println(agents[i][j]);
             }
         }*/
+        System.err.println("-------------------------------------------------");
         for (Node node : nodes) {
             System.err.println("AT: " + node.action.actionType);
 
-            if (node.action.actionType == Command.Type.Move) {
-                System.err.println("Row: " + node.agentRow);
-                System.err.println("Col: " + node.agentCol);
-                System.err.println("RowParent: " + node.parent.agentRow);
-                System.err.println("ColParent: " + node.parent.agentCol);
-                //if(node.parent.agentRow == 1 && node.parent.agentCol == 13){
-                //    System.err.println("Agent found! " + agents[node.agentRow][node.agentCol]);
-                //}
-                // Check if there's a wall or box on the cell to which the agent is moving
-                if (IsCellFree(node.agentRow, node.agentCol,agents,boxes)) {
-
-//                    char agent = agents[node.parent.agentRow][node.parent.agentCol];
-//                    agents[node.parent.agentRow][node.parent.agentCol] = ' ';
-//                    agents[node.agentRow][node.agentCol] = agent;
-
-//                    System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-
-                    //System.err.println("AGE " + agent);
-                    //System.err.println("NRow: " + newAgentRow);
-                    //System.err.println("NCol: " + newAgentCol);
-                }
-                else
-                    return false;
-                //else
-                //System.err.println(this);
-            }
-
-
-            /*
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action
@@ -87,7 +65,10 @@ public class CheckWhetherActionPossible {
 
 
                     char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                    agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                    System.err.println("AgentAt: " + agents[node.agentRow][node.agentCol]);
+                    System.err.println("AgentAt: " + agents[node.parent.agentRow][node.parent.agentCol]);
+
+                    //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                     agents[node.agentRow][node.agentCol] = agent;
                     System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
 
@@ -112,8 +93,8 @@ public class CheckWhetherActionPossible {
                         agents[node.agentRow][node.agentCol] = agent;
                         boxes[newBoxRow][newBoxCol] = box;
 
-                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
-                        boxes[node.agentRow][node.agentCol] = 0;
+                        //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        //boxes[node.agentRow][node.agentCol] = 0;
 
                         System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
                         System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
@@ -136,18 +117,18 @@ public class CheckWhetherActionPossible {
                     // .. and there's a box in "dir2" of the agent
                     if (boxAt(boxRow, boxCol,boxes)) {
                         char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                         agents[node.agentRow][node.agentCol] = agent;
 
                         char box = boxes[boxRow][boxCol];
-                        boxes[boxRow][boxCol] = 0;
+                        //boxes[boxRow][boxCol] = 0;
                         boxes[node.parent.agentRow][node.parent.agentCol] = box;
                     }else
                         return false;
                 }else
                     return false;
                 //else if (node.action.actionType == Command.Type.NoOp)
-            }*/
+            }
         }
 
         return true;

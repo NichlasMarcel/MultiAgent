@@ -21,7 +21,10 @@ public class Client {
     public static int MAX_COL;*/
     public String color;
     static Map< Character, String > colors = new HashMap< Character, String >();
-
+    public int number;
+    public int getNumber(){
+      return number;
+    }
     public Client() {
     }
 

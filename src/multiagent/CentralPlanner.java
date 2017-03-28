@@ -111,7 +111,7 @@ public class CentralPlanner {
                 if ('0' <= agents[ax][ay] && agents[ax][ay] <= '9') {
                     Client agent = new Client();
                     agent.color = colors.get(agents[ax][ay]);
-
+                    agent.number = (int)agents[ax][ay];
                     Node initialNode = new Node(null, agent);
                     initialNode.agentRow = ax;
                     initialNode.agentCol = ay;
@@ -124,6 +124,22 @@ public class CentralPlanner {
                 }
             }
         }
+        System.err.println("Trying: "  + (int)'1');
+        //sorting Clients by their number
+        for  (Client agent : agentList)
+            System.err.println("number:" + agent.getNumber());
+        Collections.sort(agentList, new Comparator<Client>() {
+            @Override
+            public int compare(Client o1, Client o2) {
+                return Integer.compare(o1.getNumber(),o2.getNumber());
+            }
+        });
+
+        for  (Client agent : agentList)
+            System.err.println("numberAfter:" + agent.getNumber());
+
+
+
         // Agents are going for the same boxes FIX THAT LATER
         for (Client agent : agentList) {
             char[][] aGoals = new char[MAX_ROW][MAX_COL];
@@ -158,6 +174,7 @@ public class CentralPlanner {
 
         // Get plans from agents
         HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
+        //for (Client agent: joinPlan.setKeys())
         for (Client agent : agentList) {
 
             // One agent
@@ -194,21 +211,23 @@ public class CentralPlanner {
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
 
-            for (Client cP : joinPlan.keySet()) {
+            for (Client cP : agentList) {
 
                 if(joinPlan.get(cP).size() == 0)
                     continue;
 
                 Node n = joinPlan.get(cP).removeFirst();
-                actions.add(n);
+                //actions.add(n);
+
 
 
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
-                while(!Bartek.CheckIfActionCanBeApplied(actions, this)){
+              //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this));
+                //while(CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this)){
+                //while(true){
                 //while(count == 2 || count == 5 || count == 7 ){ was used for testing
-
-                    actions.remove(n);
+                    //actions.remove(n);
                     // Recalculate a new goal for the client and make the client replan.
                     // or we can give the client a state where the cell which the client tried to move it, now would be a wall
                     // or we could add the NoOp operation to the agent
@@ -216,10 +235,24 @@ public class CentralPlanner {
                     // Determine what the agent should plan for
                     // 1. Tell the agent to find a new plan.
                     // 2. Tell the agent to stay and continue with their plan afterwards
-
-                    if(false) {
+                    //System.err.println("CHECK ACTION WHILE INSIDE");
+                    if(true) {
                         // 1. Tell the agent to find a new plan
-                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+
+                        //joinPlan.clear();
+                        //System.err.println("¤¤¤¤¤¤¤¤¤¤ "+cP.Search(new Strategy.StrategyBFS()));
+                        //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+                        //n = joinPlan.get(cP).removeFirst();
+                        //System.err.println();
+                        if(n.parent != null){
+                            cP.initialState = n.parent;
+                            //joinPlan.remove(cP);
+                            //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+                            //n = joinPlan.get(cP).removeFirst();
+                            System.err.println("AR: " + n.agentRow + "AC: " + n.agentCol);
+                            //break;
+                        }
+
                     } else {
                         // 2. Tell the agent to stay and continue with their plan afterwards
                         Node nnode = n.parent.ChildNode();
@@ -229,12 +262,13 @@ public class CentralPlanner {
                         actions.add(nnode);
                     }
 
-                }
+                //}
+
 
 
 
                 PlanGenerator.FillWithNoOp(joinPlan);
-
+                System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
                 for (List<Node> l : joinPlan.values()){
                     System.err.println(l.size());
@@ -246,13 +280,13 @@ public class CentralPlanner {
             if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
                 joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
 
-            ApplyAction(cmdForClients);
 
             joinedAction += "]";
 
+            ApplyAction(cmdForClients);
             System.err.println(joinedAction);
 
-            System.err.println(this);
+            //System.err.println(this);
 
             System.out.println(joinedAction);
             try{
@@ -293,7 +327,7 @@ public class CentralPlanner {
                 //}
                 // Check if there's a wall or box on the cell to which the agent is moving
                 if (IsCellFree(node.agentRow, node.agentCol)) {
-                   // System.err.println("Row: " + node.agentRow);
+                    // System.err.println("Row: " + node.agentRow);
                     //System.err.println("Col: " + node.agentCol);
 
 
@@ -307,7 +341,7 @@ public class CentralPlanner {
                     //System.err.println("NCol: " + newAgentCol);
                 }
                 //else
-                    //System.err.println(this);
+                //System.err.println(this);
             } else if (node.action.actionType == Command.Type.Push) {
                 // Make sure that there's actually a box to move
                 if (boxAt(node.agentRow, node.agentCol)) {

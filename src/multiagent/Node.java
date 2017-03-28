@@ -172,10 +172,7 @@ public class Node {
 		Node other = (Node) obj;
 		if (this.agentRow != other.agentRow || this.agentCol != other.agentCol)
 			return false;
-		if (!Arrays.deepEquals(this.boxes, other.boxes))
-			return false;
-
-		return true;
+		return Arrays.deepEquals(this.boxes, other.boxes);
 	}
 
 	@Override

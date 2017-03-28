@@ -4,14 +4,14 @@ import java.util.LinkedList;
 
 public class Command {
 	// Order of enum important for determining opposites.
-	public static enum Dir {
+	public enum Dir {
 		N, W, E, S
-	};
+	}
 
-	public static enum Type {
+	public enum Type {
 		Move, Push, Pull, NoOp
-	};
-	
+	}
+
 	public static final Command[] EVERY;
 	static {
 		LinkedList<Command> cmds = new LinkedList<Command>();

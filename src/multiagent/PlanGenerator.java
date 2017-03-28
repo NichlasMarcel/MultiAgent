@@ -25,16 +25,27 @@ public class PlanGenerator {
         for (LinkedList<Node> p : joinPlan.values())
             maximumLength = Integer.max(maximumLength, p.size());
 
-        for (LinkedList<Node> p : joinPlan.values()){
+        //for (LinkedList<Node> p : joinPlan.values()){
+        for (Client client : joinPlan.keySet()){
+            LinkedList<Node> p = joinPlan.get(client);
             int s = p.size();
             System.err.println("max: " + maximumLength + "p: " + p.size());
-
-            while (p.size() < maximumLength){
-                Node copy = p.get(s-1).ChildNode();
+            /*if(p.size() == 0){
+                Node n = new Node(null,client);
                 Command c = new Command();
-                copy.action = c;
-                p.addLast(copy);
+                n.action = c;
+                p.addLast(n);
+            }*/
+            //else
+                {
+                while (p.size() < maximumLength){
+                    Node copy = p.get(s-1).ChildNode();
+                    Command c = new Command();
+                    copy.action = c;
+                    p.addLast(copy);
+                }
             }
+
         }
     }
 }

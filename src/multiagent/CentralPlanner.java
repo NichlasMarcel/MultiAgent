@@ -176,7 +176,6 @@ public class CentralPlanner {
         HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
         //for (Client agent: joinPlan.setKeys())
         for (Client agent : agentList) {
-
             // One agent
             LinkedList<Node> solution;
             Strategy strategy = new Strategy.StrategyBFS();
@@ -212,7 +211,7 @@ public class CentralPlanner {
             List<Node> actions = new ArrayList<>();
 
             for (Client cP : agentList) {
-
+                //System.err.println(cP.initialState);
                 if(joinPlan.get(cP).size() == 0)
                     continue;
 
@@ -244,14 +243,44 @@ public class CentralPlanner {
                         //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
                         //n = joinPlan.get(cP).removeFirst();
                         //System.err.println();
-                        if(n.parent != null){
-                            cP.initialState = n.parent;
+
                             //joinPlan.remove(cP);
-                            //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
-                            //n = joinPlan.get(cP).removeFirst();
+
+                            cP.initialState.agentRow = n.parent.agentRow;
+                            cP.initialState.agentCol = n.parent.agentCol;
+                            cP.initialState.boxes = n.parent.boxes;
+
+                            try{
+                                LinkedList<Node> p = cP.Search(new Strategy.StrategyBFS());
+                                if(p == null){
+                                    p = new LinkedList<>();
+                                    Node nop = n.parent.ChildNode();
+                                    nop.action = new Command();
+                                    p.add(nop);
+                                }
+                                joinPlan.put(cP, p);
+
+                                //System.err.println(joinPlan);
+                                PlanGenerator.FillWithNoOp(joinPlan);
+                                //System.err.println(joinPlan);
+                                n = joinPlan.get(cP).removeFirst();
+
+                            }catch(Exception e){
+                                System.err.println("ERROR TIME");
+                                System.err.println(e.getMessage());
+                                //System.err.println(cP.initialState);
+                            }
+
+
+
+                            System.err.println(cP.initialState);
+                            System.err.println("AND");
+                            System.err.println(n);
+
                             System.err.println("AR: " + n.agentRow + "AC: " + n.agentCol);
+                            //cP.initialState = null;
                             //break;
-                        }
+
 
                     } else {
                         // 2. Tell the agent to stay and continue with their plan afterwards
@@ -267,7 +296,6 @@ public class CentralPlanner {
 
 
 
-                PlanGenerator.FillWithNoOp(joinPlan);
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
                 for (List<Node> l : joinPlan.values()){

@@ -39,7 +39,13 @@ public class PlanGenerator {
             //else
                 {
                 while (p.size() < maximumLength){
-                    Node copy = p.get(s-1).ChildNode();
+                    Node copy = null;
+                    if(s == 0){
+                        copy = new Node(client.initialState, client);
+                    }
+                    else{
+                        copy = p.get(s-1).ChildNode();
+                    }
                     Command c = new Command();
                     copy.action = c;
                     p.addLast(copy);

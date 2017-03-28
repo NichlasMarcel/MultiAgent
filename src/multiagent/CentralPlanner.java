@@ -216,17 +216,18 @@ public class CentralPlanner {
                     continue;
 
                 Node n = joinPlan.get(cP).removeFirst();
-                //actions.add(n);
+                actions.add(n);
 
 
 
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
               //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this));
-                //while(CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this)){
+                while(!CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this))
+                {
                 //while(true){
                 //while(count == 2 || count == 5 || count == 7 ){ was used for testing
-                    //actions.remove(n);
+//                    actions.remove(n);
                     // Recalculate a new goal for the client and make the client replan.
                     // or we can give the client a state where the cell which the client tried to move it, now would be a wall
                     // or we could add the NoOp operation to the agent
@@ -235,63 +236,66 @@ public class CentralPlanner {
                     // 1. Tell the agent to find a new plan.
                     // 2. Tell the agent to stay and continue with their plan afterwards
                     //System.err.println("CHECK ACTION WHILE INSIDE");
-                    if(true) {
-                        // 1. Tell the agent to find a new plan
-
-                        //joinPlan.clear();
-                        //System.err.println("¤¤¤¤¤¤¤¤¤¤ "+cP.Search(new Strategy.StrategyBFS()));
-                        //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
-                        //n = joinPlan.get(cP).removeFirst();
-                        //System.err.println();
-
-                            //joinPlan.remove(cP);
-
-                            cP.initialState.agentRow = n.parent.agentRow;
-                            cP.initialState.agentCol = n.parent.agentCol;
-                            cP.initialState.boxes = n.parent.boxes;
-
-                            try{
-                                LinkedList<Node> p = cP.Search(new Strategy.StrategyBFS());
-                                if(p == null){
-                                    p = new LinkedList<>();
-                                    Node nop = n.parent.ChildNode();
-                                    nop.action = new Command();
-                                    p.add(nop);
-                                }
-                                joinPlan.put(cP, p);
-
-                                //System.err.println(joinPlan);
-                                PlanGenerator.FillWithNoOp(joinPlan);
-                                //System.err.println(joinPlan);
-                                n = joinPlan.get(cP).removeFirst();
-
-                            }catch(Exception e){
-                                System.err.println("ERROR TIME");
-                                System.err.println(e.getMessage());
-                                //System.err.println(cP.initialState);
-                            }
 
 
-
-                            System.err.println(cP.initialState);
-                            System.err.println("AND");
-                            System.err.println(n);
-
-                            System.err.println("AR: " + n.agentRow + "AC: " + n.agentCol);
-                            //cP.initialState = null;
-                            //break;
-
-
-                    } else {
-                        // 2. Tell the agent to stay and continue with their plan afterwards
-                        Node nnode = n.parent.ChildNode();
-                        nnode.action = new Command(); // Adding NoOp
-                        joinPlan.get(cP).addFirst(n);
-                        n = nnode;
-                        actions.add(nnode);
-                    }
-
-                //}
+//                    if(true) {
+//                        // 1. Tell the agent to find a new plan
+//
+//                        //joinPlan.clear();
+//                        //System.err.println("¤¤¤¤¤¤¤¤¤¤ "+cP.Search(new Strategy.StrategyBFS()));
+//                        //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
+//                        //n = joinPlan.get(cP).removeFirst();
+//                        //System.err.println();
+//
+//                            //joinPlan.remove(cP);
+//
+//                            cP.initialState.agentRow = n.parent.agentRow;
+//                            cP.initialState.agentCol = n.parent.agentCol;
+//                            cP.initialState.boxes = n.parent.boxes;
+//
+//                            try{
+//                                LinkedList<Node> p = cP.Search(new Strategy.StrategyBFS());
+//                                if(p == null){
+//                                    p = new LinkedList<>();
+//                                    Node nop = n.parent.ChildNode();
+//                                    nop.action = new Command();
+//                                    p.add(nop);
+//                                    actions.add(nop);
+//                                }
+//                                joinPlan.put(cP, p);
+//
+//                                //System.err.println(joinPlan);
+//                                PlanGenerator.FillWithNoOp(joinPlan);
+//                                //System.err.println(joinPlan);
+//                                n = joinPlan.get(cP).removeFirst();
+//
+//                            }catch(Exception e){
+//                                System.err.println("ERROR TIME");
+//                                System.err.println(e.getMessage());
+//                                //System.err.println(cP.initialState);
+//                            }
+//
+//
+//
+//                            System.err.println(cP.initialState);
+//                            System.err.println("AND");
+//                            System.err.println(n);
+//
+//                            System.err.println("AR: " + n.agentRow + "AC: " + n.agentCol);
+//                            //cP.initialState = null;
+//                            //break;
+//
+//
+//                    } else {
+//                        // 2. Tell the agent to stay and continue with their plan afterwards
+//                        Node nnode = n.parent.ChildNode();
+//                        nnode.action = new Command(); // Adding NoOp
+//                        joinPlan.get(cP).addFirst(n);
+//                        n = nnode;
+//                        actions.add(nnode);
+//                    }
+//
+               }
 
 
 

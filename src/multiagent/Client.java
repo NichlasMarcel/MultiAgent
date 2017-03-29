@@ -17,6 +17,7 @@ public class Client {
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
     public char[][] goals; // Taget fra node
+    public boolean[][] walls;
    /* public static int MAX_ROW;
     public static int MAX_COL;*/
     public String color;
@@ -25,12 +26,28 @@ public class Client {
     public int getNumber(){
       return number;
     }
-    public Client() {
+
+    public void addWall(int row, int col){
+        walls[row][col] = true;
     }
 
-    public LinkedList<Node> Search(Strategy strategy) {
+    public void removeWall(int row, int col){
+        walls[row][col] = false;
+    }
+
+    public Client() {
+        walls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+
+        for(int i = 0; i < CentralPlanner.MAX_ROW; i++){
+            for(int j = 0; j < CentralPlanner.MAX_COL; j++){
+                this.walls[i][j] = CentralPlanner.walls[i][j];
+            }
+        }
+    }
+
+    public LinkedList<Node> Search(Strategy strategy, Node node) {
         System.err.format("Search starting with strategy %s.\n", strategy.toString());
-        strategy.addToFrontier(this.initialState);
+        strategy.addToFrontier(node);
 
         int iterations = 0;
         while (true) {

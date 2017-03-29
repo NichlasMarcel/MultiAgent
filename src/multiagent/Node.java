@@ -14,24 +14,13 @@ public class Node {
 	public int agentRow;
 	public int agentCol;
 
-	// Arrays are indexed from the top-left of the level, with first index being row and second being column.
-	// Row 0: (0,0) (0,1) (0,2) (0,3) ...
-	// Row 1: (1,0) (1,1) (1,2) (1,3) ...
-	// Row 2: (2,0) (2,1) (2,2) (2,3) ...
-	// ...
-	// (Start in the top left corner, first go down, then go right)
-	// E.g. this.walls[2] is an array of booleans having size MAX_COL.
-	// this.walls[row][col] is true if there's a wall at (row, col)
-	//
-	
-
 	public char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 	
 
 	public Node parent;
 	public Command action;
 	public Client c;
-	private int g;
+	public int g;
 	
 	private int _hash = 0;
 
@@ -121,7 +110,7 @@ public class Node {
 	}
 
 	public boolean cellIsFree(int row, int col) {
-		return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0;
+		return !c.walls[row][col] && this.boxes[row][col] == 0;
 	}
 
 	public boolean boxAt(int row, int col) {
@@ -155,7 +144,7 @@ public class Node {
 			result = prime * result + this.agentRow;
 			result = prime * result + Arrays.deepHashCode(this.boxes);
 			result = prime * result + Arrays.deepHashCode(c.goals);
-			result = prime * result + Arrays.deepHashCode(CentralPlanner.walls);
+			result = prime * result + Arrays.deepHashCode(c.walls);
 			this._hash = result;
 		}
 		return this._hash;
@@ -179,7 +168,7 @@ public class Node {
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
-			if (!CentralPlanner.walls[row][0]) {
+			if (!c.walls[row][0]) {
 				break;
 			}
 			for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
@@ -187,7 +176,7 @@ public class Node {
 					s.append(this.boxes[row][col]);
 				} else if (c.goals[row][col] > 0) {
 					s.append(c.goals[row][col]);
-				} else if (CentralPlanner.walls[row][col]) {
+				} else if (c.walls[row][col]) {
 					s.append("+");
 				} else if (row == this.agentRow && col == this.agentCol) {
 					s.append('0');

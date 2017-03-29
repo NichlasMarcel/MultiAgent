@@ -11,11 +11,12 @@ import java.util.Random;
  */
 public class CheckWhetherActionPossible {
 
+    public static Boolean IncludeNegativeEffect = false;
 
     public static boolean IsCellFree(int row, int col,char[][] agents, char[][] boxes){
-        System.err.println("Box: " + boxes[row][col]);
-        System.err.println("Agent: " + agents[row][col]);
-        System.err.println("Walls: " + CentralPlanner.walls[row][col]);
+        //System.err.println("Box: " + boxes[row][col]);
+        //System.err.println("Agent: " + agents[row][col]);
+        //System.err.println("Walls: " + CentralPlanner.walls[row][col]);
 
 
         return !CentralPlanner.walls[row][col] && boxes[row][col] == 0 && !('0' <= agents[row][col] && agents[row][col] <= '9');
@@ -44,9 +45,9 @@ public class CheckWhetherActionPossible {
                 System.err.println(agents[i][j]);
             }
         }*/
-        System.err.println("-------------------------------------------------");
+        //System.err.println("-------------------------------------------------");
         for (Node node : nodes) {
-            System.err.println("AT: " + node.action.actionType);
+            //System.err.println("AT: " + node.action.actionType);
 
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
@@ -65,12 +66,13 @@ public class CheckWhetherActionPossible {
 
 
                     char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                    System.err.println("AgentAt: " + agents[node.agentRow][node.agentCol]);
-                    System.err.println("AgentAt: " + agents[node.parent.agentRow][node.parent.agentCol]);
+                    //System.err.println("AgentAt: " + agents[node.agentRow][node.agentCol]);
+                    //System.err.println("AgentAt: " + agents[node.parent.agentRow][node.parent.agentCol]);
+                    if(IncludeNegativeEffect)
+                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
 
-                    //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                     agents[node.agentRow][node.agentCol] = agent;
-                    System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
+                    //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
 
                     //System.err.println("AGE " + agent);
                     //System.err.println("NRow: " + newAgentRow);
@@ -92,13 +94,14 @@ public class CheckWhetherActionPossible {
 
                         agents[node.agentRow][node.agentCol] = agent;
                         boxes[newBoxRow][newBoxCol] = box;
+                        if(IncludeNegativeEffect)
+                            agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        if(IncludeNegativeEffect)
+                            boxes[node.agentRow][node.agentCol] = 0;
 
-                        //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
-                        //boxes[node.agentRow][node.agentCol] = 0;
-
-                        System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-                        System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
-                        System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
+                        //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
+                        //System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
+                        //System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
                         boxes[newBoxRow][newBoxCol] = box;
 
 
@@ -117,7 +120,8 @@ public class CheckWhetherActionPossible {
                     // .. and there's a box in "dir2" of the agent
                     if (boxAt(boxRow, boxCol,boxes)) {
                         char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                        //agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                        if(IncludeNegativeEffect)
+                            agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                         agents[node.agentRow][node.agentCol] = agent;
 
                         char box = boxes[boxRow][boxCol];

@@ -2,6 +2,7 @@ package multiagent;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by Nichlas on 22-03-2017.
@@ -53,5 +54,22 @@ public class PlanGenerator {
             }
 
         }
+    }
+
+    public static ConflictTypes IdentifyConflictType(HashMap<Client, LinkedList<Node>> plans){
+        LinkedList<Node> sumOfPlans = new LinkedList<>();
+        for(Client client : plans.keySet()){
+            LinkedList<Node> plan = plans.get(client);
+            for(Node sNode : sumOfPlans){
+                for(Node aNode : plan){
+                    if(sNode.agentRow == aNode.agentRow && sNode.agentCol == aNode.agentCol)
+                        if(sNode.extractPlan().size() == aNode.extractPlan().size())
+                            return ConflictTypes.AgentBlockingPath;
+                }
+            }
+            sumOfPlans.addAll(plan);
+        }
+
+        return ConflictTypes.NoConflict;
     }
 }

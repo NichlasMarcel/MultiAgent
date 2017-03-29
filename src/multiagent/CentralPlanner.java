@@ -1,5 +1,7 @@
 package multiagent;
 
+import com.sun.rowset.internal.Row;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -116,6 +118,7 @@ public class CentralPlanner {
                     initialNode.agentRow = ax;
                     initialNode.agentCol = ay;
                     agent.initialState = initialNode;
+                    //agent.calculateFromThisState = initialNode;
 
                     System.err.println("COL " + agent.color);
                     agentList.add(agent);
@@ -165,6 +168,7 @@ public class CentralPlanner {
                 }
             }
             agent.initialState.boxes = aBoxes;
+            //agent.calculateFromThisState.boxes = aBoxes;
             agent.goals = aGoals;
 
 
@@ -180,7 +184,7 @@ public class CentralPlanner {
             LinkedList<Node> solution;
             Strategy strategy = new Strategy.StrategyBFS();
             try {
-                solution = agent.Search(strategy);
+                solution = agent.Search(strategy, agent.initialState);
             } catch (OutOfMemoryError ex) {
                 System.err.println("Maximum memory usage exceeded.");
                 solution = null;
@@ -223,15 +227,19 @@ public class CentralPlanner {
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
               //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this));
+                int RowWall = -1;
+                int ColWall = -1;
+
                 while(!CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this)){
                 //while(true){
                 //while(count == 2 || count == 5 || count == 7 ){ was used for testing
+
+                    System.err.println("inside conflict handling");
+                    //cP.addWall(n.agentRow, n.agentCol);
+                    //RowWall = n.agentRow;
+                    //ColWall = n.agentCol;
+
                     actions.remove(n);
-                    Node nnode = n.parent.ChildNode();
-                        nnode.action = new Command(); // Adding NoOp
-                        joinPlan.get(cP).addFirst(n);
-                        n = nnode;
-                        actions.add(nnode);
 
                     // Recalculate a new goal for the client and make the client replan.
                     // or we can give the client a state where the cell which the client tried to move it, now would be a wall
@@ -241,60 +249,68 @@ public class CentralPlanner {
                     // 1. Tell the agent to find a new plan.
                     // 2. Tell the agent to stay and continue with their plan afterwards
                     //System.err.println("CHECK ACTION WHILE INSIDE");
-//                    if(true) {
-//                        // 1. Tell the agent to find a new plan
-//
-//                        //joinPlan.clear();
-//                        //System.err.println("¤¤¤¤¤¤¤¤¤¤ "+cP.Search(new Strategy.StrategyBFS()));
-//                        //joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS()));
-//                        //n = joinPlan.get(cP).removeFirst();
-//                        //System.err.println();
-//
-//                            //joinPlan.remove(cP);
-//
-//                            cP.initialState.agentRow = n.parent.agentRow;
-//                            cP.initialState.agentCol = n.parent.agentCol;
-//                            cP.initialState.boxes = n.parent.boxes;
-//
-//                            try{
-//                                LinkedList<Node> p = cP.Search(new Strategy.StrategyBFS());
-//                                if(p == null){
-//                                    p = new LinkedList<>();
-//                                    Node nop = n.parent.ChildNode();
-//                                    nop.action = new Command();
-//                                    p.add(nop);
-//                                //System.err.println(joinPlan);
-//                                n = joinPlan.get(cP).removeFirst();
-//
-//                            }catch(Exception e){
-//                                System.err.println("ERROR TIME");
-//                                System.err.println(e.getMessage());
-//                                //System.err.println(cP.initialState);
-//                            }
-//
-//
-//
-//                            System.err.println(cP.initialState);
-//                            System.err.println("AND");
-//                            System.err.println(n);
-//
-//                            System.err.println("AR: " + n.agentRow + "AC: " + n.agentCol);
-//                            //cP.initialState = null;
-//                            //break;
-//
-//
-//                    } else {
-//                        // 2. Tell the agent to stay and continue with their plan afterwards
-//                        Node nnode = n.parent.ChildNode();
-//                        nnode.action = new Command(); // Adding NoOp
-//                        joinPlan.get(cP).addFirst(n);
-//                        n = nnode;
-//                        actions.add(nnode);
-//                    }
+
+                    // Determine the type of conflict!!!
+
+
+
+                    if(true) {
+                        // 1. Tell the agent to find a new plan
+                        /*
+                        Node cfts = new Node(n.parent.parent,cP);
+                        cfts.agentCol = n.parent.agentCol;
+                        cfts.agentRow = n.parent.agentRow;
+                        cfts.boxes = n.parent.boxes;
+
+                        cP.calculateFromThisState = cfts;
+
+
+                        cP.initialState.agentRow = n.parent.agentRow;
+                        cP.initialState.agentCol = n.parent.agentCol;
+                        cP.initialState.boxes = n.parent.boxes;
+*/
+                        for(Node node : n.parent.getExpandedNodes()){
+                            actions.add(node);
+                            //node.action.actionType != Command.Type.NoOp &&
+                            System.err.println("Actions: " + actions.size());
+                                if(!node.equals(n) && CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions,this)){
+//                                    cP.initialState.agentRow = node.agentRow;
+//                                    cP.initialState.agentCol = node.agentCol;
+//                                    cP.initialState.boxes = node.boxes;
+
+                                    //System.err.println("PPPPP " + cP.initialState.parent);
+                                    System.err.println("N: ");
+                                    System.err.println(n);
+                                    System.err.println("Replace N with: ");
+                                    System.err.println(node);
+                                    n = node;
+                                    System.err.println("N is now:");
+                                    System.err.println(n);
+                                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(),node));
+                                    //System.err.println("REACHED");
+                                    break;
+                                }
+
+                            actions.remove(node);
+                        }
+                    }
+                    else {
+                        // 2. Tell the agent to stay and continue with their plan afterwards
+                        Node nnode = n.parent.ChildNode();
+                        nnode.action = new Command(); // Adding NoOp
+                        joinPlan.get(cP).addFirst(n);
+                        n = nnode;
+                        actions.add(nnode);
+                    }
 
                 }
 
-
+                PlanGenerator.FillWithNoOp(joinPlan);
+/*
+                if(RowWall != -1 && ColWall != -1){
+                    cP.removeWall(RowWall,ColWall);
+                }
+*/
 
 
                 System.err.println();

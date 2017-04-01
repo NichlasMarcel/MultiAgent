@@ -47,6 +47,10 @@ public class PlanGenerator {
                     else{
                         copy = p.get(s-1).ChildNode();
                     }
+
+                    copy.agentRow = client.currentState.agentRow;
+                    copy.agentCol = client.currentState.agentCol;
+
                     Command c = new Command();
                     copy.action = c;
                     p.addLast(copy);
@@ -64,7 +68,7 @@ public class PlanGenerator {
                 for(Node aNode : plan){
                     if(sNode.agentRow == aNode.agentRow && sNode.agentCol == aNode.agentCol)
                         if(sNode.extractPlan().size() == aNode.extractPlan().size())
-                            return ConflictTypes.AgentBlockingPath;
+                            return ConflictTypes.AgentsBlockEachother;
                 }
             }
             sumOfPlans.addAll(plan);

@@ -43,6 +43,9 @@ public class Node {
 	}
 
 	public boolean isGoalState() {
+
+	return c.goalStack.peek().IsGoal(agentRow,agentCol,boxes);
+/*
 		for (int row = 1; row < CentralPlanner.MAX_ROW - 1; row++) {
 			for (int col = 1; col < CentralPlanner.MAX_COL - 1; col++) {
 				char g = c.goals[row][col];
@@ -53,6 +56,7 @@ public class Node {
 			}
 		}
 		return true;
+		*/
 	}
 
 	public ArrayList<Node> getExpandedNodes() {
@@ -143,7 +147,7 @@ public class Node {
 			result = prime * result + this.agentCol;
 			result = prime * result + this.agentRow;
 			result = prime * result + Arrays.deepHashCode(this.boxes);
-			result = prime * result + Arrays.deepHashCode(c.goals);
+			//result = prime * result + Arrays.deepHashCode(c.goals);
 			result = prime * result + Arrays.deepHashCode(c.walls);
 			this._hash = result;
 		}

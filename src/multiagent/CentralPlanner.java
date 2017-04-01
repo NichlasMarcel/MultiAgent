@@ -1,7 +1,5 @@
 package multiagent;
 
-import com.sun.rowset.internal.Row;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +19,7 @@ public class CentralPlanner {
     public static int MAX_ROW;
     public static int MAX_COL;
     static Map<Character, String> colors = new HashMap< Character, String >();
-
+    static Map<Integer, Client> clients = new HashMap<>();
     public CentralPlanner(BufferedReader serverMessages) {
         in = serverMessages;
     }
@@ -113,7 +111,7 @@ public class CentralPlanner {
                 if ('0' <= agents[ax][ay] && agents[ax][ay] <= '9') {
                     Client agent = new Client();
                     agent.color = colors.get(agents[ax][ay]);
-                    agent.number = (int)agents[ax][ay];
+                    agent.number = Character.getNumericValue(agents[ax][ay]);
                     Node initialNode = new Node(null, agent);
                     initialNode.agentRow = ax;
                     initialNode.agentCol = ay;
@@ -168,10 +166,16 @@ public class CentralPlanner {
                 }
             }
             agent.initialState.boxes = aBoxes;
+            agent.currentState = new Node(null,agent);
+            agent.currentState.agentRow = agent.initialState.agentRow;
+            agent.currentState.agentCol = agent.initialState.agentCol;
+            CopyBoxes(agent.initialState.boxes,agent.currentState.boxes);
             //agent.calculateFromThisState.boxes = aBoxes;
             agent.goals = aGoals;
-
-
+            Goal goal = new Goal(aGoals);
+            goal.goal = GoalTypes.BoxOnGoal;
+            agent.addGoal(goal);
+            clients.put(agent.getNumber(),agent);
         }
 
 
@@ -216,102 +220,145 @@ public class CentralPlanner {
 
             for (Client cP : agentList) {
                 //System.err.println(cP.initialState);
-                if(joinPlan.get(cP).size() == 0)
+                if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() == 0){
+                    System.err.println(cP.color + "inside");
                     continue;
+                }
+/*
+                else if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() > 0){
+                    System.err.println("FINALLY");
+                    //System.err.println("Walls in the map : " + cP.walls.toString());
+                    System.err.println("Initial state or rather just a state : " + cP.currentState);
+                    System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
+                    cP.currentState.agentRow = cP.initialState.agentRow;
+                    cP.currentState.agentCol = cP.initialState.agentCol;
+                    CopyBoxes(cP.initialState.boxes,cP.currentState.boxes);
+
+                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.currentState));
+                }
+*/
+
 
                 Node n = joinPlan.get(cP).removeFirst();
+
+
                 actions.add(n);
 
 
 
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
-              //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this));
+              //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
                 int RowWall = -1;
                 int ColWall = -1;
-
-                while(!CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions, this)){
+                Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
+                while(conflict.IsConflict()){
                 //while(true){
                 //while(count == 2 || count == 5 || count == 7 ){ was used for testing
+                    System.err.println(conflict.type);
 
-                    System.err.println("inside conflict handling");
-                    //cP.addWall(n.agentRow, n.agentCol);
-                    //RowWall = n.agentRow;
-                    //ColWall = n.agentCol;
 
                     actions.remove(n);
 
-                    // Recalculate a new goal for the client and make the client replan.
-                    // or we can give the client a state where the cell which the client tried to move it, now would be a wall
-                    // or we could add the NoOp operation to the agent
+                    LinkedList<Node> planForConflictingAgent ;
+                    switch (conflict.type){
+                        case AgentsBlockEachother:
+                            Client conflictingAgent = conflict.conflictingAgent;
+                            planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
+                            boolean step1Succes = false;
+                            // 1
+                            for(Node node : n.parent.getExpandedNodes()){
+                                actions.add(node);
+                                //node.action.actionType != Command.Type.NoOp &&
+//                              System.err.println("Actions: " + actions.size());
+                                conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
+                                System.err.println("Current row: " + node.parent.agentRow);
+                                System.err.println("Current col: " + node.parent.agentCol);
+                                System.err.println("- - - - - - - - - - -");
+                                System.err.println(node.c.color);
+                                if(!node.equals(n) && !conflict.IsConflict()){
+                                    boolean ConflictWithPlan = false;
+                                    System.err.println("size: " + planForConflictingAgent.size());
 
-                    // Determine what the agent should plan for
-                    // 1. Tell the agent to find a new plan.
-                    // 2. Tell the agent to stay and continue with their plan afterwards
-                    //System.err.println("CHECK ACTION WHILE INSIDE");
-
-                    // Determine the type of conflict!!!
+                                    for(Node caNode : planForConflictingAgent){
+                                        System.err.println("Frow: " + node.agentRow + "prow: " + caNode.agentRow);
+                                        System.err.println("Fcol: " + node.agentCol + "pcol: " + caNode.agentCol);
+                                        System.err.println("- - - - - - - - - - -");
 
 
 
-                    if(true) {
-                        // 1. Tell the agent to find a new plan
-                        /*
-                        Node cfts = new Node(n.parent.parent,cP);
-                        cfts.agentCol = n.parent.agentCol;
-                        cfts.agentRow = n.parent.agentRow;
-                        cfts.boxes = n.parent.boxes;
 
-                        cP.calculateFromThisState = cfts;
+                                        if(node.agentRow == caNode.agentRow && node.agentCol == caNode.agentCol){
+                                            ConflictWithPlan = true;
+                                            System.err.println("check");
+                                            break;
+                                        }
+                                    }
+
+                                    if(!ConflictWithPlan){
+                                        step1Succes = true;
+                                        break;
+                                    }
 
 
-                        cP.initialState.agentRow = n.parent.agentRow;
-                        cP.initialState.agentCol = n.parent.agentCol;
-                        cP.initialState.boxes = n.parent.boxes;
-*/
-                        for(Node node : n.parent.getExpandedNodes()){
-                            actions.add(node);
-                            //node.action.actionType != Command.Type.NoOp &&
-                            System.err.println("Actions: " + actions.size());
-                                if(!node.equals(n) && CheckWhetherActionPossible.CheckIfActionCanBeApplied(actions,this)){
-//                                    cP.initialState.agentRow = node.agentRow;
-//                                    cP.initialState.agentCol = node.agentCol;
-//                                    cP.initialState.boxes = node.boxes;
-
-                                    //System.err.println("PPPPP " + cP.initialState.parent);
-                                    System.err.println("N: ");
-                                    System.err.println(n);
-                                    System.err.println("Replace N with: ");
-                                    System.err.println(node);
-                                    n = node;
-                                    System.err.println("N is now:");
-                                    System.err.println(n);
-                                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(),node));
-                                    //System.err.println("REACHED");
-                                    break;
+                                }else{
+                                    System.err.println("Recalculate move: " + conflict.type);
                                 }
 
-                            actions.remove(node);
-                        }
-                    }
-                    else {
-                        // 2. Tell the agent to stay and continue with their plan afterwards
-                        Node nnode = n.parent.ChildNode();
-                        nnode.action = new Command(); // Adding NoOp
-                        joinPlan.get(cP).addFirst(n);
-                        n = nnode;
-                        actions.add(nnode);
+                                actions.remove(node);
+                            }
+
+                            if(step1Succes)
+                                break;
+
+                            // 2
+                            System.err.println("Step 2");
+                            Goal moveToEmptyCell = new Goal(planForConflictingAgent);
+                            System.err.println("Plan for agent: ");
+                            System.err.println(planForConflictingAgent);
+                            moveToEmptyCell.goal = GoalTypes.MoveToEmptyCell;
+                            cP.addGoal(moveToEmptyCell);
+                            cP.addWall(n.agentRow, n.agentCol);
+                            cP.initialState.agentRow = n.parent.agentRow;
+                            cP.initialState.agentCol = n.parent.agentCol;
+                            cP.initialState.boxes = n.parent.boxes;
+                            cP.initialState.g = n.parent.g;
+                            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                            cP.removeWall(n.agentRow, n.agentCol);
+                            n = joinPlan.get(cP).removeFirst();
+                            actions.add(n);
+
+
+                            //joinPlan.get(conflictingAgent).addFirst(n);
+                            Node nnode = joinPlan.get(conflictingAgent).getFirst().parent.ChildNode();
+                            nnode.action = new Command(); // Adding NoOp
+                            nnode.agentRow = joinPlan.get(conflictingAgent).getFirst().parent.agentRow;
+                            nnode.agentCol = joinPlan.get(conflictingAgent).getFirst().parent.agentCol;
+
+                            System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
+
+                            joinPlan.get(conflictingAgent).addFirst(nnode);
+
+                            break;
+
+                        default:
+                            break;
+
                     }
 
                 }
 
-                PlanGenerator.FillWithNoOp(joinPlan);
-/*
-                if(RowWall != -1 && ColWall != -1){
-                    cP.removeWall(RowWall,ColWall);
+                if(cP.goalStack.size() > 1 && n.isGoalState()){
+                    System.err.println("LALALA");
+                    cP.initialState.agentRow = n.parent.agentRow;
+                    cP.initialState.agentCol = n.parent.agentCol;
+                    cP.initialState.boxes = n.parent.boxes;
+                    cP.initialState.g = n.parent.g;
+                    System.err.println(cP.goalStack.peek().goal);
+                    cP.goalStack.pop();
+                    System.err.println(cP.goalStack.peek().goal);
+                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                 }
-*/
-
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
@@ -322,6 +369,7 @@ public class CentralPlanner {
                 cmdForClients.put(cP, n);
                 joinedAction += n.action.toString() + ",";
             }
+            PlanGenerator.FillWithNoOp(joinPlan);
             if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
                 joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
 
@@ -359,7 +407,17 @@ public class CentralPlanner {
 
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
+            /*
+            if(node != null){
+                c.currentState.agentRow = node.agentRow;
+                c.currentState.agentCol = node.agentCol;
+                CopyBoxes(node.boxes,c.currentState.boxes);
+            }
 
+            // Remember to add boxes
+            if(c.goalStack.size() > 0 && node.isGoalState())
+                c.goalStack.pop();
+*/
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action
@@ -432,6 +490,15 @@ public class CentralPlanner {
                 //else if (node.action.actionType == Command.Type.NoOp)
             }
         }
+    }
+
+    public void CopyBoxes(char[][] boxesToCopy, char[][] receiver){
+        for (int i=0; i<boxesToCopy.length; i++)
+            for (int j=0; j<boxesToCopy[i].length; j++)
+            {
+                receiver[i][j] = boxesToCopy[i][j];
+                //receiver[i][j] =  boxesToCopy[i][j];
+            }
     }
 
     @Override

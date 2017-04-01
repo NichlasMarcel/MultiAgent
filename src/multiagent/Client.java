@@ -3,10 +3,7 @@ package multiagent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Nichlas on 14-03-2017.
@@ -16,6 +13,7 @@ public class Client {
 
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
+    public Node currentState;
     public char[][] goals; // Taget fra node
     public boolean[][] walls;
    /* public static int MAX_ROW;
@@ -27,6 +25,7 @@ public class Client {
       return number;
     }
 
+    Stack<Goal> goalStack = new Stack<>();
     public void addWall(int row, int col){
         walls[row][col] = true;
     }
@@ -43,6 +42,10 @@ public class Client {
                 this.walls[i][j] = CentralPlanner.walls[i][j];
             }
         }
+    }
+
+    public void addGoal(Goal goal){
+        goalStack.push(goal);
     }
 
     public LinkedList<Node> Search(Strategy strategy, Node node) {

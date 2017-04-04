@@ -178,7 +178,7 @@ public class CentralPlanner {
             clients.put(agent.getNumber(),agent);
         }
 
-
+        System.err.println("Nothing");
 
         // Get plans from agents
         HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();

@@ -30,7 +30,7 @@ public class PlanGenerator {
         for (Client client : joinPlan.keySet()){
             LinkedList<Node> p = joinPlan.get(client);
             int s = p.size();
-            System.err.println("max: " + maximumLength + "p: " + p.size());
+            //System.err.println("max: " + maximumLength + "p: " + p.size());
             /*if(p.size() == 0){
                 Node n = new Node(null,client);
                 Command c = new Command();

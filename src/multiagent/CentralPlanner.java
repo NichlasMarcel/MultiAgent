@@ -1,5 +1,6 @@
 package multiagent;
 
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,6 +55,8 @@ public class CentralPlanner {
             max_row++;
         }
 
+        in.readLine();
+
         MAX_COL = max_col+1;
         MAX_ROW = max_row+1;
 
@@ -83,7 +86,7 @@ public class CentralPlanner {
                 }
             }
         }
-
+/*
         for(int j = 0; j < agents.length; j++){
             for (int i = 0; i< agents[j].length; i++){
                 if(agents[j][i] !=  '\u0000')
@@ -91,6 +94,7 @@ public class CentralPlanner {
             }
 
         }
+        */
     }
 
     public static void main( String[] args ) throws IOException {
@@ -120,8 +124,6 @@ public class CentralPlanner {
 
                     System.err.println("COL " + agent.color);
                     agentList.add(agent);
-
-
                 }
             }
         }
@@ -214,12 +216,20 @@ public class CentralPlanner {
         while (true) {
 
 
-            String joinedAction = "[";
+
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
 
             for (Client cP : agentList){
-                System.err.println(cP.color + " : " + joinPlan.get(cP).size());
+
+                int count = 0;
+                for(Node node : joinPlan.get(cP)){
+                    if(node.action.dir1 == Command.Dir.E && node.action.actionType == Command.Type.Move){
+                        count++;
+                    }
+
+                }
+                System.err.println(cP.color + " : " + count);
             }
             System.err.println("# - - - - - - - - - - #");
             for (Client cP : agentList) {
@@ -270,6 +280,7 @@ public class CentralPlanner {
                             Client conflictingAgent = conflict.conflictingAgent;
                             planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                             boolean step1Succes = false;
+
                             // 1
                             for(Node node : n.parent.getExpandedNodes()){
                                 actions.add(node);
@@ -285,13 +296,6 @@ public class CentralPlanner {
                                     System.err.println("size: " + planForConflictingAgent.size());
 
                                     for(Node caNode : planForConflictingAgent){
-                                        System.err.println("Frow: " + node.agentRow + "prow: " + caNode.agentRow);
-                                        System.err.println("Fcol: " + node.agentCol + "pcol: " + caNode.agentCol);
-                                        System.err.println("- - - - - - - - - - -");
-
-
-
-
                                         if(node.agentRow == caNode.agentRow && node.agentCol == caNode.agentCol){
                                             ConflictWithPlan = true;
                                             System.err.println("check");
@@ -300,6 +304,7 @@ public class CentralPlanner {
                                     }
 
                                     if(!ConflictWithPlan){
+
                                         step1Succes = true;
                                         break;
                                     }
@@ -312,14 +317,18 @@ public class CentralPlanner {
                                 actions.remove(node);
                             }
 
-                            if(step1Succes)
+                            if(step1Succes){
+                                System.err.println("Step 1 was a success");
                                 break;
+                            }
+
 
                             // 2
                             System.err.println("Step 2");
                             Goal moveToEmptyCell = new Goal(planForConflictingAgent);
-                            System.err.println("Plan for agent: ");
-                            System.err.println(planForConflictingAgent);
+                            //System.err.println("Plan for agent: ");
+                            //System.err.println(planForConflictingAgent);
+
                             moveToEmptyCell.goal = GoalTypes.MoveToEmptyCell;
                             cP.addGoal(moveToEmptyCell);
                             cP.addWall(n.agentRow, n.agentCol);
@@ -336,9 +345,13 @@ public class CentralPlanner {
                             actions.add(n);
 
                             if(cmdForClients.get(conflictingAgent) != null){
+                                Node noop = CreateNoOp(cmdForClients.get(conflictingAgent));
                                 joinPlan.get(conflictingAgent).addFirst(cmdForClients.get(conflictingAgent));
-                                cmdForClients.put(conflictingAgent, CreateNoOp(cmdForClients.get(conflictingAgent)));
-                            }else{
+                                cmdForClients.put(conflictingAgent, noop);
+                                actions.remove(cmdForClients.get(conflictingAgent));
+                                actions.add(noop);
+                            }
+                            else{
                                 System.err.println("Plan for conflicting agent: ");
                                 System.err.println(joinPlan.get(conflictingAgent));
                                 joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
@@ -347,6 +360,7 @@ public class CentralPlanner {
                             break;
 
                         default:
+
                             System.err.println("Enter default conflict handling");
                             actions.remove(n);
                             boolean success = false;
@@ -404,9 +418,17 @@ public class CentralPlanner {
                 }
 
                 cmdForClients.put(cP, n);
-                joinedAction += n.action.toString() + ",";
+
             }
+
             PlanGenerator.FillWithNoOp(joinPlan);
+
+            String joinedAction = "[";
+
+            for(Client a : agentList){
+                joinedAction += cmdForClients.get(a).action.toString() + ",";
+            }
+
             if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
                 joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
 
@@ -414,11 +436,10 @@ public class CentralPlanner {
             joinedAction += "]";
 
             ApplyAction(cmdForClients);
+
             System.err.println(joinedAction);
-
-            //System.err.println(this);
-
             System.out.println(joinedAction);
+
             try{
                 String response = in.readLine();
                 if (response.contains("false")) {
@@ -454,7 +475,7 @@ public class CentralPlanner {
             // Remember to add boxes
             if(c.goalStack.size() > 0 && node.isGoalState())
                 c.goalStack.pop();
-*/
+            */
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action
@@ -474,7 +495,7 @@ public class CentralPlanner {
                     char agent = agents[node.parent.agentRow][node.parent.agentCol];
                     agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                     agents[node.agentRow][node.agentCol] = agent;
-                    System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
+                    //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
 
                     //System.err.println("AGE " + agent);
                     //System.err.println("NRow: " + newAgentRow);
@@ -497,11 +518,11 @@ public class CentralPlanner {
 
                         agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                         boxes[node.agentRow][node.agentCol] = 0;
-
+/*
                         System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
                         System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
                         System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);                        boxes[newBoxRow][newBoxCol] = box;
-
+*/
 
                     }
                 }

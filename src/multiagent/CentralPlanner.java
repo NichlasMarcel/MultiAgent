@@ -218,6 +218,10 @@ public class CentralPlanner {
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
 
+            for (Client cP : agentList){
+                System.err.println(cP.color + " : " + joinPlan.get(cP).size());
+            }
+            System.err.println("# - - - - - - - - - - #");
             for (Client cP : agentList) {
                 //System.err.println(cP.initialState);
                 if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() == 0){
@@ -340,31 +344,6 @@ public class CentralPlanner {
                                 joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
                             }
 
-
-
-                            //joinPlan.get(conflictingAgent).addFirst(n);
-
-/*
-                            if(cmdForClients.get(conflictingAgent) != null){
-                                Node nnode = cmdForClients.get(conflictingAgent).parent.ChildNode();
-                                nnode.action = new Command(); // Adding NoOp
-                                nnode.agentRow = cmdForClients.get(conflictingAgent).parent.agentRow;
-                                nnode.agentCol = cmdForClients.get(conflictingAgent).parent.agentCol;
-                                joinPlan.get(conflictingAgent).addFirst(cmdForClients.get(conflictingAgent));
-                                //System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
-                                System.err.println("Conflicting Agent already had a action");
-                                cmdForClients.put(conflictingAgent,nnode);
-                            }else {
-                                Node nnode = joinPlan.get(conflictingAgent).getFirst().parent.ChildNode();
-                                nnode.action = new Command(); // Adding NoOp
-                                nnode.agentRow = joinPlan.get(conflictingAgent).getFirst().parent.agentRow;
-                                nnode.agentCol = joinPlan.get(conflictingAgent).getFirst().parent.agentCol;
-
-                                System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
-                                System.err.println("Conflicting Agent have not been calculated yet");
-                                joinPlan.get(conflictingAgent).addFirst(nnode);
-                            }
-*/
                             break;
 
                         default:
@@ -406,7 +385,7 @@ public class CentralPlanner {
 
                 }
 
-                if(cP.goalStack.size() > 1 && n.isGoalState()){
+                if(cP.goalStack.size() > 1 && n.isGoalState() && joinPlan.get(cP).size() == 0){
                     System.err.println("LALALA");
                     cP.initialState.agentRow = n.parent.agentRow;
                     cP.initialState.agentCol = n.parent.agentCol;

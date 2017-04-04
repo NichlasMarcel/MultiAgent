@@ -304,7 +304,12 @@ public class CentralPlanner {
                                     }
 
                                     if(!ConflictWithPlan){
-
+                                        cP.initialState.agentRow = node.agentRow;
+                                        cP.initialState.agentCol = node.agentCol;
+                                        cP.initialState.boxes = node.boxes;
+                                        cP.initialState.g = node.g;
+                                        n = node;
+                                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                                         step1Succes = true;
                                         break;
                                     }

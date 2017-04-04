@@ -324,25 +324,71 @@ public class CentralPlanner {
                             cP.initialState.boxes = n.parent.boxes;
                             cP.initialState.g = n.parent.g;
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                            LinkedList<Node> newPlan = joinPlan.get(cP);
+                            //for (int i = conflictingAgent.)
+
                             cP.removeWall(n.agentRow, n.agentCol);
                             n = joinPlan.get(cP).removeFirst();
                             actions.add(n);
 
 
                             //joinPlan.get(conflictingAgent).addFirst(n);
-                            Node nnode = joinPlan.get(conflictingAgent).getFirst().parent.ChildNode();
-                            nnode.action = new Command(); // Adding NoOp
-                            nnode.agentRow = joinPlan.get(conflictingAgent).getFirst().parent.agentRow;
-                            nnode.agentCol = joinPlan.get(conflictingAgent).getFirst().parent.agentCol;
 
-                            System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
 
-                            joinPlan.get(conflictingAgent).addFirst(nnode);
+                            if(cmdForClients.get(conflictingAgent) != null){
+                                Node nnode = cmdForClients.get(conflictingAgent).parent.ChildNode();
+                                nnode.action = new Command(); // Adding NoOp
+                                nnode.agentRow = cmdForClients.get(conflictingAgent).parent.agentRow;
+                                nnode.agentCol = cmdForClients.get(conflictingAgent).parent.agentCol;
+                                joinPlan.get(conflictingAgent).addFirst(cmdForClients.get(conflictingAgent));
+                                //System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
+                                System.err.println("Conflicting Agent already had a action");
+                                cmdForClients.put(conflictingAgent,nnode);
+                            }else {
+                                Node nnode = joinPlan.get(conflictingAgent).getFirst().parent.ChildNode();
+                                nnode.action = new Command(); // Adding NoOp
+                                nnode.agentRow = joinPlan.get(conflictingAgent).getFirst().parent.agentRow;
+                                nnode.agentCol = joinPlan.get(conflictingAgent).getFirst().parent.agentCol;
+
+                                System.err.println("NoOp: row: " + nnode.agentRow + " col: " + nnode.agentCol);
+                                System.err.println("Conflicting Agent have not been calculated yet");
+                                joinPlan.get(conflictingAgent).addFirst(nnode);
+                            }
 
                             break;
 
                         default:
+                            System.err.println("Enter default conflict handling");
+                            actions.remove(n);
+                            boolean success = false;
+                            for (Node a : n.parent.getExpandedNodes()) {
+                                actions.add(a);
+                                conflict = ConflictDetector.CheckIfActionCanBeApplied(actions, this);
+
+                                if (!conflict.IsConflict()) {
+
+                                    joinPlan.get(cP).addFirst(n);
+                                    n = a;
+                                    success = true;
+                                    break;
+                                }
+                                actions.remove(a);
+                            }
+
+                            if(success)
+                                break;
+
+                            Node nnode = n.parent.ChildNode();
+                            nnode.action = new Command(); // Adding NoOp
+                            nnode.agentRow = n.parent.agentRow;
+                            nnode.agentCol = n.parent.agentCol;
+
+                            joinPlan.get(cP).addFirst(n);
+                            n= nnode;
+
                             break;
+
+
 
                     }
 

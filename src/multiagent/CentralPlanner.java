@@ -210,16 +210,15 @@ public class CentralPlanner {
             }
         }
 
-        PlanGenerator.FillWithNoOp(joinPlan);
+        //PlanGenerator.FillWithNoOp(joinPlan);
 
         // Execute plans from agents
         while (true) {
 
 
-
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
-
+/*
             for (Client cP : agentList){
 
                 int count = 0;
@@ -231,12 +230,20 @@ public class CentralPlanner {
                 }
                 System.err.println(cP.color + " : " + count);
             }
+
             System.err.println("# - - - - - - - - - - #");
+            */
             for (Client cP : agentList) {
                 //System.err.println(cP.initialState);
                 if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() == 0){
-                    System.err.println(cP.color + "inside");
-                    continue;
+                    Node h = CreateNoOp(cP.currentState);
+                    joinPlan.get(cP).add(h);
+                }
+
+                if(joinPlan.get(cP).size() == 0){
+                    Node h = CreateNoOp(cP.currentState);
+                    System.err.println(cP.currentState.agentRow + " - " + cP.currentState.agentCol);
+                    joinPlan.get(cP).add(h);
                 }
 /*
                 else if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() > 0){
@@ -280,7 +287,13 @@ public class CentralPlanner {
                             Client conflictingAgent = conflict.conflictingAgent;
                             planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                             boolean step1Succes = false;
-
+                            System.err.println("Conflict: " + conflictingAgent.color + " A: " + cP.color);
+                            for (int i=0; i<agents.length; i++)
+                                for (int j=0; j<agents[i].length; j++) {
+                                    if(('0' <= agents[i][j] && agents[i][j] <= '9')){
+                                        System.err.println("Row: " + i + " Col: " + j + " Agent: " + agents[i][j]);
+                                    }
+                                }
                             // 1
                             for(Node node : n.parent.getExpandedNodes()){
                                 actions.add(node);
@@ -290,11 +303,13 @@ public class CentralPlanner {
                                 System.err.println("Current row: " + node.parent.agentRow);
                                 System.err.println("Current col: " + node.parent.agentCol);
                                 System.err.println("- - - - - - - - - - -");
+                                System.err.println("Agent position row : " +  node.agentRow   +  " ,  Agent col position : " + node.agentCol );
                                 System.err.println(node.c.color);
                                 if(!node.equals(n) && !conflict.IsConflict()){
+
                                     boolean ConflictWithPlan = false;
                                     System.err.println("size: " + planForConflictingAgent.size());
-
+                                    //System.err.println("This is a plan of ConflictingAgent : \n" + planForConflictingAgent);
                                     for(Node caNode : planForConflictingAgent){
                                         if(node.agentRow == caNode.agentRow && node.agentCol == caNode.agentCol){
                                             ConflictWithPlan = true;
@@ -308,6 +323,7 @@ public class CentralPlanner {
                                         cP.initialState.agentCol = node.agentCol;
                                         cP.initialState.boxes = node.boxes;
                                         cP.initialState.g = node.g;
+                                        System.err.println(node);
                                         n = node;
                                         joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                                         step1Succes = true;
@@ -324,6 +340,9 @@ public class CentralPlanner {
 
                             if(step1Succes){
                                 System.err.println("Step 1 was a success");
+                                //System.err.println("Conflicting agent: " + conflictingAgent.color);
+                                //System.err.println("Path of conflicting agent: ");
+                                //System.err.println(planForConflictingAgent);
                                 break;
                             }
 
@@ -421,12 +440,12 @@ public class CentralPlanner {
                 for (List<Node> l : joinPlan.values()){
                     System.err.println(l.size());
                 }
-
+                System.err.println(n.agentRow + "-:-" + n.agentCol);
                 cmdForClients.put(cP, n);
 
             }
 
-            PlanGenerator.FillWithNoOp(joinPlan);
+            //PlanGenerator.FillWithNoOp(joinPlan);
 
             String joinedAction = "[";
 
@@ -470,17 +489,7 @@ public class CentralPlanner {
 
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
-            /*
-            if(node != null){
-                c.currentState.agentRow = node.agentRow;
-                c.currentState.agentCol = node.agentCol;
-                CopyBoxes(node.boxes,c.currentState.boxes);
-            }
-
-            // Remember to add boxes
-            if(c.goalStack.size() > 0 && node.isGoalState())
-                c.goalStack.pop();
-            */
+            c.UpdateCurrentState(node);
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action
@@ -572,6 +581,8 @@ public class CentralPlanner {
 
         return n;
     }
+
+
 
     @Override
     public String toString() {

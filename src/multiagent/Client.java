@@ -34,6 +34,12 @@ public class Client {
         walls[row][col] = false;
     }
 
+    public void UpdateCurrentState(Node n){
+        currentState = n.ChildNode();
+        currentState.agentCol = n.agentCol;
+        currentState.agentRow = n.agentRow;
+        currentState.action = n.action;
+    }
     public Client() {
         walls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 

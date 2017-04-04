@@ -248,13 +248,13 @@ public class CentralPlanner {
 
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
-              //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
+                //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
                 int RowWall = -1;
                 int ColWall = -1;
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 while(conflict.IsConflict()){
-                //while(true){
-                //while(count == 2 || count == 5 || count == 7 ){ was used for testing
+                    //while(true){
+                    //while(count == 2 || count == 5 || count == 7 ){ was used for testing
                     System.err.println(conflict.type);
 
 
@@ -324,17 +324,27 @@ public class CentralPlanner {
                             cP.initialState.boxes = n.parent.boxes;
                             cP.initialState.g = n.parent.g;
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
-                            LinkedList<Node> newPlan = joinPlan.get(cP);
-                            //for (int i = conflictingAgent.)
 
                             cP.removeWall(n.agentRow, n.agentCol);
+
+
                             n = joinPlan.get(cP).removeFirst();
                             actions.add(n);
+
+                            if(cmdForClients.get(conflictingAgent) != null){
+                                joinPlan.get(conflictingAgent).addFirst(cmdForClients.get(conflictingAgent));
+                                cmdForClients.put(conflictingAgent, CreateNoOp(cmdForClients.get(conflictingAgent)));
+                            }else{
+                                System.err.println("Plan for conflicting agent: ");
+                                System.err.println(joinPlan.get(conflictingAgent));
+                                joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
+                            }
+
 
 
                             //joinPlan.get(conflictingAgent).addFirst(n);
 
-
+/*
                             if(cmdForClients.get(conflictingAgent) != null){
                                 Node nnode = cmdForClients.get(conflictingAgent).parent.ChildNode();
                                 nnode.action = new Command(); // Adding NoOp
@@ -354,7 +364,7 @@ public class CentralPlanner {
                                 System.err.println("Conflicting Agent have not been calculated yet");
                                 joinPlan.get(conflictingAgent).addFirst(nnode);
                             }
-
+*/
                             break;
 
                         default:
@@ -378,13 +388,15 @@ public class CentralPlanner {
                             if(success)
                                 break;
 
-                            Node nnode = n.parent.ChildNode();
-                            nnode.action = new Command(); // Adding NoOp
-                            nnode.agentRow = n.parent.agentRow;
-                            nnode.agentCol = n.parent.agentCol;
+
+
+                            Node f = n.parent.ChildNode();
+                            f.action = new Command(); // Adding NoOp
+                            f.agentRow = n.parent.agentRow;
+                            f.agentCol = n.parent.agentCol;
 
                             joinPlan.get(cP).addFirst(n);
-                            n= nnode;
+                            n = f;
 
                             break;
 
@@ -545,6 +557,15 @@ public class CentralPlanner {
                 receiver[i][j] = boxesToCopy[i][j];
                 //receiver[i][j] =  boxesToCopy[i][j];
             }
+    }
+
+    public Node CreateNoOp(Node node){
+        Node n = node.parent.ChildNode();
+        n.action = new Command();
+        n.agentRow = node.parent.agentRow;
+        n.agentCol = node.parent.agentCol;
+
+        return n;
     }
 
     @Override

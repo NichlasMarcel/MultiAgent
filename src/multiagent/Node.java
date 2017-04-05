@@ -63,8 +63,20 @@ public class Node {
 		ArrayList<Node> expandedNodes = new ArrayList<Node>(Command.EVERY.length);
 		for (Command c : Command.EVERY) {
 			// Determine applicability of action
+
+
+			if( c.actionType == Command.Type.NoOp){
+				Node n = this.ChildNode();
+				n.action = c;
+				n.agentRow = this.agentRow;
+				n.agentCol = this.agentCol;
+				expandedNodes.add(n);
+				continue;
+			}
+
 			int newAgentRow = this.agentRow + Command.dirToRowChange(c.dir1);
 			int newAgentCol = this.agentCol + Command.dirToColChange(c.dir1);
+
 
 			if (c.actionType == Command.Type.Move) {
 				// Check if there's a wall or box on the cell to which the agent is moving

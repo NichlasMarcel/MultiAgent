@@ -34,6 +34,8 @@ public class Command {
 			cmds.add(new Command(d));
 		}
 
+		cmds.add(new Command());
+
 		EVERY = cmds.toArray(new Command[0]);
 	}
 

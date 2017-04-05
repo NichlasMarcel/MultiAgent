@@ -270,7 +270,7 @@ public class CentralPlanner {
                 while(conflict.IsConflict()){
                     //while(true){
                     //while(count == 2 || count == 5 || count == 7 ){ was used for testing
-                    System.err.println(conflict.type);
+                    System.err.println("Conflict type: " + conflict.type);
 
                     actions.remove(n);
 
@@ -324,7 +324,7 @@ public class CentralPlanner {
                                         cP.initialState.agentCol = node.agentCol;
                                         cP.initialState.boxes = node.boxes;
                                         cP.initialState.g = node.g;
-*/
+                                        */
                                         n.parent = node.parent;
                                         n.action = node.action;
                                         n.agentRow = node.agentRow;
@@ -352,7 +352,6 @@ public class CentralPlanner {
                                         System.err.println();
                                         System.err.println("Conflict parent: ");
                                         System.err.println("Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
-
                                         System.err.println("Recalculate move: " + conflict.type);
                                     }
                                 }
@@ -385,8 +384,10 @@ public class CentralPlanner {
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
 
                             cP.removeWall(n.agentRow, n.agentCol);
-
-                            n = joinPlan.get(cP).removeFirst();
+                            if(joinPlan.get(cP).size() == 0)
+                                n = CreateNoOp(n.parent);
+                            else
+                                n = joinPlan.get(cP).removeFirst();
                             actions.add(n);
 
                             if(cmdForClients.get(conflictingAgent) != null){
@@ -398,8 +399,20 @@ public class CentralPlanner {
                             }
                             else{
                                 System.err.println("Plan for conflicting agent: ");
-                                System.err.println(joinPlan.get(conflictingAgent));
-                                joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
+                                //System.err.println(joinPlan.get(conflictingAgent));
+                                if(joinPlan.get(conflictingAgent) != null){
+                                    if(joinPlan.get(conflictingAgent).size() == 0)
+                                        joinPlan.get(conflictingAgent).addFirst(CreateNoOp(n.parent));
+                                    else
+                                        joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
+                                }else{
+                                    joinPlan.put(conflictingAgent, new LinkedList<Node>());
+                                    joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
+
+                                }
+
+
+
                             }
 
                             break;
@@ -416,7 +429,11 @@ public class CentralPlanner {
                                 if (!conflict.IsConflict()) {
 
                                     joinPlan.get(cP).addFirst(n);
-                                    n = a;
+                                    n.parent = a.parent;
+                                    n.action = a.action;
+                                    n.agentRow = a.agentRow;
+                                    n.agentCol = a.agentCol;
+                                    n.g = a.g;
                                     success = true;
                                     break;
                                 }
@@ -450,8 +467,9 @@ public class CentralPlanner {
                     cP.initialState.agentCol = n.parent.agentCol;
                     cP.initialState.boxes = n.parent.boxes;
                     cP.initialState.g = n.parent.g;
-                    System.err.println(cP.goalStack.peek().goal);
+                    System.err.println("Finished: " + cP.goalStack.peek().goal);
                     cP.goalStack.pop();
+                    System.err.println("Starting: " + cP.goalStack.peek().goal);
                     //System.err.println(cP.goalStack.peek().goal);
                     joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                 }else if(cP.goalStack.size() > 0 && n.isGoalState() && joinPlan.get(cP).size() == 0){

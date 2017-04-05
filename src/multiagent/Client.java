@@ -35,11 +35,22 @@ public class Client {
     }
 
     public void UpdateCurrentState(Node n){
-        currentState = n.ChildNode();
+        currentState = new Node(n.parent,this);
         currentState.agentCol = n.agentCol;
         currentState.agentRow = n.agentRow;
         currentState.action = n.action;
+        CopyBoxes(n.boxes, currentState.boxes);
     }
+
+    public void CopyBoxes(char[][] boxesToCopy, char[][] receiver){
+        for (int i=0; i<boxesToCopy.length; i++)
+            for (int j=0; j<boxesToCopy[i].length; j++)
+            {
+                receiver[i][j] = boxesToCopy[i][j];
+                //receiver[i][j] =  boxesToCopy[i][j];
+            }
+    }
+
     public Client() {
         walls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 

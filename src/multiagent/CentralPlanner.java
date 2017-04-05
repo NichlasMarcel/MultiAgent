@@ -240,24 +240,18 @@ public class CentralPlanner {
                     joinPlan.get(cP).add(h);
                 }
 
-                if(joinPlan.get(cP).size() == 0){
-                    Node h = CreateNoOp(cP.currentState);
-                    System.err.println(cP.currentState.agentRow + " - " + cP.currentState.agentCol);
-                    joinPlan.get(cP).add(h);
-                }
-/*
                 else if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() > 0){
                     System.err.println("FINALLY");
                     //System.err.println("Walls in the map : " + cP.walls.toString());
                     System.err.println("Initial state or rather just a state : " + cP.currentState);
                     System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
-                    cP.currentState.agentRow = cP.initialState.agentRow;
-                    cP.currentState.agentCol = cP.initialState.agentCol;
-                    CopyBoxes(cP.initialState.boxes,cP.currentState.boxes);
+                    cP.initialState.agentRow = cP.currentState.agentRow;
+                    cP.initialState.agentCol = cP.currentState.agentCol;
+                    CopyBoxes(cP.currentState.boxes,cP.initialState.boxes);
 
-                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.currentState));
+                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                 }
-*/
+
 
 
                 Node n = joinPlan.get(cP).removeFirst();
@@ -278,7 +272,6 @@ public class CentralPlanner {
                     //while(count == 2 || count == 5 || count == 7 ){ was used for testing
                     System.err.println(conflict.type);
 
-
                     actions.remove(n);
 
                     LinkedList<Node> planForConflictingAgent ;
@@ -294,8 +287,10 @@ public class CentralPlanner {
                                         System.err.println("Row: " + i + " Col: " + j + " Agent: " + agents[i][j]);
                                     }
                                 }
+                            System.err.println("Current Agents: Row " + n.parent.agentRow + " Col " + n.parent.agentCol + "Agent: " + agents[n.parent.agentRow][n.parent.agentCol]);
                             // 1
                             for(Node node : n.parent.getExpandedNodes()){
+
                                 actions.add(node);
                                 //node.action.actionType != Command.Type.NoOp &&
 //                              System.err.println("Actions: " + actions.size());
@@ -316,36 +311,50 @@ public class CentralPlanner {
                                     }
 
                                     if(!ConflictWithPlan){
-                                        cP.initialState.agentRow = node.agentRow;
-                                        cP.initialState.agentCol = node.agentCol;
-                                        cP.initialState.boxes = node.boxes;
-                                        cP.initialState.g = node.g;
 
+
+                                        System.err.println("Actions Type: " + node.action.actionType + " Dir1: " + node.action.dir1 + " Dir 2: " + node.action.dir2);
                                         System.err.println("CP - Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
                                         System.err.println("CP - New Agents: Row " + node.agentRow + " Col " + node.agentCol + "Agent: " + agents[node.agentRow][node.agentCol]);
                                         System.err.println("CP - Conflict Agents: Row " + n.agentRow + " Col " + n.agentCol + "Agent: " + agents[n.agentRow][n.agentCol]);
                                         System.err.println("Check Agent is here: " + agents[3][9]);
                                         System.err.println("Check Agent is here: " + agents[4][10]);
-
-
-                                        System.err.println(node);
-                                        n = node;
+                                        /*
+                                        cP.initialState.agentRow = node.agentRow;
+                                        cP.initialState.agentCol = node.agentCol;
+                                        cP.initialState.boxes = node.boxes;
+                                        cP.initialState.g = node.g;
+*/
+                                        n.parent = node.parent;
+                                        n.action = node.action;
+                                        n.agentRow = node.agentRow;
+                                        n.agentCol = node.agentCol;
+                                        n.g = node.g;
                                         System.err.println(n);
-
+                                        joinPlan.get(cP).clear();
                                         //System.err.println("Node: " + node.agentRow + node.agentCol);
 
-
-                                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+/*
+                                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), node));
                                         System.err.println("node in new plan");
-                                        System.err.println(joinPlan.get(cP).getFirst());
-
+                                        Node test = joinPlan.get(cP).getFirst();
+                                        System.err.println(test);
+                                        System.err.println("test parent");
+                                        System.err.println(test.parent);
+*/
                                         step1Succes = true;
                                         break;
                                     }
 
 
                                 }else{
-                                    System.err.println("Recalculate move: " + conflict.type);
+                                    if(!node.equals(n)) {
+                                        System.err.println();
+                                        System.err.println("Conflict parent: ");
+                                        System.err.println("Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
+
+                                        System.err.println("Recalculate move: " + conflict.type);
+                                    }
                                 }
 
                                 actions.remove(node);
@@ -443,8 +452,14 @@ public class CentralPlanner {
                     cP.initialState.g = n.parent.g;
                     System.err.println(cP.goalStack.peek().goal);
                     cP.goalStack.pop();
-                    System.err.println(cP.goalStack.peek().goal);
+                    //System.err.println(cP.goalStack.peek().goal);
                     joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                }else if(cP.goalStack.size() > 0 && n.isGoalState() && joinPlan.get(cP).size() == 0){
+                    cP.initialState.agentRow = n.parent.agentRow;
+                    cP.initialState.agentCol = n.parent.agentCol;
+                    cP.initialState.boxes = n.parent.boxes;
+                    cP.initialState.g = n.parent.g;
+                    cP.goalStack.pop();
                 }
 
                 System.err.println();
@@ -452,7 +467,6 @@ public class CentralPlanner {
                 for (List<Node> l : joinPlan.values()){
                     System.err.println(l.size());
                 }
-                System.err.println(n.agentRow + "-:-" + n.agentCol);
                 cmdForClients.put(cP, n);
 
             }
@@ -504,6 +518,7 @@ public class CentralPlanner {
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
             c.UpdateCurrentState(node);
+
             if(node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action

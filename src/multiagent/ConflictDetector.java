@@ -59,6 +59,7 @@ public class ConflictDetector {
                 //    System.err.println("Agent found! " + agents[node.agentRow][node.agentCol]);
                 //}
                 // Check if there's a wall or box on the cell to which the agent is moving
+
                 int row = node.agentRow;
                 int col = node.agentCol;
                 if(CentralPlanner.walls[row][col])
@@ -77,15 +78,15 @@ public class ConflictDetector {
                         System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
                     if(row-1 > 0 && !(c_row == row-1 && c_col == col) && ('0' <= agents[row-1][col] && agents[row-1][col] <= '9')){
-                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
-                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));}
                     if(col+1 <= CentralPlanner.MAX_COL && !(c_row == row && c_col == col+1) && ('0' <= agents[row][col+1] && agents[row][col+1] <= '9')){
-                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
-                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
                     }
                     if(col-1 > 0 && !(c_row == row && c_col == col-1) && ('0' <= agents[row][col-1] && agents[row][col-1] <= '9')){
-                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
-                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                     }
 
                     return new Conflict(ConflictTypes.Move);

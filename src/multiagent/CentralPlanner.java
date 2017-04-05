@@ -300,11 +300,8 @@ public class CentralPlanner {
                                 //node.action.actionType != Command.Type.NoOp &&
 //                              System.err.println("Actions: " + actions.size());
                                 conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
-                                System.err.println("Current row: " + node.parent.agentRow);
-                                System.err.println("Current col: " + node.parent.agentCol);
-                                System.err.println("- - - - - - - - - - -");
-                                System.err.println("Agent position row : " +  node.agentRow   +  " ,  Agent col position : " + node.agentCol );
-                                System.err.println(node.c.color);
+
+                                //System.err.println(node.c.color);
                                 if(!node.equals(n) && !conflict.IsConflict()){
 
                                     boolean ConflictWithPlan = false;
@@ -323,9 +320,25 @@ public class CentralPlanner {
                                         cP.initialState.agentCol = node.agentCol;
                                         cP.initialState.boxes = node.boxes;
                                         cP.initialState.g = node.g;
+
+                                        System.err.println("CP - Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
+                                        System.err.println("CP - New Agents: Row " + node.agentRow + " Col " + node.agentCol + "Agent: " + agents[node.agentRow][node.agentCol]);
+                                        System.err.println("CP - Conflict Agents: Row " + n.agentRow + " Col " + n.agentCol + "Agent: " + agents[n.agentRow][n.agentCol]);
+                                        System.err.println("Check Agent is here: " + agents[3][9]);
+                                        System.err.println("Check Agent is here: " + agents[4][10]);
+
+
                                         System.err.println(node);
                                         n = node;
+                                        System.err.println(n);
+
+                                        //System.err.println("Node: " + node.agentRow + node.agentCol);
+
+
                                         joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                                        System.err.println("node in new plan");
+                                        System.err.println(joinPlan.get(cP).getFirst());
+
                                         step1Succes = true;
                                         break;
                                     }
@@ -363,7 +376,6 @@ public class CentralPlanner {
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
 
                             cP.removeWall(n.agentRow, n.agentCol);
-
 
                             n = joinPlan.get(cP).removeFirst();
                             actions.add(n);
@@ -460,6 +472,8 @@ public class CentralPlanner {
             joinedAction += "]";
 
             ApplyAction(cmdForClients);
+
+            System.err.println("Agent should be here: " + agents[4][10]);
 
             System.err.println(joinedAction);
             System.out.println(joinedAction);

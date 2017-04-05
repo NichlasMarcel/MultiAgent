@@ -65,6 +65,7 @@ public class ConflictDetector {
                     return new Conflict(ConflictTypes.Wall);
 
                 if(('0' <= agents[row][col] && agents[row][col] <= '9')){
+                    System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
                     return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                 }
 

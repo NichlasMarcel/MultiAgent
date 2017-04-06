@@ -205,6 +205,42 @@ public class CentralPlanner {
         return joinPlan;
     }
 
+    public void AddNewPlanToAgent(Client cP, HashMap<Client,LinkedList<Node>> joinPlan){
+        if(cP.goalStack.size() == 0){
+            Node h = CreateNoOp(cP.currentState);
+            joinPlan.get(cP).add(h);
+        }
+
+        else {
+            System.err.println("Finished: " + cP.goalStack.peek().goal);
+            cP.goalStack.pop();
+            if(cP.goalStack.size() == 0)
+                AddNewPlanToAgent(cP,joinPlan);
+
+            System.err.println("Starting: " + cP.goalStack.peek().goal);
+
+            System.err.println("FINALLY");
+            //System.err.println("Walls in the map : " + cP.walls.toString());
+            System.err.println("Initial state or rather just a state : " + cP.currentState);
+            System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
+
+            cP.SetInitialState(cP.currentState);
+
+            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+        }
+    }
+
+    public Boolean HaveAgentFinishedHisGoals(Client cP, HashMap<Client,LinkedList<Node>> joinPlan){
+
+        if(joinPlan.get(cP).size() == 0){
+            return true;
+        }else
+            return false;
+
+    }
+
+
+
     public void Run(){
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
@@ -227,47 +263,17 @@ public class CentralPlanner {
 
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
-/*
-            for (Client cP : agentList){
 
-                int count = 0;
-                for(Node node : joinPlan.get(cP)){
-                    if(node.action.dir1 == Command.Dir.E && node.action.actionType == Command.Type.Move){
-                        count++;
-                    }
-
-                }
-                System.err.println(cP.color + " : " + count);
-            }
-
-            System.err.println("# - - - - - - - - - - #");
-            */
             for (Client cP : agentList) {
                 //System.err.println(cP.initialState);
-                if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() == 0){
-                    Node h = CreateNoOp(cP.currentState);
-                    joinPlan.get(cP).add(h);
+
+                // Check if agent has satisfied all or some of his goal
+                if(HaveAgentFinishedHisGoals(cP,joinPlan)){
+                    AddNewPlanToAgent(cP,joinPlan);
                 }
-
-                else if(joinPlan.get(cP).size() == 0 && cP.goalStack.size() > 0){
-                    System.err.println("FINALLY");
-                    //System.err.println("Walls in the map : " + cP.walls.toString());
-                    System.err.println("Initial state or rather just a state : " + cP.currentState);
-                    System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
-                    cP.initialState.agentRow = cP.currentState.agentRow;
-                    cP.initialState.agentCol = cP.currentState.agentCol;
-                    CopyBoxes(cP.currentState.boxes,cP.initialState.boxes);
-
-                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
-                }
-
-
 
                 Node n = joinPlan.get(cP).removeFirst();
-
-
                 actions.add(n);
-
 
 
                 // This client action is not possible to apply.
@@ -275,215 +281,19 @@ public class CentralPlanner {
                 //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
                 int RowWall = -1;
                 int ColWall = -1;
+
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
-                while(conflict.IsConflict()){
+                if(conflict.IsConflict()){
                     //while(true){
                     //while(count == 2 || count == 5 || count == 7 ){ was used for testing
                     System.err.println("Conflict type: " + conflict.type);
 
                     actions.remove(n);
 
-                    LinkedList<Node> planForConflictingAgent ;
-                    switch (conflict.type){
-                        case AgentsBlockEachother:
-                            Client conflictingAgent = conflict.conflictingAgent;
-                            planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
-                            boolean step1Succes = false;
-                            System.err.println("Conflict: " + conflictingAgent.color + " A: " + cP.color);
-                            for (int i=0; i<agents.length; i++)
-                                for (int j=0; j<agents[i].length; j++) {
-                                    if(('0' <= agents[i][j] && agents[i][j] <= '9')){
-                                        System.err.println("Row: " + i + " Col: " + j + " Agent: " + agents[i][j]);
-                                    }
-                                }
-                            System.err.println("Current Agents: Row " + n.parent.agentRow + " Col " + n.parent.agentCol + "Agent: " + agents[n.parent.agentRow][n.parent.agentCol]);
-                            // 1
-                            for(Node node : n.parent.getExpandedNodes()){
-
-                                actions.add(node);
-                                //node.action.actionType != Command.Type.NoOp &&
-//                              System.err.println("Actions: " + actions.size());
-                                conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
-
-                                //System.err.println(node.c.color);
-                                if(!node.equals(n) && !conflict.IsConflict()){
-
-                                    boolean ConflictWithPlan = false;
-                                    System.err.println("size: " + planForConflictingAgent.size());
-                                    //System.err.println("This is a plan of ConflictingAgent : \n" + planForConflictingAgent);
-                                    for(Node caNode : planForConflictingAgent){
-                                        if(node.agentRow == caNode.agentRow && node.agentCol == caNode.agentCol){
-                                            ConflictWithPlan = true;
-                                            System.err.println("check");
-                                            break;
-                                        }
-                                    }
-
-                                    if(!ConflictWithPlan){
-
-
-                                        System.err.println("Actions Type: " + node.action.actionType + " Dir1: " + node.action.dir1 + " Dir 2: " + node.action.dir2);
-                                        System.err.println("CP - Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
-                                        System.err.println("CP - New Agents: Row " + node.agentRow + " Col " + node.agentCol + "Agent: " + agents[node.agentRow][node.agentCol]);
-                                        System.err.println("CP - Conflict Agents: Row " + n.agentRow + " Col " + n.agentCol + "Agent: " + agents[n.agentRow][n.agentCol]);
-                                        System.err.println("Check Agent is here: " + agents[3][9]);
-                                        System.err.println("Check Agent is here: " + agents[4][10]);
-                                        /*
-                                        cP.initialState.agentRow = node.agentRow;
-                                        cP.initialState.agentCol = node.agentCol;
-                                        cP.initialState.boxes = node.boxes;
-                                        cP.initialState.g = node.g;
-                                        */
-                                        n.parent = node.parent;
-                                        n.action = node.action;
-                                        n.agentRow = node.agentRow;
-                                        n.agentCol = node.agentCol;
-                                        n.g = node.g;
-                                        System.err.println(n);
-                                        joinPlan.get(cP).clear();
-                                        //System.err.println("Node: " + node.agentRow + node.agentCol);
-
-/*
-                                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), node));
-                                        System.err.println("node in new plan");
-                                        Node test = joinPlan.get(cP).getFirst();
-                                        System.err.println(test);
-                                        System.err.println("test parent");
-                                        System.err.println(test.parent);
-*/
-                                        step1Succes = true;
-                                        break;
-                                    }
-
-
-                                }else{
-                                    if(!node.equals(n)) {
-                                        System.err.println();
-                                        System.err.println("Conflict parent: ");
-                                        System.err.println("Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + agents[node.parent.agentRow][node.parent.agentCol]);
-                                        System.err.println("Recalculate move: " + conflict.type);
-                                    }
-                                }
-
-                                actions.remove(node);
-                            }
-
-                            if(step1Succes){
-                                System.err.println("Step 1 was a success");
-                                //System.err.println("Conflicting agent: " + conflictingAgent.color);
-                                //System.err.println("Path of conflicting agent: ");
-                                //System.err.println(planForConflictingAgent);
-                                break;
-                            }
-
-
-                            // 2
-                            System.err.println("Step 2");
-                            Goal moveToEmptyCell = new Goal(planForConflictingAgent);
-                            //System.err.println("Plan for agent: ");
-                            //System.err.println(planForConflictingAgent);
-
-                            moveToEmptyCell.goal = GoalTypes.MoveToEmptyCell;
-                            cP.addGoal(moveToEmptyCell);
-                            cP.addWall(n.agentRow, n.agentCol);
-                            cP.initialState.agentRow = n.parent.agentRow;
-                            cP.initialState.agentCol = n.parent.agentCol;
-                            cP.initialState.boxes = n.parent.boxes;
-                            cP.initialState.g = n.parent.g;
-                            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
-
-                            cP.removeWall(n.agentRow, n.agentCol);
-                            if(joinPlan.get(cP).size() == 0)
-                                n = CreateNoOp(n.parent);
-                            else
-                                n = joinPlan.get(cP).removeFirst();
-                            actions.add(n);
-
-                            if(cmdForClients.get(conflictingAgent) != null){
-                                Node noop = CreateNoOp(cmdForClients.get(conflictingAgent));
-                                joinPlan.get(conflictingAgent).addFirst(cmdForClients.get(conflictingAgent));
-                                cmdForClients.put(conflictingAgent, noop);
-                                actions.remove(cmdForClients.get(conflictingAgent));
-                                actions.add(noop);
-                            }
-                            else{
-                                System.err.println("Plan for conflicting agent: ");
-                                //System.err.println(joinPlan.get(conflictingAgent));
-                                if(joinPlan.get(conflictingAgent) != null){
-                                    if(joinPlan.get(conflictingAgent).size() == 0)
-                                        joinPlan.get(conflictingAgent).addFirst(CreateNoOp(n.parent));
-                                    else
-                                        joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
-                                }else{
-                                    joinPlan.put(conflictingAgent, new LinkedList<Node>());
-                                    joinPlan.get(conflictingAgent).addFirst(CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
-
-                                }
-
-
-
-                            }
-
-                            break;
-
-                        default:
-
-                            System.err.println("Enter default conflict handling");
-                            actions.remove(n);
-                            boolean success = false;
-                            for (Node a : n.parent.getExpandedNodes()) {
-                                actions.add(a);
-                                conflict = ConflictDetector.CheckIfActionCanBeApplied(actions, this);
-
-                                if (!conflict.IsConflict()) {
-
-                                    joinPlan.get(cP).addFirst(n);
-                                    n.parent = a.parent;
-                                    n.action = a.action;
-                                    n.agentRow = a.agentRow;
-                                    n.agentCol = a.agentCol;
-                                    n.g = a.g;
-                                    success = true;
-                                    break;
-                                }
-                                actions.remove(a);
-                            }
-
-                            if(success)
-                                break;
-
-
-
-                            Node f = n.parent.ChildNode();
-                            f.action = new Command(); // Adding NoOp
-                            f.agentRow = n.parent.agentRow;
-                            f.agentCol = n.parent.agentCol;
-
-                            joinPlan.get(cP).addFirst(n);
-                            n = f;
-
-                            break;
-
-
-
-                    }
-
+                    // Find New Action
+                    n = ConflictHandler.HandleConflict(conflict,n,this,cmdForClients,cP,joinPlan,actions);
                 }
 
-                if(cP.goalStack.size() > 1 && n.isGoalState() && joinPlan.get(cP).size() == 0){
-                    System.err.println("LALALA");
-
-                    cP.SetInitialState(n);
-
-                    System.err.println("Finished: " + cP.goalStack.peek().goal);
-                    cP.goalStack.pop();
-                    System.err.println("Starting: " + cP.goalStack.peek().goal);
-                    //System.err.println(cP.goalStack.peek().goal);
-                    joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
-                }else if(cP.goalStack.size() > 0 && n.isGoalState() && joinPlan.get(cP).size() == 0){
-                    cP.SetInitialState(n.parent);
-                    cP.goalStack.pop();
-                }
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());

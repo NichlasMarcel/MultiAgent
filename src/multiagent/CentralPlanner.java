@@ -104,12 +104,8 @@ public class CentralPlanner {
         c.Run();
     }
 
-
-    public void Run(){
-        // Use stderr to print to console
-        System.err.println("SearchClient initializing. I am sending this using the error output stream.");
+    public List<Client> createAgentList(){
         List<Client> agentList = new ArrayList<>();
-        // Read level and create the initial state of the problem
         for (int ax = 0; ax < agents.length; ax++) {
             for (int ay = 0; ay < agents[0].length; ay++) {
                 if ('0' <= agents[ax][ay] && agents[ax][ay] <= '9') {
@@ -127,6 +123,18 @@ public class CentralPlanner {
                 }
             }
         }
+
+        return agentList;
+    }
+
+    public void Run(){
+        // Use stderr to print to console
+        System.err.println("SearchClient initializing. I am sending this using the error output stream.");
+
+        List<Client> agentList = createAgentList();
+        // Read level and create the initial state of the problem
+
+
         System.err.println("Trying: "  + (int)'1');
         //sorting Clients by their number
         for  (Client agent : agentList)

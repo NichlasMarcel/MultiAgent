@@ -25,7 +25,20 @@ public class Client {
       return number;
     }
 
+
+
     Stack<Goal> goalStack = new Stack<>();
+
+    public void SetInitialState(Node n){
+        initialState = new Node(null, this);
+        initialState.agentRow = n.agentRow;
+        initialState.agentCol = n.agentCol;
+        initialState.g = n.g;
+        for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
+            System.arraycopy(initialState.boxes[row], 0, n.boxes[row], 0, CentralPlanner.MAX_COL);
+        }
+    }
+
     public void addWall(int row, int col){
         walls[row][col] = true;
     }
@@ -35,7 +48,7 @@ public class Client {
     }
 
     public void UpdateCurrentState(Node n){
-        currentState = new Node(n.parent,this);
+        currentState = new Node(n,this);
         currentState.agentCol = n.agentCol;
         currentState.agentRow = n.agentRow;
         currentState.action = n.action;

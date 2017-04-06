@@ -135,6 +135,10 @@ public class Node {
 
 	public Node ChildNode() {
 		Node copy = new Node(this,c);
+		copy.agentCol = this.agentCol;
+		copy.agentRow = this.agentRow;
+		copy.action = this.action;
+
 		for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
 			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, CentralPlanner.MAX_COL);
 		}

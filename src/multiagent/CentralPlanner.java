@@ -463,20 +463,16 @@ public class CentralPlanner {
 
                 if(cP.goalStack.size() > 1 && n.isGoalState() && joinPlan.get(cP).size() == 0){
                     System.err.println("LALALA");
-                    cP.initialState.agentRow = n.parent.agentRow;
-                    cP.initialState.agentCol = n.parent.agentCol;
-                    cP.initialState.boxes = n.parent.boxes;
-                    cP.initialState.g = n.parent.g;
+
+                    cP.SetInitialState(n);
+
                     System.err.println("Finished: " + cP.goalStack.peek().goal);
                     cP.goalStack.pop();
                     System.err.println("Starting: " + cP.goalStack.peek().goal);
                     //System.err.println(cP.goalStack.peek().goal);
                     joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                 }else if(cP.goalStack.size() > 0 && n.isGoalState() && joinPlan.get(cP).size() == 0){
-                    cP.initialState.agentRow = n.parent.agentRow;
-                    cP.initialState.agentCol = n.parent.agentCol;
-                    cP.initialState.boxes = n.parent.boxes;
-                    cP.initialState.g = n.parent.g;
+                    cP.SetInitialState(n.parent);
                     cP.goalStack.pop();
                 }
 

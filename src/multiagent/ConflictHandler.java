@@ -28,13 +28,8 @@ public class ConflictHandler {
                 for(Node node : n.parent.getExpandedNodes()){
 
                     actions.add(node);
-                    //node.action.actionType != Command.Type.NoOp &&
-//                              System.err.println("Actions: " + actions.size());
                     conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
-
-                    //System.err.println(node.c.color);
                     if(!node.equals(n) && !conflict.IsConflict()){
-
                         boolean ConflictWithPlan = false;
                         System.err.println("size: " + planForConflictingAgent.size());
                         //System.err.println("This is a plan of ConflictingAgent : \n" + planForConflictingAgent);
@@ -47,20 +42,7 @@ public class ConflictHandler {
                         }
 
                         if(!ConflictWithPlan){
-/*
 
-                            System.err.println("Actions Type: " + node.action.actionType + " Dir1: " + node.action.dir1 + " Dir 2: " + node.action.dir2);
-                            System.err.println("CP - Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + centralPlanner.agents[node.parent.agentRow][node.parent.agentCol]);
-                            System.err.println("CP - New Agents: Row " + node.agentRow + " Col " + node.agentCol + "Agent: " + centralPlanner.agents[node.agentRow][node.agentCol]);
-                            System.err.println("CP - Conflict Agents: Row " + n.agentRow + " Col " + n.agentCol + "Agent: " + centralPlanner.agents[n.agentRow][n.agentCol]);
-                            System.err.println("Check Agent is here: " + centralPlanner.agents[3][9]);
-                            System.err.println("Check Agent is here: " + centralPlanner.agents[4][10]);
-
-                                        cP.initialState.agentRow = node.agentRow;
-                                        cP.initialState.agentCol = node.agentCol;
-                                        cP.initialState.boxes = node.boxes;
-                                        cP.initialState.g = node.g;
-                                        */
                             result = node;
 
                             joinPlan.get(cP).clear();
@@ -68,28 +50,11 @@ public class ConflictHandler {
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                             //System.err.println("Node: " + node.agentRow + node.agentCol);
 
-/*
-                                        joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), node));
-                                        System.err.println("node in new plan");
-                                        Node test = joinPlan.get(cP).getFirst();
-                                        System.err.println(test);
-                                        System.err.println("test parent");
-                                        System.err.println(test.parent);
-*/
                             step1Succes = true;
                             break;
                         }
 
 
-                    }else{
-                        if(!node.equals(n)) {
-                            /*
-                            System.err.println();
-                            System.err.println("Conflict parent: ");
-                            System.err.println("Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + centralPlanner.agents[node.parent.agentRow][node.parent.agentCol]);
-                            System.err.println("Recalculate move: " + conflict.type);
-                            */
-                        }
                     }
 
                     actions.remove(node);

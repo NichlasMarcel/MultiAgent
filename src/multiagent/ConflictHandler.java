@@ -64,6 +64,8 @@ public class ConflictHandler {
                             result = node;
 
                             joinPlan.get(cP).clear();
+                            cP.SetInitialState(result);
+                            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                             //System.err.println("Node: " + node.agentRow + node.agentCol);
 
 /*

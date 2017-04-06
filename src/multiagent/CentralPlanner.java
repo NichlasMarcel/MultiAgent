@@ -231,7 +231,7 @@ public class CentralPlanner {
             Strategy strategy = new Strategy.StrategyBFS();
             cP.SetInitialState(cP.currentState);
             LinkedList<Node> solution = cP.Search(strategy, cP.initialState);
-
+            System.err.println(solution);
             if (solution == null) {
                 System.err.println(strategy.searchStatus());
                 System.err.println("Unable to solve level.");

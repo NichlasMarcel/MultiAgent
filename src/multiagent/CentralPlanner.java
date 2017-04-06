@@ -214,8 +214,11 @@ public class CentralPlanner {
         else {
             System.err.println("Finished: " + cP.goalStack.peek().goal);
             cP.goalStack.pop();
-            if(cP.goalStack.size() == 0)
+            if(cP.goalStack.size() == 0){
                 AddNewPlanToAgent(cP,joinPlan);
+                return;
+            }
+
 
             System.err.println("Starting: " + cP.goalStack.peek().goal);
 
@@ -223,10 +226,23 @@ public class CentralPlanner {
             //System.err.println("Walls in the map : " + cP.walls.toString());
             System.err.println("Initial state or rather just a state : " + cP.currentState);
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
+            Strategy strategy = new Strategy.StrategyBFS();
+            cP.SetInitialState(cP.currentState);
+            LinkedList<Node> solution = cP.Search(strategy, cP.initialState);
+
+            if (solution == null) {
+                System.err.println(strategy.searchStatus());
+                System.err.println("Unable to solve level.");
+                System.exit(0);
+            } else {
+                System.err.println("\nSummary for " + strategy.toString());
+                System.err.println("Found solution of length " + solution.size());
+                System.err.println(strategy.searchStatus());
+            }
 
             cP.SetInitialState(cP.currentState);
 
-            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+            joinPlan.put(cP, solution);
         }
     }
 

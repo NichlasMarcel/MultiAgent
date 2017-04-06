@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Nichlas on 21-03-2017.
@@ -124,21 +125,6 @@ public class CentralPlanner {
             }
         }
 
-        return agentList;
-    }
-
-    public void Run(){
-        // Use stderr to print to console
-        System.err.println("SearchClient initializing. I am sending this using the error output stream.");
-
-        List<Client> agentList = createAgentList();
-        // Read level and create the initial state of the problem
-
-
-        System.err.println("Trying: "  + (int)'1');
-        //sorting Clients by their number
-        for  (Client agent : agentList)
-            System.err.println("number:" + agent.getNumber());
         Collections.sort(agentList, new Comparator<Client>() {
             @Override
             public int compare(Client o1, Client o2) {
@@ -146,11 +132,10 @@ public class CentralPlanner {
             }
         });
 
-        for  (Client agent : agentList)
-            System.err.println("numberAfter:" + agent.getNumber());
+        return agentList;
+    }
 
-
-
+    public void DivideStartGoals(List<Client> agentList ){
         // Agents are going for the same boxes FIX THAT LATER
         for (Client agent : agentList) {
             char[][] aGoals = new char[MAX_ROW][MAX_COL];
@@ -176,10 +161,6 @@ public class CentralPlanner {
                 }
             }
             agent.initialState.boxes = aBoxes;
-            agent.currentState = new Node(null,agent);
-            agent.currentState.agentRow = agent.initialState.agentRow;
-            agent.currentState.agentCol = agent.initialState.agentCol;
-            CopyBoxes(agent.initialState.boxes,agent.currentState.boxes);
             //agent.calculateFromThisState.boxes = aBoxes;
             agent.goals = aGoals;
             Goal goal = new Goal(aGoals);
@@ -187,36 +168,56 @@ public class CentralPlanner {
             agent.addGoal(goal);
             clients.put(agent.getNumber(),agent);
         }
+    }
 
-        System.err.println("Nothing");
+    public LinkedList<Node> GetPlanFromAgent(Client agent){
+        LinkedList<Node> solution = new LinkedList<>();
+        Strategy strategy = new Strategy.StrategyBFS();
+        try {
+            solution = agent.Search(strategy, agent.initialState);
+        } catch (OutOfMemoryError ex) {
+            System.err.println("Maximum memory usage exceeded.");
+        }
 
-        // Get plans from agents
+        if (solution == null) {
+            System.err.println(strategy.searchStatus());
+            System.err.println("Unable to solve level.");
+            System.exit(0);
+        } else {
+            System.err.println("\nSummary for " + strategy.toString());
+            System.err.println("Found solution of length " + solution.size());
+            System.err.println(strategy.searchStatus());
+        }
+
+        return solution;
+    }
+
+    public HashMap<Client,LinkedList<Node>> GetPlansFromAgents(List<Client> agentList){
         HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
-        //for (Client agent: joinPlan.setKeys())
+
         for (Client agent : agentList) {
             // One agent
-            LinkedList<Node> solution;
-            Strategy strategy = new Strategy.StrategyBFS();
-            try {
-                solution = agent.Search(strategy, agent.initialState);
-            } catch (OutOfMemoryError ex) {
-                System.err.println("Maximum memory usage exceeded.");
-                solution = null;
-            }
+            LinkedList<Node> solution = GetPlanFromAgent(agent);
+            joinPlan.put(agent,solution);
 
-            if (solution == null) {
-                System.err.println(strategy.searchStatus());
-                System.err.println("Unable to solve level.");
-                System.exit(0);
-            } else {
-                System.err.println("\nSummary for " + strategy.toString());
-                System.err.println("Found solution of length " + solution.size());
-                System.err.println(strategy.searchStatus());
-
-                joinPlan.put(agent,solution);
-                //System.err.println(solution.toString());
-            }
         }
+
+        return joinPlan;
+    }
+
+    public void Run(){
+        // Use stderr to print to console
+        System.err.println("SearchClient initializing. I am sending this using the error output stream.");
+
+        // Create agents
+        List<Client> agentList = createAgentList();
+
+        // Divide start goals
+        DivideStartGoals(agentList);
+
+
+        // Get plans from agents
+        HashMap<Client,LinkedList<Node>> joinPlan = GetPlansFromAgents(agentList);
 
         //PlanGenerator.FillWithNoOp(joinPlan);
 

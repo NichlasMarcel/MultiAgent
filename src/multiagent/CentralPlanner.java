@@ -166,6 +166,8 @@ public class CentralPlanner {
             Goal goal = new Goal(aGoals);
             goal.goal = GoalTypes.BoxOnGoal;
             agent.addGoal(goal);
+
+            agent.UpdateCurrentState(agent.initialState);
             clients.put(agent.getNumber(),agent);
         }
     }
@@ -452,14 +454,13 @@ public class CentralPlanner {
     }
 
     public Node CreateNoOp(Node node){
-        Node n = node.parent.ChildNode();
+        Node n = new Node(node, node.c);
         n.action = new Command();
-        n.agentRow = node.parent.agentRow;
-        n.agentCol = node.parent.agentCol;
+        n.agentRow = node.agentRow;
+        n.agentCol = node.agentCol;
+        CopyBoxes(node.boxes, n.boxes);
         return n;
     }
-
-
 
     @Override
     public String toString() {

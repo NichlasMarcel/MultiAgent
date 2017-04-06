@@ -113,16 +113,35 @@ public class ConflictHandler {
                 cP.addWall(n.agentRow, n.agentCol);
                 cP.SetInitialState(n.parent);
 
+                System.err.println("Check initial state");
+                System.err.println(cP.initialState);
+                LinkedList<Node> solution = cP.Search(new Strategy.StrategyBFS(), cP.initialState);
+                System.err.println("Solution");
+                System.err.println(solution);
+
+
                 joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
 
                 cP.removeWall(n.agentRow, n.agentCol);
+                System.err.println("Plan of Agent: " + joinPlan.get(cP).size());
+                System.err.println("Plan of conflicting Agent: " + planForConflictingAgent.size());
+
+                System.err.println(joinPlan.get(cP).getLast().action.actionType);
+
+
+                for(int i = joinPlan.get(cP).size(); i < planForConflictingAgent.size(); i++){
+
+                    joinPlan.get(cP).addLast(centralPlanner.CreateNoOp(joinPlan.get(cP).getLast()));
+                }
+                System.err.println("After");
+                System.err.println(joinPlan.get(cP).getLast().action.actionType);
 
                 if(joinPlan.get(cP).size() == 0)
                     result = centralPlanner.CreateNoOp(n.parent);
                     //n = centralPlanner.CreateNoOp(n.parent);
                 else
                     result = joinPlan.get(cP).removeFirst();
-                    //n = joinPlan.get(cP).removeFirst();
+
                 actions.add(result);
 
                 if(cmdForClients.get(conflictingAgent) != null){
@@ -137,12 +156,12 @@ public class ConflictHandler {
                     //System.err.println(joinPlan.get(conflictingAgent));
                     if(joinPlan.get(conflictingAgent) != null){
                         if(joinPlan.get(conflictingAgent).size() == 0)
-                            joinPlan.get(conflictingAgent).addFirst(centralPlanner.CreateNoOp(n.parent));
+                            joinPlan.get(conflictingAgent).addFirst(centralPlanner.CreateNoOp(conflictingAgent.currentState));
                         else
                             joinPlan.get(conflictingAgent).addFirst(centralPlanner.CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
                     }else{
                         joinPlan.put(conflictingAgent, new LinkedList<Node>());
-                        joinPlan.get(conflictingAgent).addFirst(centralPlanner.CreateNoOp(joinPlan.get(conflictingAgent).getFirst()));
+                        joinPlan.get(conflictingAgent).addFirst(centralPlanner.CreateNoOp(conflictingAgent.currentState));
 
                     }
 

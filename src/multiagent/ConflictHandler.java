@@ -47,7 +47,7 @@ public class ConflictHandler {
                         }
 
                         if(!ConflictWithPlan){
-
+/*
 
                             System.err.println("Actions Type: " + node.action.actionType + " Dir1: " + node.action.dir1 + " Dir 2: " + node.action.dir2);
                             System.err.println("CP - Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + centralPlanner.agents[node.parent.agentRow][node.parent.agentCol]);
@@ -55,18 +55,14 @@ public class ConflictHandler {
                             System.err.println("CP - Conflict Agents: Row " + n.agentRow + " Col " + n.agentCol + "Agent: " + centralPlanner.agents[n.agentRow][n.agentCol]);
                             System.err.println("Check Agent is here: " + centralPlanner.agents[3][9]);
                             System.err.println("Check Agent is here: " + centralPlanner.agents[4][10]);
-                                        /*
+
                                         cP.initialState.agentRow = node.agentRow;
                                         cP.initialState.agentCol = node.agentCol;
                                         cP.initialState.boxes = node.boxes;
                                         cP.initialState.g = node.g;
                                         */
-                            n.parent = node.parent;
-                            n.action = node.action;
-                            n.agentRow = node.agentRow;
-                            n.agentCol = node.agentCol;
-                            n.g = node.g;
-                            System.err.println(n);
+                            result = node;
+
                             joinPlan.get(cP).clear();
                             //System.err.println("Node: " + node.agentRow + node.agentCol);
 
@@ -85,10 +81,12 @@ public class ConflictHandler {
 
                     }else{
                         if(!node.equals(n)) {
+                            /*
                             System.err.println();
                             System.err.println("Conflict parent: ");
                             System.err.println("Current Agents: Row " + node.parent.agentRow + " Col " + node.parent.agentCol + "Agent: " + centralPlanner.agents[node.parent.agentRow][node.parent.agentCol]);
                             System.err.println("Recalculate move: " + conflict.type);
+                            */
                         }
                     }
 
@@ -113,20 +111,19 @@ public class ConflictHandler {
                 moveToEmptyCell.goal = GoalTypes.MoveToEmptyCell;
                 cP.addGoal(moveToEmptyCell);
                 cP.addWall(n.agentRow, n.agentCol);
-                cP.initialState.agentRow = n.parent.agentRow;
-                cP.initialState.agentCol = n.parent.agentCol;
-                cP.initialState.boxes = n.parent.boxes;
-                cP.initialState.g = n.parent.g;
+                cP.SetInitialState(n.parent);
+
                 joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
 
                 cP.removeWall(n.agentRow, n.agentCol);
+
                 if(joinPlan.get(cP).size() == 0)
                     result = centralPlanner.CreateNoOp(n.parent);
                     //n = centralPlanner.CreateNoOp(n.parent);
                 else
                     result = joinPlan.get(cP).removeFirst();
                     //n = joinPlan.get(cP).removeFirst();
-                actions.add(n);
+                actions.add(result);
 
                 if(cmdForClients.get(conflictingAgent) != null){
                     Node noop = centralPlanner.CreateNoOp(cmdForClients.get(conflictingAgent));

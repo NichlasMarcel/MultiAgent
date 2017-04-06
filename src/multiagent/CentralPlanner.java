@@ -456,7 +456,6 @@ public class CentralPlanner {
         n.action = new Command();
         n.agentRow = node.parent.agentRow;
         n.agentCol = node.parent.agentCol;
-
         return n;
     }
 

@@ -128,6 +128,8 @@ public class CentralPlanner {
                     initialNode.agentRow = ax;
                     initialNode.agentCol = ay;
                     agent.initialState = initialNode;
+                    initialNode.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                    agent.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                     //agent.calculateFromThisState = initialNode;
 
                     System.err.println("COL " + agent.color);
@@ -147,33 +149,26 @@ public class CentralPlanner {
     }
 
     public Boolean CheckIfAgentIsBoxedIn(Client client){
-        char[][] tmpWalls = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        char[][] previousBoxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+
+        CopyBoxes(client.initialState.boxes, previousBoxes);
+
         for (int bx = 0; bx < boxes.length; bx++) {
             for (int by = 0; by < boxes[0].length; by++) {
                 if (boxes[bx][by] != 0) {
                     if (!client.color.equals(
                             colors.get
                                     (boxes[bx][by]))) {
-                        System.err.println("Row: " + bx + " Col: " + by + "Color: " + colors.get
+                            System.err.println("Row: " + bx + " Col: " + by + "Color: " + colors.get
                                 (boxes[bx][by]));
                         client.addWall(bx,by);
-                        tmpWalls[bx][by] = boxes[bx][by];
                     }
                 }
             }
         }
 
         LinkedList<Node> result = GetPlanFromAgent(client);
-
-        for (int bx = 0; bx < boxes.length; bx++) {
-            for (int by = 0; by < boxes[0].length; by++) {
-                if (tmpWalls[bx][by] != 0) {
-                    client.removeWall(bx,by);
-                }
-            }
-        }
-
-        System.err.println(client.initialState);
+        CopyBoxes(walls, client.walls);
 
         if(result == null)
             return true;
@@ -206,21 +201,22 @@ public class CentralPlanner {
 
                 }
             }
-            agent.initialState.boxes = aBoxes;
-            //agent.calculateFromThisState.boxes = aBoxes;
-            agent.goals = aGoals;
+
+            CopyBoxes(aBoxes,agent.initialState.boxes);
+            CopyBoxes(aGoals,agent.goals);
+
             Goal goal = new Goal(aGoals);
             goal.goal = GoalTypes.BoxOnGoal;
             agent.addGoal(goal);
+
             agent.UpdateCurrentState(agent.initialState);
 
-            // This is wierd....
-            /*
             if(CheckIfAgentIsBoxedIn(agent)){
                 Goal boxedAgent = new Goal();
                 boxedAgent.goal = GoalTypes.FreeAgent;
+                System.err.println("FreeAgent");
             }
-*/
+
 
             clients.put(agent.getNumber(),agent);
         }
@@ -488,6 +484,15 @@ public class CentralPlanner {
     }
 
     public void CopyBoxes(char[][] boxesToCopy, char[][] receiver){
+        for (int i=0; i<boxesToCopy.length; i++)
+            for (int j=0; j<boxesToCopy[i].length; j++)
+            {
+                receiver[i][j] = boxesToCopy[i][j];
+                //receiver[i][j] =  boxesToCopy[i][j];
+            }
+    }
+
+    public void CopyBoxes(boolean[][] boxesToCopy, boolean[][] receiver){
         for (int i=0; i<boxesToCopy.length; i++)
             for (int j=0; j<boxesToCopy[i].length; j++)
             {

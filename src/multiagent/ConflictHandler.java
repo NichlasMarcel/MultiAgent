@@ -148,37 +148,30 @@ public class ConflictHandler {
                     conflict = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
 
                     if (!conflict.IsConflict()) {
-
-                        joinPlan.get(cP).addFirst(n);
-                        n.parent = a.parent;
-                        n.action = a.action;
-                        n.agentRow = a.agentRow;
-                        n.agentCol = a.agentCol;
-                        n.g = a.g;
+                        Node copy = new Node(a.parent,a.c);
+                        copy.agentRow = a.agentRow;
+                        copy.agentCol = a.agentCol;
+                        copy.action = a.action;
+                        copy.g = a.g;
+                        centralPlanner.CopyBoxes(a.boxes, copy.boxes);
                         result = a;
                         success = true;
+                        System.err.println("Check Initial State");
+                        System.err.println(cP.initialState);
+
+                        cP.SetInitialState(copy);
+                        System.err.println(cP.initialState);
+                        joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
                         break;
                     }
                     actions.remove(a);
                 }
 
-                if(success)
-                    break;
-
-
-
-                Node f = n.parent.ChildNode();
-                f.action = new Command(); // Adding NoOp
-                f.agentRow = n.parent.agentRow;
-                f.agentCol = n.parent.agentCol;
-                result = f;
-                joinPlan.get(cP).addFirst(n);
-
+                if(!success){
+                    System.err.println("Default conflict handler: Could not find a solution");
+                }
 
                 break;
-
-
-
         }
         return result;
     }

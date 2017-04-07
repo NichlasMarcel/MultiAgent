@@ -20,25 +20,26 @@ public class CentralPlanner {
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
     public static int MAX_COL;
-    static Map<Character, String> colors = new HashMap< Character, String >();
+    static Map<Character, String> colors = new HashMap<Character, String>();
     static Map<Integer, Client> clients = new HashMap<>();
     static Boolean sameColor = false;
+
     public CentralPlanner(BufferedReader serverMessages) {
         in = serverMessages;
     }
 
-    public void LoadMap()throws IOException {// Read lines specifying colors
+    public void LoadMap() throws IOException {// Read lines specifying colors
         String line, color;
 
-        while ( ( line = in.readLine() ).matches( "^[a-z]+:\\s*[0-9A-Z](,\\s*[0-9A-Z])*\\s*$" ) ) {
-            line = line.replaceAll( "\\s", "" );
-            color = line.split( ":" )[0];
+        while ((line = in.readLine()).matches("^[a-z]+:\\s*[0-9A-Z](,\\s*[0-9A-Z])*\\s*$")) {
+            line = line.replaceAll("\\s", "");
+            color = line.split(":")[0];
 
-            for ( String id : line.split( ":" )[1].split( "," ) )
-                colors.put( id.charAt( 0 ), color );
+            for (String id : line.split(":")[1].split(","))
+                colors.put(id.charAt(0), color);
         }
 
-        if(colors.keySet().size() == 0)
+        if (colors.keySet().size() == 0)
             sameColor = true;
 
 
@@ -54,7 +55,7 @@ public class CentralPlanner {
 
             store_contents.add(line);
 
-            if(line.length() - 1 > max_col)
+            if (line.length() - 1 > max_col)
                 max_col = line.length() - 1;
 
             line = in.readLine();
@@ -63,15 +64,15 @@ public class CentralPlanner {
 
         in.readLine();
 
-        MAX_COL = max_col+1;
-        MAX_ROW = max_row+1;
+        MAX_COL = max_col + 1;
+        MAX_ROW = max_row + 1;
 
         goals = new char[MAX_ROW][MAX_COL];
         walls = new boolean[MAX_ROW][MAX_COL];
         agents = new char[MAX_ROW][MAX_COL];
         boxes = new char[MAX_ROW][MAX_COL];
 
-        for(int row = 0; row < store_contents.size(); row++){
+        for (int row = 0; row < store_contents.size(); row++) {
             line = store_contents.get(row);
             for (int col = 0; col < line.length(); col++) {
                 char chr = line.charAt(col);
@@ -79,13 +80,13 @@ public class CentralPlanner {
                 if (chr == '+') { // Wall.
                     walls[row][col] = true;
                 } else if ('0' <= chr && chr <= '9') { // Agent.
-                    if(sameColor){
-                        colors.put(chr,"red");
+                    if (sameColor) {
+                        colors.put(chr, "red");
                     }
                     agents[row][col] = chr;
                 } else if ('A' <= chr && chr <= 'Z') { // Box.
-                    if(sameColor){
-                        colors.put(chr,"red");
+                    if (sameColor) {
+                        colors.put(chr, "red");
                     }
                     boxes[row][col] = chr;
                 } else if ('a' <= chr && chr <= 'z') { // Goal.
@@ -109,14 +110,14 @@ public class CentralPlanner {
         */
     }
 
-    public static void main( String[] args ) throws IOException {
+    public static void main(String[] args) throws IOException {
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
         CentralPlanner c = new CentralPlanner(serverMessages);
         c.LoadMap();
         c.Run();
     }
 
-    public List<Client> createAgentList(){
+    public List<Client> createAgentList() {
         List<Client> agentList = new ArrayList<>();
         for (int ax = 0; ax < agents.length; ax++) {
             for (int ay = 0; ay < agents[0].length; ay++) {
@@ -141,14 +142,14 @@ public class CentralPlanner {
         Collections.sort(agentList, new Comparator<Client>() {
             @Override
             public int compare(Client o1, Client o2) {
-                return Integer.compare(o1.getNumber(),o2.getNumber());
+                return Integer.compare(o1.getNumber(), o2.getNumber());
             }
         });
 
         return agentList;
     }
 
-    public Boolean CheckIfAgentIsBoxedIn(Client client){
+    public Boolean CheckIfAgentIsBoxedIn(Client client) {
         char[][] previousBoxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 
         CopyBoxes(client.initialState.boxes, previousBoxes);
@@ -159,9 +160,9 @@ public class CentralPlanner {
                     if (!client.color.equals(
                             colors.get
                                     (boxes[bx][by]))) {
-                            System.err.println("Row: " + bx + " Col: " + by + "Color: " + colors.get
+                        System.err.println("Row: " + bx + " Col: " + by + "Color: " + colors.get
                                 (boxes[bx][by]));
-                        client.addWall(bx,by);
+                        client.addWall(bx, by);
                     }
                 }
             }
@@ -170,13 +171,17 @@ public class CentralPlanner {
         LinkedList<Node> result = GetPlanFromAgent(client);
         CopyBoxes(walls, client.walls);
 
-        if(result == null)
+        System.err.println(client.initialState);
+
+        if (result == null)
             return true;
 
         return false;
+
+
     }
 
-    public void DivideStartGoals(List<Client> agentList ){
+    public void DivideStartGoals(List<Client> agentList) {
         // Agents are going for the same boxes FIX THAT LATER
         for (Client agent : agentList) {
             char[][] aGoals = new char[MAX_ROW][MAX_COL];
@@ -202,8 +207,8 @@ public class CentralPlanner {
                 }
             }
 
-            CopyBoxes(aBoxes,agent.initialState.boxes);
-            CopyBoxes(aGoals,agent.goals);
+            CopyBoxes(aBoxes, agent.initialState.boxes);
+            CopyBoxes(aGoals, agent.goals);
 
             Goal goal = new Goal(aGoals);
             goal.goal = GoalTypes.BoxOnGoal;
@@ -211,18 +216,18 @@ public class CentralPlanner {
 
             agent.UpdateCurrentState(agent.initialState);
 
-            if(CheckIfAgentIsBoxedIn(agent)){
+            if (CheckIfAgentIsBoxedIn(agent)) {
                 Goal boxedAgent = new Goal();
                 boxedAgent.goal = GoalTypes.FreeAgent;
                 System.err.println("FreeAgent");
             }
 
 
-            clients.put(agent.getNumber(),agent);
+            clients.put(agent.getNumber(), agent);
         }
     }
 
-    public LinkedList<Node> GetPlanFromAgent(Client agent){
+    public LinkedList<Node> GetPlanFromAgent(Client agent) {
         LinkedList<Node> solution = new LinkedList<>();
         Strategy strategy = new Strategy.StrategyBFS();
         try {
@@ -244,30 +249,28 @@ public class CentralPlanner {
         return solution;
     }
 
-    public HashMap<Client,LinkedList<Node>> GetPlansFromAgents(List<Client> agentList){
-        HashMap<Client,LinkedList<Node>> joinPlan = new HashMap<>();
+    public HashMap<Client, LinkedList<Node>> GetPlansFromAgents(List<Client> agentList) {
+        HashMap<Client, LinkedList<Node>> joinPlan = new HashMap<>();
 
         for (Client agent : agentList) {
             // One agent
             LinkedList<Node> solution = GetPlanFromAgent(agent);
-            joinPlan.put(agent,solution);
+            joinPlan.put(agent, solution);
 
         }
 
         return joinPlan;
     }
 
-    public void AddNewPlanToAgent(Client cP, HashMap<Client,LinkedList<Node>> joinPlan){
-        if(cP.goalStack.size() == 0){
+    public void AddNewPlanToAgent(Client cP, HashMap<Client, LinkedList<Node>> joinPlan) {
+        if (cP.goalStack.size() == 0) {
             Node h = CreateNoOp(cP.currentState);
             joinPlan.get(cP).add(h);
-        }
-
-        else {
+        } else {
             System.err.println("Finished: " + cP.goalStack.peek().goal);
             cP.goalStack.pop();
-            if(cP.goalStack.size() == 0){
-                AddNewPlanToAgent(cP,joinPlan);
+            if (cP.goalStack.size() == 0) {
+                AddNewPlanToAgent(cP, joinPlan);
                 return;
             }
 
@@ -298,16 +301,16 @@ public class CentralPlanner {
         }
     }
 
-    public Boolean HaveAgentFinishedHisGoals(Client cP, HashMap<Client,LinkedList<Node>> joinPlan){
+    public Boolean HaveAgentFinishedHisGoals(Client cP, HashMap<Client, LinkedList<Node>> joinPlan) {
 
-        if(joinPlan.get(cP).size() == 0){
+        if (joinPlan.get(cP).size() == 0) {
             return true;
-        }else
+        } else
             return false;
 
     }
 
-    public void Run(){
+    public void Run() {
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 
@@ -319,7 +322,7 @@ public class CentralPlanner {
 
 
         // Get plans from agents
-        HashMap<Client,LinkedList<Node>> joinPlan = GetPlansFromAgents(agentList);
+        HashMap<Client, LinkedList<Node>> joinPlan = GetPlansFromAgents(agentList);
 
         //PlanGenerator.FillWithNoOp(joinPlan);
 
@@ -332,8 +335,8 @@ public class CentralPlanner {
                 //System.err.println(cP.initialState);
 
                 // Check if agent has satisfied all or some of his goal
-                if(HaveAgentFinishedHisGoals(cP,joinPlan)){
-                    AddNewPlanToAgent(cP,joinPlan);
+                if (HaveAgentFinishedHisGoals(cP, joinPlan)) {
+                    AddNewPlanToAgent(cP, joinPlan);
                 }
 
                 Node n = joinPlan.get(cP).removeFirst();
@@ -345,18 +348,18 @@ public class CentralPlanner {
                 int ColWall = -1;
 
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
-                if(conflict.IsConflict()){
+                if (conflict.IsConflict()) {
                     System.err.println("Conflict type: " + conflict.type);
                     actions.remove(n);
 
                     // Find New Action
-                    n = ConflictHandler.HandleConflict(conflict,n,this,cmdForClients,cP,joinPlan,actions);
+                    n = ConflictHandler.HandleConflict(conflict, n, this, cmdForClients, cP, joinPlan, actions);
                 }
 
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
-                for (List<Node> l : joinPlan.values()){
+                for (List<Node> l : joinPlan.values()) {
                     System.err.println(l.size());
                 }
                 cmdForClients.put(cP, n);
@@ -367,11 +370,11 @@ public class CentralPlanner {
 
             String joinedAction = "[";
 
-            for(Client a : agentList){
+            for (Client a : agentList) {
                 joinedAction += cmdForClients.get(a).action.toString() + ",";
             }
 
-            if(joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
+            if (joinedAction.toCharArray()[joinedAction.length() - 1] == ',')
                 joinedAction = joinedAction.substring(0, joinedAction.length() - 1);
 
 
@@ -382,20 +385,20 @@ public class CentralPlanner {
             System.err.println(joinedAction);
             System.out.println(joinedAction);
 
-            try{
+            try {
                 String response = in.readLine();
                 if (response.contains("false")) {
                     System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, joinedAction);
                     break;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
 
         }
     }
 
-    public boolean IsCellFree(int row, int col){
+    public boolean IsCellFree(int row, int col) {
         return !CentralPlanner.walls[row][col] && this.boxes[row][col] == 0 && !('0' <= this.agents[row][col] && this.agents[row][col] <= '9');
     }
 
@@ -403,13 +406,13 @@ public class CentralPlanner {
         return ('A' <= this.boxes[row][col] && this.boxes[row][col] <= 'Z');
     }
 
-    public void ApplyAction(HashMap<Client,Node> cmds){
+    public void ApplyAction(HashMap<Client, Node> cmds) {
 
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
             c.UpdateCurrentState(node);
 
-            if(node.action.actionType == Command.Type.NoOp)
+            if (node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action
             int newAgentRow = node.agentRow + Command.dirToRowChange(node.action.dir1);
@@ -483,25 +486,23 @@ public class CentralPlanner {
         }
     }
 
-    public void CopyBoxes(char[][] boxesToCopy, char[][] receiver){
-        for (int i=0; i<boxesToCopy.length; i++)
-            for (int j=0; j<boxesToCopy[i].length; j++)
-            {
+    public void CopyBoxes(char[][] boxesToCopy, char[][] receiver) {
+        for (int i = 0; i < boxesToCopy.length; i++)
+            for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];
                 //receiver[i][j] =  boxesToCopy[i][j];
             }
     }
 
-    public void CopyBoxes(boolean[][] boxesToCopy, boolean[][] receiver){
-        for (int i=0; i<boxesToCopy.length; i++)
-            for (int j=0; j<boxesToCopy[i].length; j++)
-            {
+    public void CopyBoxes(boolean[][] boxesToCopy, boolean[][] receiver) {
+        for (int i = 0; i < boxesToCopy.length; i++)
+            for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];
                 //receiver[i][j] =  boxesToCopy[i][j];
             }
     }
 
-    public Node CreateNoOp(Node node){
+    public Node CreateNoOp(Node node) {
         Node n = new Node(node, node.c);
         n.action = new Command();
         n.agentRow = node.agentRow;

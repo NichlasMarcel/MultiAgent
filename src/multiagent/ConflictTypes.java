@@ -5,6 +5,7 @@ package multiagent;
  */
 public enum ConflictTypes {
     AgentsBlockEachother,
+    AgentBlockedByBox,
     Move,
     Push,
     Pull,

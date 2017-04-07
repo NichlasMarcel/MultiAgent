@@ -6,6 +6,7 @@ package multiagent;
 public enum GoalTypes {
     BoxOnGoal,
     MoveToCell,
+    FreeAgent,
     MoveBoxFromPath,
     MoveToEmptyCell
 }

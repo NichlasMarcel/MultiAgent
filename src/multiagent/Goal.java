@@ -15,6 +15,8 @@ public class Goal {
     Client client;
     LinkedList<Node> path;
     // Default goal constructor
+    public Goal(){}
+
     public Goal(char[][] goals){
         this.goals = goals;
     }

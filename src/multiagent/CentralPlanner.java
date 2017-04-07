@@ -135,6 +135,41 @@ public class CentralPlanner {
         return agentList;
     }
 
+    public Boolean CheckIfAgentIsBoxedIn(Client client){
+        char[][] tmpWalls = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        for (int bx = 0; bx < boxes.length; bx++) {
+            for (int by = 0; by < boxes[0].length; by++) {
+                if (boxes[bx][by] != 0) {
+                    if (!client.color.equals(
+                            colors.get
+                                    (boxes[bx][by]))) {
+                        System.err.println("Row: " + bx + " Col: " + by + "Color: " + colors.get
+                                (boxes[bx][by]));
+                        client.addWall(bx,by);
+                        tmpWalls[bx][by] = boxes[bx][by];
+                    }
+                }
+            }
+        }
+
+        LinkedList<Node> result = GetPlanFromAgent(client);
+
+        for (int bx = 0; bx < boxes.length; bx++) {
+            for (int by = 0; by < boxes[0].length; by++) {
+                if (tmpWalls[bx][by] != 0) {
+                    client.removeWall(bx,by);
+                }
+            }
+        }
+
+        System.err.println(client.initialState);
+
+        if(result == null)
+            return true;
+
+        return false;
+    }
+
     public void DivideStartGoals(List<Client> agentList ){
         // Agents are going for the same boxes FIX THAT LATER
         for (Client agent : agentList) {
@@ -166,8 +201,16 @@ public class CentralPlanner {
             Goal goal = new Goal(aGoals);
             goal.goal = GoalTypes.BoxOnGoal;
             agent.addGoal(goal);
-
             agent.UpdateCurrentState(agent.initialState);
+
+            // This is wierd....
+            /*
+            if(CheckIfAgentIsBoxedIn(agent)){
+                Goal boxedAgent = new Goal();
+                boxedAgent.goal = GoalTypes.FreeAgent;
+            }
+*/
+
             clients.put(agent.getNumber(),agent);
         }
     }
@@ -184,7 +227,7 @@ public class CentralPlanner {
         if (solution == null) {
             System.err.println(strategy.searchStatus());
             System.err.println("Unable to solve level.");
-            System.exit(0);
+            return null;
         } else {
             System.err.println("\nSummary for " + strategy.toString());
             System.err.println("Found solution of length " + solution.size());
@@ -257,8 +300,6 @@ public class CentralPlanner {
 
     }
 
-
-
     public void Run(){
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
@@ -277,8 +318,6 @@ public class CentralPlanner {
 
         // Execute plans from agents
         while (true) {
-
-
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
 
@@ -292,8 +331,6 @@ public class CentralPlanner {
 
                 Node n = joinPlan.get(cP).removeFirst();
                 actions.add(n);
-
-
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
                 //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
@@ -302,10 +339,7 @@ public class CentralPlanner {
 
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 if(conflict.IsConflict()){
-                    //while(true){
-                    //while(count == 2 || count == 5 || count == 7 ){ was used for testing
                     System.err.println("Conflict type: " + conflict.type);
-
                     actions.remove(n);
 
                     // Find New Action

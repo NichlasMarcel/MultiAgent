@@ -307,6 +307,17 @@ public class CentralPlanner {
 
     }
 
+    public void ReleaseAgents(){
+        for (Client agent : agentList) {
+            if (CheckIfAgentIsBoxedIn(agent)) {
+                Conflict conflict = new Conflict(ConflictTypes.TrappedAgent, agent);
+                joinPlan.put(agent,GetPlanFromAgent(agent));
+                ConflictHandler.HandleConflict(conflict,null,this,null,null,joinPlan,null);
+            }
+
+        }
+    }
+
     public void Run() {
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
@@ -317,26 +328,11 @@ public class CentralPlanner {
         // Divide start goals
         DivideStartGoals(agentList);
 
-
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
 
         // Check If Agents are blocked in
-        for (Client agent : agentList) {
-            if (CheckIfAgentIsBoxedIn(agent)) {
-                Conflict conflict = new Conflict(ConflictTypes.TrappedAgent, agent);
-                joinPlan.put(agent,GetPlanFromAgent(agent));
-                ConflictHandler.HandleConflict(conflict,null,this,null,null,joinPlan,null);
-            }
-
-        }
-
-        for (Client agent : agentList) {
-            System.err.println(agent.color);
-            System.err.println(joinPlan.get(agent));
-        }
-
-
+        ReleaseAgents();
 
         //PlanGenerator.FillWithNoOp(joinPlan);
 
@@ -358,14 +354,11 @@ public class CentralPlanner {
                 // This client action is not possible to apply.
                 // We continue to replan until we get a plan with a first action that can be applied
                 //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
-                int RowWall = -1;
-                int ColWall = -1;
 
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 if (conflict.IsConflict()) {
                     System.err.println("Conflict type: " + conflict.type);
                     actions.remove(n);
-
                     // Find New Action
                     n = ConflictHandler.HandleConflict(conflict, n, this, cmdForClients, cP, joinPlan, actions);
                 }

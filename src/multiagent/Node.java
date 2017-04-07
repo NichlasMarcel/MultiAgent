@@ -121,7 +121,7 @@ public class Node {
 				}
 			}
 		}
-		Collections.shuffle(expandedNodes, RND);
+
 		return expandedNodes;
 	}
 

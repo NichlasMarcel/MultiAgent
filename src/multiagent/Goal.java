@@ -45,6 +45,13 @@ public class Goal {
                         return false;
                 }
                 return true;
+            case FreeAgent:
+                for(Node node : path){
+                    if(boxes[node.agentRow][node.agentCol] != 0 || (agentRow == node.agentRow && agentCol == node.agentCol))
+                        return false;
+                }
+
+                return true;
             default:
                 for (int row = 1; row < CentralPlanner.MAX_ROW - 1; row++) {
                     for (int col = 1; col < CentralPlanner.MAX_COL - 1; col++) {

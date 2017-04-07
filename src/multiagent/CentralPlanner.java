@@ -20,6 +20,8 @@ public class CentralPlanner {
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
     public static int MAX_COL;
+    public List<Client> agentList;
+    HashMap<Client, LinkedList<Node>> joinPlan;
     static Map<Character, String> colors = new HashMap<Character, String>();
     static Map<Integer, Client> clients = new HashMap<>();
     static Boolean sameColor = false;
@@ -216,13 +218,6 @@ public class CentralPlanner {
 
             agent.UpdateCurrentState(agent.initialState);
 
-            if (CheckIfAgentIsBoxedIn(agent)) {
-                Goal boxedAgent = new Goal();
-                boxedAgent.goal = GoalTypes.FreeAgent;
-                System.err.println("FreeAgent");
-            }
-
-
             clients.put(agent.getNumber(), agent);
         }
     }
@@ -315,14 +310,31 @@ public class CentralPlanner {
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 
         // Create agents
-        List<Client> agentList = createAgentList();
+        agentList = createAgentList();
 
         // Divide start goals
         DivideStartGoals(agentList);
 
 
         // Get plans from agents
-        HashMap<Client, LinkedList<Node>> joinPlan = GetPlansFromAgents(agentList);
+        joinPlan = GetPlansFromAgents(agentList);
+
+        // Check If Agents are blocked in
+        for (Client agent : agentList) {
+            if (CheckIfAgentIsBoxedIn(agent)) {
+                Conflict conflict = new Conflict(ConflictTypes.TrappedAgent, agent);
+                joinPlan.put(agent,GetPlanFromAgent(agent));
+                ConflictHandler.HandleConflict(conflict,null,this,null,null,joinPlan,null);
+            }
+
+        }
+
+        for (Client agent : agentList) {
+            System.err.println(agent.color);
+            System.err.println(joinPlan.get(agent));
+        }
+
+
 
         //PlanGenerator.FillWithNoOp(joinPlan);
 

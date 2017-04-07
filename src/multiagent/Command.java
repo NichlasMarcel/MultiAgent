@@ -15,6 +15,9 @@ public class Command {
 	public static final Command[] EVERY;
 	static {
 		LinkedList<Command> cmds = new LinkedList<Command>();
+
+		cmds.add(new Command());
+
 		for (Dir d1 : Dir.values()) {
 			for (Dir d2 : Dir.values()) {
 				if (!Command.isOpposite(d1, d2)) {
@@ -34,7 +37,7 @@ public class Command {
 			cmds.add(new Command(d));
 		}
 
-		cmds.add(new Command());
+
 
 		EVERY = cmds.toArray(new Command[0]);
 	}

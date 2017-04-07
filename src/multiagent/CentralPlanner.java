@@ -47,24 +47,23 @@ public class CentralPlanner {
 
         int max_row = 0;
         boolean agentFound = false;
-
-
         int max_col = 0;
 
         ArrayList<String> store_contents = new ArrayList<String>();
 
-        while (!line.equals("")) {
-
+        while (line != null) {
+            if (line.isEmpty()) {
+                break;
+            }
             store_contents.add(line);
 
-            if (line.length() - 1 > max_col)
+            if (line.length() - 1 > max_col) {
                 max_col = line.length() - 1;
+            }
 
             line = in.readLine();
             max_row++;
         }
-
-        in.readLine();
 
         MAX_COL = max_col + 1;
         MAX_ROW = max_row + 1;
@@ -114,8 +113,11 @@ public class CentralPlanner {
 
     public static void main(String[] args) throws IOException {
         BufferedReader serverMessages = new BufferedReader(new InputStreamReader(System.in));
+        System.err.println("1");
         CentralPlanner c = new CentralPlanner(serverMessages);
+        System.err.println("2");
         c.LoadMap();
+        System.err.println("3");
         c.Run();
     }
 

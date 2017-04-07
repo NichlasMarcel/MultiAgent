@@ -486,7 +486,7 @@ public class CentralPlanner {
         }
     }
 
-    public void CopyBoxes(char[][] boxesToCopy, char[][] receiver) {
+    public static void CopyBoxes(char[][] boxesToCopy, char[][] receiver) {
         for (int i = 0; i < boxesToCopy.length; i++)
             for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];
@@ -494,7 +494,7 @@ public class CentralPlanner {
             }
     }
 
-    public void CopyBoxes(boolean[][] boxesToCopy, boolean[][] receiver) {
+    public static void CopyBoxes(boolean[][] boxesToCopy, boolean[][] receiver) {
         for (int i = 0; i < boxesToCopy.length; i++)
             for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];

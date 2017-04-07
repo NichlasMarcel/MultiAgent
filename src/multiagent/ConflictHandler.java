@@ -148,13 +148,8 @@ public class ConflictHandler {
                     conflict = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
 
                     if (!conflict.IsConflict()) {
-                        Node copy = new Node(a.parent,a.c);
-                        copy.agentRow = a.agentRow;
-                        copy.agentCol = a.agentCol;
-                        copy.action = a.action;
-                        copy.g = a.g;
-                        centralPlanner.CopyBoxes(a.boxes, copy.boxes);
-                        result = a;
+                        Node copy = a.Copy();
+                        result = copy;
                         success = true;
                         System.err.println("Check Initial State");
                         System.err.println(cP.initialState);

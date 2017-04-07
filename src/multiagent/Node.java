@@ -138,10 +138,18 @@ public class Node {
 		copy.agentCol = this.agentCol;
 		copy.agentRow = this.agentRow;
 		copy.action = this.action;
+		copy.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+		CentralPlanner.CopyBoxes(this.boxes, copy.boxes);
+		return copy;
+	}
 
-		for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
-			System.arraycopy(this.boxes[row], 0, copy.boxes[row], 0, CentralPlanner.MAX_COL);
-		}
+	public Node Copy() {
+		Node copy = new Node(this.parent,c);
+		copy.agentCol = this.agentCol;
+		copy.agentRow = this.agentRow;
+		copy.action = this.action;
+		copy.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+		CentralPlanner.CopyBoxes(this.boxes, copy.boxes);
 		return copy;
 	}
 

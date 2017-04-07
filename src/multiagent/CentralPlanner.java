@@ -22,6 +22,7 @@ public class CentralPlanner {
     public static int MAX_COL;
     static Map<Character, String> colors = new HashMap< Character, String >();
     static Map<Integer, Client> clients = new HashMap<>();
+    static Boolean sameColor = false;
     public CentralPlanner(BufferedReader serverMessages) {
         in = serverMessages;
     }
@@ -36,6 +37,10 @@ public class CentralPlanner {
             for ( String id : line.split( ":" )[1].split( "," ) )
                 colors.put( id.charAt( 0 ), color );
         }
+
+        if(colors.keySet().size() == 0)
+            sameColor = true;
+
 
         int max_row = 0;
         boolean agentFound = false;
@@ -74,8 +79,14 @@ public class CentralPlanner {
                 if (chr == '+') { // Wall.
                     walls[row][col] = true;
                 } else if ('0' <= chr && chr <= '9') { // Agent.
+                    if(sameColor){
+                        colors.put(chr,"red");
+                    }
                     agents[row][col] = chr;
                 } else if ('A' <= chr && chr <= 'Z') { // Box.
+                    if(sameColor){
+                        colors.put(chr,"red");
+                    }
                     boxes[row][col] = chr;
                 } else if ('a' <= chr && chr <= 'z') { // Goal.
                     goals[row][col] = chr;
@@ -371,8 +382,6 @@ public class CentralPlanner {
             joinedAction += "]";
 
             ApplyAction(cmdForClients);
-
-            System.err.println("Agent should be here: " + agents[4][10]);
 
             System.err.println(joinedAction);
             System.out.println(joinedAction);

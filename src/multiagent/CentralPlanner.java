@@ -136,7 +136,7 @@ public class CentralPlanner {
                     initialNode.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                     agent.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                     //agent.calculateFromThisState = initialNode;
-
+                    agent.UpdateCurrentState(agent.initialState);
                     System.err.println("COL " + agent.color);
                     agentList.add(agent);
                 }
@@ -188,6 +188,7 @@ public class CentralPlanner {
     public void DivideGoals(List<Client> agentList) {
         int agentsNumber = agentList.size();
         List<char[][]> list = new ArrayList();
+        double[] workload = new double[agentsNumber];
 
 
         for (int i = 0; i < MAX_ROW; i++)
@@ -224,9 +225,9 @@ public class CentralPlanner {
                                         (boxes[i][j]))) {
 
                             System.err.println("\nDistance to agent: " + c.getNumber() + " " + c.initialState.agentRow+" :" + c.initialState.agentCol + " - " + distance);
-                            if (minimumDistanceAgentToBox >= distance) {
+                            if (minimumDistanceAgentToBox >= distance * (workload[c.getNumber()]+1) ) {
                                 savedClient = c;
-                                minimumDistanceAgentToBox = distance;
+                                minimumDistanceAgentToBox = distance * (workload[c.getNumber()]+1)  ;
                             }
                         }
                     }
@@ -250,6 +251,7 @@ public class CentralPlanner {
                         System.err.println("Goal" + goal.goals[savedRow][savedColumn]);
 
                         savedClient.UpdateCurrentState(savedClient.initialState);
+                        workload[savedClient.getNumber()]+= 1;
                         System.err.println("Stack size: "  +  savedClient.goalStack.size());
 
                     }
@@ -266,21 +268,19 @@ public class CentralPlanner {
         }
 
         System.err.println("Boxes and goals");
-        for (Client agent : agentList)
-        {   System.err.println("Agent: " + agent.getNumber());
-        System.err.println("STack size of the agent: " + agent.goalStack.size());
-            for (Goal g: agent.goalStack) {
-                for (int i=0; i<MAX_ROW; i++) {
-                    for (int j = 0; j < MAX_ROW; j++) {
-                        System.err.print(g.boxes[1][18]);
-                        System.err.print(g.boxes[7][19]);
+//        for (Client agent : agentList)
+//        {   System.err.println("Agent: " + agent.getNumber());
+//        System.err.println("STack size of the agent: " + agent.goalStack.size());
+//            for (Goal g: agent.goalStack) {
+//                    Node n = new Node(null, agent);
+//                    n.boxes = g.boxes;
+//                    n.c.goals = g.goals;
+//
+//                    System.err.println(n);
+//                    }
+//                    System.err.println();
+//                }
 
-                    }
-                    System.err.println();
-                }
-            }
-            System.err.println("\n");
-        }
 
     }
 
@@ -331,13 +331,19 @@ public class CentralPlanner {
         LinkedList<Node> solution = new LinkedList<>();
         Strategy strategy = new Strategy.StrategyBFS();
         //agent.initialState.boxes = agent.goalStack.peek().boxes ;
-        CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes );
-        CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+
         try {
-            solution = agent.Search(strategy, agent.initialState);
+            if (agent.goalStack.size()!=0) {
+                CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
+                CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+                solution = agent.Search(strategy, agent.initialState);
+            }
+
+
         } catch (OutOfMemoryError ex) {
             System.err.println("Maximum memory usage exceeded.");
         }
+
 
         if (solution == null) {
             System.err.println(strategy.searchStatus());
@@ -348,6 +354,8 @@ public class CentralPlanner {
             System.err.println("Found solution of length " + solution.size());
             System.err.println(strategy.searchStatus());
         }
+
+
 
         return solution;
     }
@@ -606,7 +614,8 @@ public class CentralPlanner {
     }
 
     public Node CreateNoOp(Node node) {
-        Node n = new Node(node, node.c);
+        Node n = new Node(node,
+                node.c);
         n.action = new Command();
         n.agentRow = node.agentRow;
         n.agentCol = node.agentCol;

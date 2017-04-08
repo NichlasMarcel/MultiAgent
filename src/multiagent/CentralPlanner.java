@@ -350,8 +350,10 @@ public class CentralPlanner {
 
 
         if (solution == null) {
+
             System.err.println(strategy.searchStatus());
             System.err.println("Unable to solve level.");
+            System.err.println(agent.initialState);
             return null;
         } else {
             System.err.println("\nSummary for " + strategy.toString());
@@ -393,7 +395,7 @@ public class CentralPlanner {
             CopyBoxes(cP.currentState.boxes,cP.goalStack.peek().boxes);
             System.err.println("FINALLY");
             //System.err.println("Walls in the map : " + cP.walls.toString());
-            System.err.println("Initial state or rather just a state : " + cP.currentState);
+            System.err.println("Initial state or rather just a state : ");
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             cP.SetInitialState(cP.currentState);
 
@@ -520,6 +522,11 @@ public class CentralPlanner {
     public boolean boxAt(int row, int col) {
         return ('A' <= this.boxes[row][col] && this.boxes[row][col] <= 'Z');
     }
+
+    public boolean AgentAt(int row, int col) {
+        return ('0' <= this.agents[row][col] && this.agents[row][col] <= '9');
+    }
+
 
     public void ApplyAction(HashMap<Client, Node> cmds) {
 

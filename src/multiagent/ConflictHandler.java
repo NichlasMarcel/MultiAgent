@@ -177,30 +177,40 @@ public class ConflictHandler {
             default:
                 System.err.println("Enter default conflict handling");
                 actions.remove(n);
-                boolean success = false;
-                for (Node a : n.parent.getExpandedNodes()) {
-                    actions.add(a);
-                    conflict = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
 
-                    if (!conflict.IsConflict()) {
-                        Node copy = a.Copy();
-                        result = copy;
-                        success = true;
-                        System.err.println("Check Initial State");
-                        System.err.println(cP.initialState);
+                System.err.println("InitialState");
+                System.err.println(cP.initialState);
+                System.err.println("currentstate");
+                System.err.println(cP.currentState);
+                cP.SetInitialState(cP.currentState);
+                boolean[][] tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                CentralPlanner.CopyBoxes(cP.walls,tmpWalls);
 
-                        cP.SetInitialState(copy);
-                        System.err.println(cP.initialState);
-                        joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
-                        break;
+                cP.addWall(n.agentRow,n.agentCol);
+                solution = centralPlanner.GetPlanFromAgent(cP);
+
+
+                /*
+                while(true){
+                    boolean solutionFound = true;
+                    solution = centralPlanner.GetPlanFromAgent(cP);
+                    for (Node pathNode: solution){
+                        if(pathNode.action.actionType == Command.Type.Move){
+                            if(centralPlanner.IsCellFree(pathNode.agentRow,pathNode.agentCol)){
+                                cP.addWall(pathNode.agentRow,pathNode.agentCol);
+                                solutionFound = false;
+                            }
+                        }
                     }
-                    actions.remove(a);
+
+                    if(solutionFound)
+                        break;
                 }
 
-                if (!success) {
-                    System.err.println("Default conflict handler: Could not find a solution");
-                }
-
+                CentralPlanner.CopyBoxes(tmpWalls, cP.walls);
+                */
+                result = solution.removeFirst();
+                joinPlan.put(cP,solution);
                 break;
         }
         return result;

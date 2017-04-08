@@ -634,6 +634,33 @@ public class CentralPlanner {
         return n;
     }
 
+    public static String PrintNode(Node node) {
+        StringBuilder s = new StringBuilder();
+
+        for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
+            if (!node.c.walls[row][0]) {
+                break;
+            }
+            for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
+                if (node.boxes[row][col] > 0) {
+                    System.err.print(node.boxes[row][col]);
+                } else if (node.c.goals[row][col] > 0) {
+                    System.err.print(node.c.goals[row][col]);
+                    //s.append(node.c.goals[row][col]);
+                } else if (node.c.walls[row][col]) {
+                    System.err.print("+");
+                } else if (row == node.agentRow && col == node.agentCol) {
+                    System.err.print("0");
+                } else {
+                    System.err.print(" ");
+                }
+            }
+            s.append("\n");
+            System.err.println("Node toString length: " + s.length());
+        }
+        return s.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();

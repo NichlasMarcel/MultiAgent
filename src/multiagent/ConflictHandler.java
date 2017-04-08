@@ -140,33 +140,41 @@ public class ConflictHandler {
             case TrappedAgent:
                 Client trappedAgent = conflict.conflictingAgent;
                 LinkedList<Node> plan = centralPlanner.GetPlanFromAgent(trappedAgent);
-
+                System.err.println("Trapped Agent Plan");
+                System.err.println(plan);
                 int row = -1;
                 int col = -1;
 
                 for (Node node : plan) {
-                    if(centralPlanner.boxes[node.agentRow][node.agentCol] != 0 && !CentralPlanner.colors.get(centralPlanner.boxes[node.agentRow][node.agentCol]).equals(trappedAgent.color)){
+                    if (centralPlanner.boxes[node.agentRow][node.agentCol] != 0 && !CentralPlanner.colors.get(centralPlanner.boxes[node.agentRow][node.agentCol]).equals(trappedAgent.color)) {
                         row = node.agentRow;
                         col = node.agentCol;
                     }
                 }
 
                 for (Client client : centralPlanner.agentList) {
-                    if(client.color.equals(CentralPlanner.colors.get(centralPlanner.boxes[row][col]))){
-                        Goal boxedAgent = new Goal(joinPlan.get(trappedAgent));
+                    if (client.color.equals(CentralPlanner.colors.get(centralPlanner.boxes[row][col]))) {
+                        Goal boxedAgent = new Goal(plan);
                         boxedAgent.goal = GoalTypes.FreeAgent;
+
                         client.goalStack.push(boxedAgent);
                         client.SetInitialState(client.currentState);
+                        client.initialState.boxes[row][col] = centralPlanner.boxes[row][col];
                         client.addWall(trappedAgent.currentState.agentRow, trappedAgent.currentState.agentCol);
+                        System.err.println("Savior Initial State: ");
+                        System.err.println(client.initialState);
                         joinPlan.put(client, centralPlanner.GetPlanFromAgent(client));
                         client.removeWall(trappedAgent.currentState.agentRow, trappedAgent.currentState.agentCol);
+
+                        System.err.println("Savior Plan: ");
+
+                        System.err.println(centralPlanner.GetPlanFromAgent(client));
                     }
                 }
 
                 break;
 
             default:
-
                 System.err.println("Enter default conflict handling");
                 actions.remove(n);
                 boolean success = false;

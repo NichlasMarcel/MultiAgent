@@ -55,6 +55,8 @@ public class ConflictDetector {
             // Determine applicability of action
 
             if (node.action.actionType == Command.Type.Move) {
+                System.err.println("Default nodes");
+
                 //if(node.parent.agentRow == 1 && node.parent.agentCol == 13){
                 //    System.err.println("Agent found! " + agents[node.agentRow][node.agentCol]);
                 //}
@@ -88,6 +90,9 @@ public class ConflictDetector {
                         System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                     }
+
+                    System.err.println("Print CentralPlanner");
+                    System.err.println(cp);
 
                     return new Conflict(ConflictTypes.Move);
                 }

@@ -33,22 +33,28 @@ public class Goal {
         this.path = path;
     }
 
-    public Boolean IsGoal(int agentRow, int agentCol, char[][] boxes){
+    public Boolean IsGoal(Node n){
         switch (goal){
             case MoveToCell:
-                if(this.agentRow == agentRow && this.agentCol == agentCol)
+                if(this.agentRow == n.agentRow && this.agentCol == n.agentCol)
                     return true;
                 else
                     return false;
             case MoveToEmptyCell:
                 for(Node node : path){
-                    if(node.agentCol == agentCol && node.agentRow == agentRow)
+                    if(node.agentCol == n.agentCol && node.agentRow == n.agentRow)
                         return false;
                 }
                 return true;
             case FreeAgent:
+                System.err.println("FreeAgent: Size " + path.size());
+                System.err.println("InitialState: Test Boxes");
+                System.err.println(n);
+
                 for(Node node : path){
-                    if(boxes[node.agentRow][node.agentCol] != 0 || (agentRow == node.agentRow && agentCol == node.agentCol))
+                    System.err.println("AgentRow: " + node.agentRow + " Col: " + node.agentCol);
+                    System.err.println("Box: " + n.boxes[node.agentRow][node.agentCol]);
+                    if(n.boxes[node.agentRow][node.agentCol] != 0 || (n.agentRow == node.agentRow && n.agentCol == node.agentCol))
                         return false;
                 }
 
@@ -57,7 +63,7 @@ public class Goal {
                 for (int row = 1; row < CentralPlanner.MAX_ROW - 1; row++) {
                     for (int col = 1; col < CentralPlanner.MAX_COL - 1; col++) {
                         char g = goals[row][col];
-                        char b = Character.toLowerCase(boxes[row][col]);
+                        char b = Character.toLowerCase(n.boxes[row][col]);
                         if (g > 0 && b != g) {
                             return false;
                         }

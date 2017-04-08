@@ -44,19 +44,7 @@ public class Node {
 
 	public boolean isGoalState() {
 
-	return c.goalStack.peek().IsGoal(agentRow,agentCol,boxes);
-/*
-		for (int row = 1; row < CentralPlanner.MAX_ROW - 1; row++) {
-			for (int col = 1; col < CentralPlanner.MAX_COL - 1; col++) {
-				char g = c.goals[row][col];
-				char b = Character.toLowerCase(boxes[row][col]);
-				if (g > 0 && b != g) {
-					return false;
-				}
-			}
-		}
-		return true;
-		*/
+	return c.goalStack.peek().IsGoal(this);
 	}
 
 	public ArrayList<Node> getExpandedNodes() {

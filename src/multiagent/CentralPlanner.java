@@ -334,9 +334,12 @@ public class CentralPlanner {
 
         try {
             if (agent.goalStack.size()!=0) {
-                System.err.println("HERE: " + agent.goalStack.peek().goal);
-                CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
-                CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+
+
+                if(agent.goalStack.peek().goal != GoalTypes.FreeAgent) {
+                    CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
+                    CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+                }
                 solution = agent.Search(strategy, agent.initialState);
             }
 
@@ -368,7 +371,6 @@ public class CentralPlanner {
             // One agent
             LinkedList<Node> solution = GetPlanFromAgent(agent);
             joinPlan.put(agent, solution);
-
         }
 
         return joinPlan;
@@ -388,16 +390,17 @@ public class CentralPlanner {
 
 
             System.err.println("Starting: " + cP.goalStack.peek().goal);
-
+            CopyBoxes(cP.currentState.boxes,cP.goalStack.peek().boxes);
             System.err.println("FINALLY");
             //System.err.println("Walls in the map : " + cP.walls.toString());
             System.err.println("Initial state or rather just a state : " + cP.currentState);
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
-            Strategy strategy = new Strategy.StrategyBFS();
             cP.SetInitialState(cP.currentState);
 
 
             LinkedList<Node> solution = GetPlanFromAgent(cP);
+
+            System.err.println(solution);
 
             joinPlan.put(cP, solution);
         }

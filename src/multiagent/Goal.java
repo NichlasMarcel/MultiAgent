@@ -17,8 +17,9 @@ public class Goal {
     // Default goal constructor
     public Goal(){}
 
-    public Goal(char[][] goals){
+    public Goal(char[][] goals, char[][] boxes){
         this.goals = goals;
+        this.boxes = boxes;
     }
 
     // MoveToCell constructor

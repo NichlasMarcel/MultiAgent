@@ -185,6 +185,109 @@ public class CentralPlanner {
 
     }
 
+    public void DivideGoals(List<Client> agentList) {
+        int agentsNumber = agentList.size();
+        List<char[][]> list = new ArrayList();
+
+
+        for (int i = 0; i < MAX_ROW; i++)
+            for (int j = 0; j < MAX_COL; j++)
+                if (boxAt(i, j))
+
+                {
+                    System.err.println("------------------\n\n" + boxes[i][j] + ":" +  i + ":" + j );
+                    double minimumDistance = 500;
+                    int savedRow = 0, savedColumn = 0;
+
+                    for (int gx = 0; gx < MAX_ROW; gx++)
+                        for (int gy = 0; gy < MAX_COL; gy++) {
+                            if (Character.toLowerCase(boxes[i][j])==goals[gx][gy]) {
+                                double distance = CalculateMathDistance(i, j, gx, gy);
+                                System.err.println("\nDistance to goal: " + goals[gx][gy] + " " + gx+":" + gy +  "-  " + distance);
+                                if (minimumDistance > distance) {
+                                    minimumDistance = distance;
+                                    savedRow = gx;
+                                    savedColumn = gy;
+                                }
+
+                            }
+                        }
+
+
+                    double minimumDistanceAgentToBox = Double.MAX_VALUE;
+                    Client savedClient = null;
+
+                    for (Client c : agentList) {
+                        double distance = CalculateMathDistance(i, j, c.initialState.agentRow, c.initialState.agentCol);
+                        if (c.color.equals(
+                                colors.get
+                                        (boxes[i][j]))) {
+
+                            System.err.println("\nDistance to agent: " + c.getNumber() + " " + c.initialState.agentRow+" :" + c.initialState.agentCol + " - " + distance);
+                            if (minimumDistanceAgentToBox >= distance) {
+                                savedClient = c;
+                                minimumDistanceAgentToBox = distance;
+                            }
+                        }
+                    }
+
+
+                    if (savedClient != null) {
+//                        savedClient.initialState.boxes[i][j]
+//                                = boxes[i][j];
+//                        savedClient.goals[savedRow][savedColumn] = goals[savedRow][savedColumn];
+                        char[][] aBoxes = new char[MAX_ROW][MAX_COL];
+                        char[][] aGoals = new char[MAX_ROW][MAX_COL];
+                        aBoxes[i][j]
+                                = boxes[i][j];
+                        System.err.println("Box" + boxes[i][j]);
+                        System.err.println("Goal" + goals[savedRow][savedColumn]);
+                        aGoals[savedRow][savedColumn] = goals[savedRow][savedColumn];
+                        Goal goal = new Goal(aGoals, aBoxes);
+                        goal.goal = GoalTypes.BoxOnGoal;
+                        savedClient.addGoal(goal);
+                        System.err.println("Box" + goal.boxes[i][j]);
+                        System.err.println("Goal" + goal.goals[savedRow][savedColumn]);
+
+                        savedClient.UpdateCurrentState(savedClient.initialState);
+                        System.err.println("Stack size: "  +  savedClient.goalStack.size());
+
+                    }
+
+
+                }//boxes if
+
+
+        for (Client agent : agentList) {
+
+
+            clients.put(agent.getNumber(), agent);
+
+        }
+
+        System.err.println("Boxes and goals");
+        for (Client agent : agentList)
+        {   System.err.println("Agent: " + agent.getNumber());
+        System.err.println("STack size of the agent: " + agent.goalStack.size());
+            for (Goal g: agent.goalStack) {
+                for (int i=0; i<MAX_ROW; i++) {
+                    for (int j = 0; j < MAX_ROW; j++) {
+                        System.err.print(g.boxes[1][18]);
+                        System.err.print(g.boxes[7][19]);
+
+                    }
+                    System.err.println();
+                }
+            }
+            System.err.println("\n");
+        }
+
+    }
+
+    public double CalculateMathDistance(int x1, int y1, int x2, int y2) {
+        return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)* (y1-y2));
+    }
+
     public void DivideStartGoals(List<Client> agentList) {
         // Agents are going for the same boxes FIX THAT LATER
         for (Client agent : agentList) {
@@ -214,7 +317,7 @@ public class CentralPlanner {
             CopyBoxes(aBoxes, agent.initialState.boxes);
             CopyBoxes(aGoals, agent.goals);
 
-            Goal goal = new Goal(aGoals);
+            Goal goal = new Goal(aGoals, agent.initialState.boxes);
             goal.goal = GoalTypes.BoxOnGoal;
             agent.addGoal(goal);
 
@@ -227,6 +330,9 @@ public class CentralPlanner {
     public LinkedList<Node> GetPlanFromAgent(Client agent) {
         LinkedList<Node> solution = new LinkedList<>();
         Strategy strategy = new Strategy.StrategyBFS();
+        //agent.initialState.boxes = agent.goalStack.peek().boxes ;
+        CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes );
+        CopyBoxes(agent.goalStack.peek().goals, agent.goals);
         try {
             solution = agent.Search(strategy, agent.initialState);
         } catch (OutOfMemoryError ex) {
@@ -280,19 +386,9 @@ public class CentralPlanner {
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             Strategy strategy = new Strategy.StrategyBFS();
             cP.SetInitialState(cP.currentState);
-            LinkedList<Node> solution = cP.Search(strategy, cP.initialState);
-            System.err.println(solution);
-            if (solution == null) {
-                System.err.println(strategy.searchStatus());
-                System.err.println("Unable to solve level.");
-                System.exit(0);
-            } else {
-                System.err.println("\nSummary for " + strategy.toString());
-                System.err.println("Found solution of length " + solution.size());
-                System.err.println(strategy.searchStatus());
-            }
 
-            cP.SetInitialState(cP.currentState);
+
+            LinkedList<Node> solution = GetPlanFromAgent(cP);
 
             joinPlan.put(cP, solution);
         }
@@ -326,7 +422,7 @@ public class CentralPlanner {
         agentList = createAgentList();
 
         // Divide start goals
-        DivideStartGoals(agentList);
+        DivideGoals(agentList);
 
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);

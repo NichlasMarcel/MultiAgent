@@ -334,6 +334,7 @@ public class CentralPlanner {
 
         try {
             if (agent.goalStack.size()!=0) {
+                System.err.println("HERE: " + agent.goalStack.peek().goal);
                 CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
                 CopyBoxes(agent.goalStack.peek().goals, agent.goals);
                 solution = agent.Search(strategy, agent.initialState);

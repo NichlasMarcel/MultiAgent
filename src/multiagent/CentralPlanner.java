@@ -16,7 +16,7 @@ public class CentralPlanner {
     //private List< Agent > agents = new ArrayList< Agent >();
     public char[][] goals; // Taget fra node
     public char[][] agents; // Taget fra node
-    public char[][] boxes;
+    public static char[][] boxes;
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
     public static int MAX_COL;
@@ -397,9 +397,13 @@ public class CentralPlanner {
             }
 
             // Get closes goal
-            if (cP.goalStack.size()>1)cP.getBestGoal();
+            if (cP.goalStack.size()>1)
+                cP.getBestGoal();
+
+
             System.err.println("Starting: " + cP.goalStack.peek().goal);
-            CopyBoxes(cP.currentState.boxes,cP.goalStack.peek().boxes);
+            cP.goalStack.peek().UpdateBoxes();
+            CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
             System.err.println("FINALLY");
             //System.err.println("Walls in the map : " + cP.walls.toString());
             System.err.println("Initial state or rather just a state : ");
@@ -459,8 +463,6 @@ public class CentralPlanner {
             List<Node> actions = new ArrayList<>();
 
             for (Client cP : agentList) {
-                //System.err.println(cP.initialState);
-                if (cP.goalStack.size()>1)cP.getBestGoal();
                 // Check if agent has satisfied all or some of his goal
                 if (HaveAgentFinishedHisGoals(cP, joinPlan)) {
                     AddNewPlanToAgent(cP, joinPlan);

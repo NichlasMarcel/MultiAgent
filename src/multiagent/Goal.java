@@ -74,4 +74,44 @@ public class Goal {
                 return true;
         }
     }
+
+    public void UpdateBoxes(){
+        char goal_c = 0;
+        boolean finished = false;
+        int grow = -1;
+        int gcol = -1;
+        int row = -1;
+        int col = -1;
+        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+            if(finished)
+                break;
+            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                if(goals[i][j] != 0){
+                    goal_c = goals[i][j];
+                    grow = i;
+                    gcol = j;
+                    finished = true;
+                    break;
+                }
+            }
+        }
+
+
+        double distance = Double.MAX_VALUE;
+
+        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c){
+                    if(distance > CentralPlanner.CalculateMathDistance(i,j,grow,gcol))
+                        distance = CentralPlanner.CalculateMathDistance(i,j,grow,gcol);
+                    row = i;
+                    col = j;
+                }
+            }
+        }
+
+
+        boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        boxes[row][col] = CentralPlanner.boxes[row][col];
+    }
 }

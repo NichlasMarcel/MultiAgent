@@ -59,6 +59,36 @@ public class Client {
                 bestGoal = g;
             }
         }
+
+
+        Box box = new Box(bestGoal.boxRow, bestGoal.boxCol, CentralPlanner.boxes[bestGoal.boxRow][bestGoal.boxCol]);
+        System.err.println("Box surrounded: "  +  box.surrounded() + " walls" +  " in total: "  + box.getSurroundingBoxes(CentralPlanner.boxes).size() );
+        if (box.findBlockingBoxes(CentralPlanner.boxes).size()>0)
+        {
+            for (Box b: box.findBlockingBoxes(CentralPlanner.boxes))
+            { System.err.println("here");
+            System.err.println("Box: " + b.c + " Surrounded by: ");
+            System.err.println(b.findBlockingBoxes(CentralPlanner.boxes));
+
+                if (b.findBlockingBoxes(CentralPlanner.boxes).size()==0)
+                {
+                    System.err.println("Not here");
+
+                    int boxRow =b.x;
+                    int boxCol =b.y;
+                    for (Goal g: goalStack)
+                    {
+                        if ((g.boxRow==boxRow) && (g.boxCol == boxCol)) {
+                            bestGoal = g;
+                            System.err.println("Last");
+                            break;
+                        }
+
+                    }
+                }
+
+            }
+        }
         if (goalStack.size()>1) {
             goalStack.remove(bestGoal);
             goalStack.push(bestGoal);

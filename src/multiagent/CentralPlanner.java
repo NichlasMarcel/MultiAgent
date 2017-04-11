@@ -390,7 +390,9 @@ public class CentralPlanner {
         } else {
 
             System.err.println("Finished: " + cP.goalStack.peek().goal);
+            cP.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
             cP.goalStack.pop();
+
             if (cP.goalStack.size() == 0) {
                 AddNewPlanToAgent(cP, joinPlan);
                 return;

@@ -13,9 +13,35 @@ public class ConflictHandler {
         LinkedList<Node> planForConflictingAgent;
         switch (conflict.type) {
             case AgentsBlockEachother:
-
                 Client conflictingAgent = conflict.conflictingAgent;
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
+
+                // Check if conflicting agent has finished his goals and tell him to get the fuck away.
+                if(planForConflictingAgent.size() == 0 && conflictingAgent.goalStack.size() == 0)
+                {
+                    LinkedList<Node> planForAgent = joinPlan.get(cP);
+                    planForAgent.addFirst(n);
+                    System.err.println("Plan for the agent");
+                    System.err.println(planForAgent);
+                    Goal goal = new Goal(joinPlan.get(cP));
+                    goal.goal = GoalTypes.MoveToEmptyCell;
+                    conflictingAgent.goalStack.push(goal);
+                    System.err.println("PlanToMoveToEmptyCell");
+                    System.err.println(conflictingAgent.currentState);
+                    conflictingAgent.SetInitialState(conflictingAgent.currentState);
+                    System.err.println(conflictingAgent.initialState);
+                    System.err.println(conflictingAgent.currentState.agentRow + " : " + conflictingAgent.currentState.agentCol);
+                    LinkedList<Node> moveToEmptyCell = centralPlanner.GetPlanFromAgent(conflictingAgent);
+                    System.err.println(moveToEmptyCell);
+                    joinPlan.put(conflictingAgent, moveToEmptyCell);
+
+                    return centralPlanner.CreateNoOp(n.parent);
+                    //return joinPlan.get(conflictingAgent).removeFirst();
+
+                }
+
+
+
                 boolean step1Succes = false;
                 System.err.println("Conflict: " + conflictingAgent.color + " A: " + cP.color);
                 for (int i = 0; i < centralPlanner.agents.length; i++)

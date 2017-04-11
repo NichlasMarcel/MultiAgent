@@ -10,8 +10,8 @@ public class Goal {
 
     int agentRow;
     int agentCol;
-    char[][] boxes;
-    char[][] goals;
+    char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+    char[][] goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
     Client client;
     LinkedList<Node> path;
     // Default goal constructor

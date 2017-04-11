@@ -36,10 +36,6 @@ public class Client {
         initialState.g = n.g;
         CopyBoxes(n.boxes, initialState.boxes);
 
-        for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
-            System.arraycopy(initialState.boxes[row], 0, n.boxes[row], 0, CentralPlanner.MAX_COL);
-        }
-
     }
 
     public void addWall(int row, int col){

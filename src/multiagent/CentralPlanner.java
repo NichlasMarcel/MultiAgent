@@ -245,6 +245,10 @@ public class CentralPlanner {
                         System.err.println("Goal" + goals[savedRow][savedColumn]);
                         aGoals[savedRow][savedColumn] = goals[savedRow][savedColumn];
                         Goal goal = new Goal(aGoals, aBoxes);
+                        goal.boxRow = i;
+                        goal.boxCol = j;
+                        goal.goalRow = savedRow;
+                        goal.goalCol = savedColumn;
                         goal.goal = GoalTypes.BoxOnGoal;
                         savedClient.addGoal(goal);
                         System.err.println("Box" + goal.boxes[i][j]);
@@ -284,7 +288,7 @@ public class CentralPlanner {
 
     }
 
-    public double CalculateMathDistance(int x1, int y1, int x2, int y2) {
+    public  static double CalculateMathDistance(int x1, int y1, int x2, int y2) {
         return Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)* (y1-y2));
     }
 
@@ -379,10 +383,12 @@ public class CentralPlanner {
     }
 
     public void AddNewPlanToAgent(Client cP, HashMap<Client, LinkedList<Node>> joinPlan) {
+
         if (cP.goalStack.size() == 0) {
             Node h = CreateNoOp(cP.currentState);
             joinPlan.get(cP).add(h);
         } else {
+
             System.err.println("Finished: " + cP.goalStack.peek().goal);
             cP.goalStack.pop();
             if (cP.goalStack.size() == 0) {
@@ -390,7 +396,8 @@ public class CentralPlanner {
                 return;
             }
 
-
+            // Get closes goal
+            if (cP.goalStack.size()>1)cP.getBestGoal();
             System.err.println("Starting: " + cP.goalStack.peek().goal);
             CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
             System.err.println("FINALLY");
@@ -453,7 +460,7 @@ public class CentralPlanner {
 
             for (Client cP : agentList) {
                 //System.err.println(cP.initialState);
-
+                if (cP.goalStack.size()>1)cP.getBestGoal();
                 // Check if agent has satisfied all or some of his goal
                 if (HaveAgentFinishedHisGoals(cP, joinPlan)) {
                     AddNewPlanToAgent(cP, joinPlan);

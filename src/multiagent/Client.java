@@ -24,7 +24,7 @@ public class Client {
     public int getNumber(){
       return number;
     }
-
+    public  Goal currentGoal;
 
 
     Stack<Goal> goalStack = new Stack<>();
@@ -48,6 +48,34 @@ public class Client {
 
     public void removeWall(int row, int col){
         walls[row][col] = false;
+    }
+
+
+    public Goal getBestGoal()
+    {   double minDistance = Double.MAX_VALUE;
+        Goal bestGoal = null;
+        for (Goal g: goalStack)
+        {
+            double distance = CentralPlanner.CalculateMathDistance(currentState.agentRow, currentState.agentCol, g.boxRow, g.boxCol) +  CentralPlanner.CalculateMathDistance(g.boxRow,g.boxCol, g.goalRow,g.goalCol);
+            if (minDistance> distance)
+            {
+                minDistance = distance;
+                bestGoal = g;
+            }
+        }
+        if (goalStack.size()>1) {
+            goalStack.remove(bestGoal);
+            goalStack.push(bestGoal);
+        }
+        System.err.println("best goal");
+        try {
+            System.err.println("Box: " + bestGoal.boxes[bestGoal.boxRow][bestGoal.boxCol] + "Goal: " + bestGoal.goals[bestGoal.goalRow][bestGoal.goalCol] + " Distance:  " + minDistance);
+        }
+        catch (Exception e)
+        {
+            System.err.println(e);
+        }
+        return bestGoal;
     }
 
     public void UpdateCurrentState(Node n){

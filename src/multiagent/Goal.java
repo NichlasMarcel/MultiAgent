@@ -22,6 +22,8 @@ public class Goal {
         this.boxes = boxes;
     }
 
+    int boxRow, boxCol, goalRow, goalCol;
+
     // MoveToCell constructor
     public Goal(int agentRow, int agentCol){
         this.agentRow = agentRow;

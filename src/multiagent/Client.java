@@ -48,7 +48,6 @@ public class Client {
 
 
     public Goal getBestGoal()
-
     {   double minDistance = Double.MAX_VALUE;
         Goal bestGoal = null;
         for (Goal g: goalStack)
@@ -102,6 +101,8 @@ public class Client {
         {
             System.err.println(e);
         }
+
+
         return bestGoal;
     }
 

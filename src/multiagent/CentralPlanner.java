@@ -193,22 +193,21 @@ public class CentralPlanner {
 
         for (int i = 0; i < MAX_ROW; i++)
             for (int j = 0; j < MAX_COL; j++)
-                if (boxAt(i, j))
-
+                if (CentralPlanner.goals[i][j] != 0)
                 {
-                    System.err.println("------------------\n\n" + boxes[i][j] + ":" +  i + ":" + j );
-                    double minimumDistance = 500;
+                   // System.err.println("------------------\n\n" + boxes[i][j] + ":" +  i + ":" + j );
+                    double minimumDistance = Double.MAX_VALUE;
                     int savedRow = 0, savedColumn = 0;
 
-                    for (int gx = 0; gx < MAX_ROW; gx++)
-                        for (int gy = 0; gy < MAX_COL; gy++) {
-                            if (Character.toLowerCase(boxes[i][j])==goals[gx][gy]) {
-                                double distance = CalculateMathDistance(i, j, gx, gy);
-                                System.err.println("\nDistance to goal: " + goals[gx][gy] + " " + gx+":" + gy +  "-  " + distance);
+                    for (int bx = 0; bx < MAX_ROW; bx++)
+                        for (int by = 0; by < MAX_COL; by++) {
+                            if (Character.toLowerCase(boxes[bx][by])==goals[i][j]) {
+                                double distance = CalculateMathDistance(i, j, bx, by);
+                                //System.err.println("\nDistance to goal: " + goals[i][j] + " " + i+":" + j +  "-  " + distance);
                                 if (minimumDistance > distance) {
                                     minimumDistance = distance;
-                                    savedRow = gx;
-                                    savedColumn = gy;
+                                    savedRow = bx;
+                                    savedColumn = by;
                                 }
 
                             }
@@ -219,10 +218,10 @@ public class CentralPlanner {
                     Client savedClient = null;
 
                     for (Client c : agentList) {
-                        double distance = CalculateMathDistance(i, j, c.initialState.agentRow, c.initialState.agentCol);
+                        double distance = CalculateMathDistance(savedRow, savedColumn, c.initialState.agentRow, c.initialState.agentCol);
                         if (c.color.equals(
                                 colors.get
-                                        (boxes[i][j]))) {
+                                        (boxes[savedRow][savedColumn]))) {
 
                             System.err.println("\nDistance to agent: " + c.getNumber() + " " + c.initialState.agentRow+" :" + c.initialState.agentCol + " - " + distance);
                             if (minimumDistanceAgentToBox >= distance * (workload[c.getNumber()]+1) ) {
@@ -239,20 +238,20 @@ public class CentralPlanner {
 //                        savedClient.goals[savedRow][savedColumn] = goals[savedRow][savedColumn];
                         char[][] aBoxes = new char[MAX_ROW][MAX_COL];
                         char[][] aGoals = new char[MAX_ROW][MAX_COL];
-                        aBoxes[i][j]
-                                = boxes[i][j];
-                        System.err.println("Box" + boxes[i][j]);
-                        System.err.println("Goal" + goals[savedRow][savedColumn]);
-                        aGoals[savedRow][savedColumn] = goals[savedRow][savedColumn];
+                        aBoxes[savedRow][savedColumn]
+                                = boxes[savedRow][savedColumn];
+                        System.err.println("Box" + boxes[savedRow][savedColumn]);
+                        System.err.println("Goal" + goals[i][j]);
+                        aGoals[i][j] = goals[i][j];
                         Goal goal = new Goal(aGoals, aBoxes);
-                        goal.boxRow = i;
-                        goal.boxCol = j;
-                        goal.goalRow = savedRow;
-                        goal.goalCol = savedColumn;
+                        goal.boxRow = savedRow;
+                        goal.boxCol = savedColumn;
+                        goal.goalRow = i;
+                        goal.goalCol = j;
                         goal.goal = GoalTypes.BoxOnGoal;
                         savedClient.addGoal(goal);
-                        System.err.println("Box" + goal.boxes[i][j]);
-                        System.err.println("Goal" + goal.goals[savedRow][savedColumn]);
+                        System.err.println("Box" + goal.boxes[savedRow][savedColumn]);
+                        System.err.println("Goal" + goal.goals[i][j]);
 
                         savedClient.UpdateCurrentState(savedClient.initialState);
                         workload[savedClient.getNumber()]+= 1;
@@ -323,6 +322,7 @@ public class CentralPlanner {
 
             Goal goal = new Goal(aGoals, agent.initialState.boxes);
             goal.goal = GoalTypes.BoxOnGoal;
+
             agent.addGoal(goal);
 
             agent.UpdateCurrentState(agent.initialState);
@@ -385,6 +385,9 @@ public class CentralPlanner {
 
         for (Client agent : agentList) {
             // One agent
+            CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
+            CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+
             LinkedList<Node> solution = GetPlanFromAgent(agent);
             joinPlan.put(agent, solution);
         }
@@ -463,11 +466,24 @@ public class CentralPlanner {
         // Divide start goals
         DivideGoals(agentList);
 
+
+
+
         for (Client cP : agentList) {
-            if (cP.goalStack.size() > 1) cP.getBestGoal();
+            for (Goal goal : cP.goalStack){
+                System.err.println("Row: " + goal.goalRow + "  col: " + goal.goalCol + " : " + CentralPlanner.goals[goal.goalRow][goal.goalCol]);
+            }
+            //if (cP.goalStack.size() > 1) cP.getBestGoal();
         }
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
+
+        for (Client cP : agentList) {
+            Goal goal = cP.goalStack.peek();
+            System.err.println("Row: " + goal.goalRow + "  col: " + goal.goalCol + " : " + CentralPlanner.goals[goal.goalRow][goal.goalCol]);
+            System.err.println(joinPlan.get(cP));
+            //if (cP.goalStack.size() > 1) cP.getBestGoal();
+        }
 
         // Check If Agents are blocked in
         ReleaseAgents();

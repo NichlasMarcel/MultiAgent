@@ -392,7 +392,7 @@ public class CentralPlanner {
 
 
             System.err.println("Starting: " + cP.goalStack.peek().goal);
-            CopyBoxes(cP.currentState.boxes,cP.goalStack.peek().boxes);
+            CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
             System.err.println("FINALLY");
             //System.err.println("Walls in the map : " + cP.walls.toString());
             System.err.println("Initial state or rather just a state : ");

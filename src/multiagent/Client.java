@@ -89,6 +89,22 @@ public class Client {
 
             }
         }
+
+
+//        GoalCell g = CentralPlanner.goalsMap[bestGoal.goalRow][bestGoal.goalCol];
+//        GoalCell goalBefore = g.findGoalBefore(g);
+//
+//                    for (Goal go: goalStack)
+//                    {
+//                        if ((go.goalRow==goalBefore.x) && (go.goalCol == goalBefore.y)) {
+//                            bestGoal = go;
+//                            System.err.println("Last Goal");
+//                            break;
+//                        }
+//
+//
+//
+//        }
         if (goalStack.size()>1) {
             goalStack.remove(bestGoal);
             goalStack.push(bestGoal);
@@ -101,6 +117,9 @@ public class Client {
         {
             System.err.println(e);
         }
+
+
+
         return bestGoal;
     }
 

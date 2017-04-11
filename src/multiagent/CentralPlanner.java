@@ -1,11 +1,9 @@
 package multiagent;
 
-import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Created by Nichlas on 21-03-2017.
@@ -14,7 +12,7 @@ public class CentralPlanner {
     private BufferedReader in;
 
     //private List< Agent > agents = new ArrayList< Agent >();
-    public char[][] goals; // Taget fra node
+    public static char[][] goals; // Taget fra node
     public char[][] agents; // Taget fra node
     public static char[][] boxes;
     public static boolean[][] walls; // Taget fra node
@@ -25,7 +23,8 @@ public class CentralPlanner {
     static Map<Character, String> colors = new HashMap<Character, String>();
     static Map<Integer, Client> clients = new HashMap<>();
     static Boolean sameColor = false;
-
+    static GoalCell[][] goalsMap ;
+    ArrayList<GoalCell> goalsArray  = new ArrayList<>();
     public CentralPlanner(BufferedReader serverMessages) {
         in = serverMessages;
     }
@@ -67,7 +66,7 @@ public class CentralPlanner {
 
         MAX_COL = max_col + 1;
         MAX_ROW = max_row + 1;
-
+        goalsMap = new GoalCell[MAX_ROW][MAX_COL];
         goals = new char[MAX_ROW][MAX_COL];
         walls = new boolean[MAX_ROW][MAX_COL];
         agents = new char[MAX_ROW][MAX_COL];
@@ -92,6 +91,8 @@ public class CentralPlanner {
                     boxes[row][col] = chr;
                 } else if ('a' <= chr && chr <= 'z') { // Goal.
                     goals[row][col] = chr;
+                    goalsMap[row][col]  = new GoalCell(row,col,chr);
+                    goalsArray.add(  goalsMap[row][col] );
                 } else if (chr == ' ') {
                     // Free space.
                 } else {
@@ -100,6 +101,20 @@ public class CentralPlanner {
                 }
             }
         }
+
+        for (GoalCell g: goalsArray)
+        {
+            g.findGoalsBefore();
+        }
+
+
+        for (GoalCell g: goalsArray)
+        {
+            System.err.println(g);
+            System.err.println("Goals beFore:");
+            System.err.println(g.goalsBefore);
+        }
+
 /*
         for(int j = 0; j < agents.length; j++){
             for (int i = 0; i< agents[j].length; i++){

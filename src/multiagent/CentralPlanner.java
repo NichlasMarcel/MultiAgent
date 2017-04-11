@@ -14,7 +14,7 @@ public class CentralPlanner {
     private BufferedReader in;
 
     //private List< Agent > agents = new ArrayList< Agent >();
-    public char[][] goals; // Taget fra node
+    public static char[][] goals; // Taget fra node
     public char[][] agents; // Taget fra node
     public static char[][] boxes;
     public static boolean[][] walls; // Taget fra node
@@ -346,6 +346,7 @@ public class CentralPlanner {
                if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal){
                    System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
                    System.err.println("Agent InitialState");
+                   System.err.println(agent.initialState);
                    System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
                    strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
 
@@ -401,6 +402,7 @@ public class CentralPlanner {
             System.err.println("Finished: " + cP.goalStack.peek().goal);
             for (Client c: agentList)
                 c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
+
             cP.goalStack.pop();
 
             if (cP.goalStack.size() == 0) {

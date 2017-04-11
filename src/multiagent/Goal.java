@@ -101,7 +101,7 @@ public class Goal {
 
         for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
             for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
-                if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c){
+                if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c  && CentralPlanner.goals[i][j] == 0){
                     if(distance > CentralPlanner.CalculateMathDistance(i,j,grow,gcol))
                         distance = CentralPlanner.CalculateMathDistance(i,j,grow,gcol);
                     row = i;

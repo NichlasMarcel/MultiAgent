@@ -250,7 +250,7 @@ public class ConflictHandler {
 
                 cP.addWall(n.agentRow,n.agentCol);
                 solution = centralPlanner.GetPlanFromAgent(cP);
-
+                cP.removeWall(n.agentRow,n.agentCol);
 
                 /*
                 while(true){

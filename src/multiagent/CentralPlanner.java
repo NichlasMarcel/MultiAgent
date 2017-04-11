@@ -449,6 +449,9 @@ public class CentralPlanner {
         // Divide start goals
         DivideGoals(agentList);
 
+        for (Client cP : agentList) {
+            if (cP.goalStack.size() > 1) cP.getBestGoal();
+        }
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
 

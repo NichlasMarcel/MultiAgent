@@ -333,17 +333,20 @@ public class CentralPlanner {
 
     public LinkedList<Node> GetPlanFromAgent(Client agent) {
         LinkedList<Node> solution = new LinkedList<>();
-        Strategy strategy = new Strategy.StrategyBFS();
-        //agent.initialState.boxes = agent.goalStack.peek().boxes ;
 
+        //agent.initialState.boxes = agent.goalStack.peek().boxes ;
+        Strategy strategy = null;
         try {
             if (agent.goalStack.size()!=0) {
-
-
                 if(agent.goalStack.peek().goal != GoalTypes.FreeAgent) {
                     CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
                     CopyBoxes(agent.goalStack.peek().goals, agent.goals);
                 }
+               // if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal)
+               // strategy = new Strategy.StrategyBestFirst(new Heuristic.Greedy(agent.initialState));
+               // else
+                    strategy = new Strategy.StrategyBFS();
+
                 solution = agent.Search(strategy, agent.initialState);
             }
 

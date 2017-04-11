@@ -222,6 +222,22 @@ public class ConflictHandler {
 
                 break;
 
+            case Pull:
+                System.err.println("Enter push conflict handling");
+
+                System.err.println("Current State");
+                System.err.println(cP.currentState);
+                cP.SetInitialState(cP.currentState);
+                cP.goalStack.peek().UpdateBoxes();
+                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
+
+                cP.addWall(n.agentRow,n.agentCol);
+                solution = centralPlanner.GetPlanFromAgent(cP);
+                cP.removeWall(n.agentRow,n.agentCol);
+                result = solution.removeFirst();
+                joinPlan.put(cP,solution);
+                break;
+
             case Push:
                 System.err.println("Enter push conflict handling");
                 int newBoxRow = n.agentRow + Command.dirToRowChange(n.action.dir2);

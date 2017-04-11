@@ -222,55 +222,37 @@ public class ConflictHandler {
 
                 break;
 
-            default:
+            case Push:
+                System.err.println("Enter push conflict handling");
+                int newBoxRow = n.agentRow + Command.dirToRowChange(n.action.dir2);
+                int newBoxCol = n.agentCol + Command.dirToColChange(n.action.dir2);
+                System.err.println("Current State");
+                System.err.println(cP.currentState);
+                cP.SetInitialState(cP.currentState);
+                cP.goalStack.peek().UpdateBoxes();
+                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
+                boolean[][] tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                centralPlanner.CopyBoxes(cP.walls,tmpWalls);
+                cP.addWall(newBoxRow,newBoxCol);
+                solution = centralPlanner.GetPlanFromAgent(cP);
+                cP.removeWall(newBoxRow,newBoxCol);
+                result = solution.removeFirst();
+                joinPlan.put(cP,solution);
+                break;
 
+            default:
                 System.err.println("Enter default conflict handling");
                 actions.remove(n);
 
-                System.err.println("InitialState");
-                //CentralPlanner.PrintNode(cP.initialState);
-                System.err.println(cP.initialState.agentCol);
-                System.err.println(cP.initialState.agentRow);
-                for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
-                    for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
-                        if(cP.initialState.boxes[i][j] != 0)
-                            System.err.print(cP.initialState.boxes[i][j]);
-                        else
-                            System.err.print(" ");
-                    }
-                }
-//                System.err.println(cP.initialState.boxes);
-//                System.err.println(cP.goals);
-//                System.err.println(cP.goalStack.peek().goals);
-                System.err.println("currentstate");
+                System.err.println("Current State");
                 System.err.println(cP.currentState);
                 cP.SetInitialState(cP.currentState);
-                boolean[][] tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                 centralPlanner.CopyBoxes(cP.walls,tmpWalls);
 
                 cP.addWall(n.agentRow,n.agentCol);
                 solution = centralPlanner.GetPlanFromAgent(cP);
                 cP.removeWall(n.agentRow,n.agentCol);
-
-                /*
-                while(true){
-                    boolean solutionFound = true;
-                    solution = centralPlanner.GetPlanFromAgent(cP);
-                    for (Node pathNode: solution){
-                        if(pathNode.action.actionType == Command.Type.Move){
-                            if(centralPlanner.IsCellFree(pathNode.agentRow,pathNode.agentCol)){
-                                cP.addWall(pathNode.agentRow,pathNode.agentCol);
-                                solutionFound = false;
-                            }
-                        }
-                    }
-
-                    if(solutionFound)
-                        break;
-                }
-
-                CentralPlanner.CopyBoxes(tmpWalls, cP.walls);
-                */
                 result = solution.removeFirst();
                 joinPlan.put(cP,solution);
                 break;

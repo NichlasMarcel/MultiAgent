@@ -342,9 +342,15 @@ public class CentralPlanner {
                     CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
                     CopyBoxes(agent.goalStack.peek().goals, agent.goals);
                 }
-               // if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal)
-               // strategy = new Strategy.StrategyBestFirst(new Heuristic.Greedy(agent.initialState));
-               // else
+
+               if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal){
+                   System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
+                   System.err.println("Agent InitialState");
+                   System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
+                   strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+
+               }
+               else
                     strategy = new Strategy.StrategyBFS();
 
                 solution = agent.Search(strategy, agent.initialState);
@@ -394,7 +400,7 @@ public class CentralPlanner {
 
             System.err.println("Finished: " + cP.goalStack.peek().goal);
             for (Client c: agentList)
-            c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
+                c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
             cP.goalStack.pop();
 
             if (cP.goalStack.size() == 0) {

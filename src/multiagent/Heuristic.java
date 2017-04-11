@@ -18,10 +18,24 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	public int h(Node n) {
 
-		double distance = CentralPlanner.CalculateMathDistance(n.agentRow,n.agentCol,n.c.goalStack.peek().boxRow, n.c.goalStack.peek().boxCol) +
-				CentralPlanner.CalculateMathDistance(n.c.goalStack.peek().boxRow, n.c.goalStack.peek().boxRow, n.c.goalStack.peek().goalRow, n.c.goalStack.peek().goalCol);
-		return (int)distance;
-		/*
+		for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+			for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+
+				if(n.boxes[i][j] != 0){
+					double distance = CentralPlanner.CalculateMathDistance(n.agentRow,n.agentCol,i, j) +
+							CentralPlanner.CalculateMathDistance(i,j, n.c.goalStack.peek().goalRow, n.c.goalStack.peek().goalCol);
+
+					//System.err.println("TEST: d " + distance + "br " + i + " bc " + j + " gr " + n.c.goalStack.peek().goalRow + " gc " + n.c.goalStack.peek().goalCol);
+					return (int)(distance);
+
+				}
+			}
+		}
+
+
+		return Integer.MAX_VALUE;
+
+/*
 		boolean finished = false;
 		int grow = -1;
 		int gcol = -1;
@@ -62,7 +76,7 @@ public abstract class Heuristic implements Comparator<Node> {
 
 	@Override
 	public int compare(Node n1, Node n2) {
-		return this.f(n2) - this.f(n1);
+		return this.f(n1) - this.f(n2);
 	}
 
 	public static class AStar extends Heuristic {

@@ -68,6 +68,7 @@ public class CentralPlanner {
             max_row++;
         }
 
+        in.readLine();
         MAX_COL = max_col + 1;
         MAX_ROW = max_row + 1;
         goalsMap = new GoalCell[MAX_ROW][MAX_COL];
@@ -636,20 +637,11 @@ public class CentralPlanner {
 
 
         for (Client cP : agentList) {
-            for (Goal goal : cP.goalStack){
-                System.err.println("Row: " + goal.goalRow + "  col: " + goal.goalCol + " : " + CentralPlanner.goals[goal.goalRow][goal.goalCol]);
-            }
-            //if (cP.goalStack.size() > 1) cP.getBestGoal();
+            if (cP.goalStack.size() > 1) cP.getBestGoal();
         }
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
 
-        for (Client cP : agentList) {
-            Goal goal = cP.goalStack.peek();
-            System.err.println("Row: " + goal.goalRow + "  col: " + goal.goalCol + " : " + CentralPlanner.goals[goal.goalRow][goal.goalCol]);
-            System.err.println(joinPlan.get(cP));
-            //if (cP.goalStack.size() > 1) cP.getBestGoal();
-        }
 
         // Check If Agents are blocked in
         ReleaseAgents();

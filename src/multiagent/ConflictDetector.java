@@ -1,5 +1,6 @@
 package multiagent;
 
+import com.sun.org.apache.xml.internal.utils.SerializableLocatorImpl;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.Arrays;
@@ -120,19 +121,20 @@ public class ConflictDetector {
                         //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
                         //System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
                         //System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-                        boxes[newBoxRow][newBoxCol] = box;
+                        //boxes[newBoxRow][newBoxCol] = box;
 
 
                     }else
-                        return new Conflict(ConflictTypes.Push);
+                        return new Conflict(ConflictTypes.Push,agents,boxes);
                 }else
-                    return new Conflict(ConflictTypes.Push);
+                    return new Conflict(ConflictTypes.Push,agents,boxes);
             }
             //
             // Check this code;
             else if (node.action.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going
                 if (IsCellFree(node.agentRow, node.agentCol,agents,boxes)) {
+
                     int boxRow = node.parent.agentRow + Command.dirToRowChange(node.action.dir2);
                     int boxCol = node.parent.agentCol + Command.dirToColChange(node.action.dir2);
                     // .. and there's a box in "dir2" of the agent
@@ -145,10 +147,18 @@ public class ConflictDetector {
                         char box = boxes[boxRow][boxCol];
                         //boxes[boxRow][boxCol] = 0;
                         boxes[node.parent.agentRow][node.parent.agentCol] = box;
+
+                        if(node.c.getNumber() == 5)
+                        {
+                            System.err.println("Current box pos: " + boxRow + ":" + boxCol);
+                            System.err.println("New Box pos: " + node.parent.agentRow + ":" + node.parent.agentCol);
+                            System.err.println("New Agent: " + node.agentRow + ":" + node.agentCol);
+                        }
+
                     }else
-                        return new Conflict(ConflictTypes.Pull);
+                        return new Conflict(ConflictTypes.Pull,agents,boxes);
                 }else
-                    return new Conflict(ConflictTypes.Pull);
+                    return new Conflict(ConflictTypes.Pull,agents,boxes);
                 //else if (node.action.actionType == Command.Type.NoOp)
             }
         }

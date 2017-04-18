@@ -106,38 +106,106 @@ public class ConflictDetector {
                 if (boxAt(node.agentRow, node.agentCol,boxes)) {
                     int newBoxRow = node.agentRow + Command.dirToRowChange(node.action.dir2);
                     int newBoxCol = node.agentCol + Command.dirToColChange(node.action.dir2);
-                    // .. and that new cell of box is free
-                    if (IsCellFree(newBoxRow, newBoxCol,agents,boxes)) {
-                        char agent = agents[node.parent.agentRow][node.parent.agentCol];
-                        char box = boxes[node.agentRow][node.agentCol];
+                    int row = newBoxRow;
+                    int col = newBoxCol;
+                    if(('0' <= agents[newBoxRow][newBoxCol] && agents[newBoxRow][newBoxCol] <= '9')) {
+                        System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
+                    }
 
-                        agents[node.agentRow][node.agentCol] = agent;
-                        boxes[newBoxRow][newBoxCol] = box;
-                        if(IncludeNegativeEffect)
-                            agents[node.parent.agentRow][node.parent.agentCol] = ' ';
-                        if(IncludeNegativeEffect)
-                            boxes[node.agentRow][node.agentCol] = 0;
+                    if(boxes[newBoxRow][newBoxCol] != 0){
+                        int c_row = node.agentRow;
+                        int c_col = node.agentCol;
 
-                        //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-                        //System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
-                        //System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-                        //boxes[newBoxRow][newBoxCol] = box;
+                        if(row+1 <= CentralPlanner.MAX_ROW &&!(c_row == row+1 && c_col == col) && ('0' <= agents[row+1][col] && agents[row+1][col] <= '9')){
+                            System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
+                            return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
+                        if(row-1 > 0 && !(c_row == row-1 && c_col == col) && ('0' <= agents[row-1][col] && agents[row-1][col] <= '9')){
+                            System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));
+                            return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));}
+                        if(col+1 <= CentralPlanner.MAX_COL && !(c_row == row && c_col == col+1) && ('0' <= agents[row][col+1] && agents[row][col+1] <= '9')){
+                            System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
+                            return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
+                        }
+                        if(col-1 > 0 && !(c_row == row && c_col == col-1) && ('0' <= agents[row][col-1] && agents[row][col-1] <= '9')){
+                            System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                            return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                        }
 
 
-                    }else
+
                         return new Conflict(ConflictTypes.Push,agents,boxes);
+                    }
+
+                    char agent = agents[node.parent.agentRow][node.parent.agentCol];
+                    char box = boxes[node.agentRow][node.agentCol];
+
+                    agents[node.agentRow][node.agentCol] = agent;
+                    boxes[newBoxRow][newBoxCol] = box;
+                    if(IncludeNegativeEffect)
+                        agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                    if(IncludeNegativeEffect)
+                        boxes[node.agentRow][node.agentCol] = 0;
                 }else
                     return new Conflict(ConflictTypes.Push,agents,boxes);
             }
             //
             // Check this code;
             else if (node.action.actionType == Command.Type.Pull) {
+
+                if(node.c.getNumber() == 4 || node.c.getNumber() == 1){
+                    System.err.println(node.c.getNumber() + " : Row " + node.agentRow + " Col " + node.agentCol);
+                    System.err.println(node.c.getNumber() + " : CurrentRow " + node.c.currentState.agentRow + " CurrentCol " + node.c.currentState.agentCol);
+
+                }
+
+                if(('0' <= agents[node.agentRow][node.agentCol] && agents[node.agentRow][node.agentCol] <= '9')) {
+                    System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
+                    return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[node.agentRow][node.agentCol])));
+                }
+
+                int boxRow = node.parent.agentRow + Command.dirToRowChange(node.action.dir2);
+                int boxCol = node.parent.agentCol + Command.dirToColChange(node.action.dir2);
+                int row = node.agentRow;
+                int col = node.agentCol;
+
+                if(boxes[node.agentRow][node.agentCol] != 0){
+                    int c_row = node.agentRow;
+                    int c_col = node.agentCol;
+
+                    if(row+1 <= CentralPlanner.MAX_ROW &&!(c_row == row+1 && c_col == col) && ('0' <= agents[row+1][col] && agents[row+1][col] <= '9')){
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
+                    if(row-1 > 0 && !(c_row == row-1 && c_col == col) && ('0' <= agents[row-1][col] && agents[row-1][col] <= '9')){
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row-1][col]+"")));}
+                    if(col+1 <= CentralPlanner.MAX_COL && !(c_row == row && c_col == col+1) && ('0' <= agents[row][col+1] && agents[row][col+1] <= '9')){
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col+1]+"")));
+                    }
+                    if(col-1 > 0 && !(c_row == row && c_col == col-1) && ('0' <= agents[row][col-1] && agents[row][col-1] <= '9')){
+                        System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                        return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                    }
+
+
+
+                    return new Conflict(ConflictTypes.Pull,agents,boxes);
+                }
+
+
                 // Cell is free where agent is going
+                /*
                 if (IsCellFree(node.agentRow, node.agentCol,agents,boxes)) {
 
                     int boxRow = node.parent.agentRow + Command.dirToRowChange(node.action.dir2);
                     int boxCol = node.parent.agentCol + Command.dirToColChange(node.action.dir2);
+
+
+
+
                     // .. and there's a box in "dir2" of the agent
+
                     if (boxAt(boxRow, boxCol,boxes)) {
                         char agent = agents[node.parent.agentRow][node.parent.agentCol];
                         if(IncludeNegativeEffect)
@@ -148,7 +216,7 @@ public class ConflictDetector {
                         //boxes[boxRow][boxCol] = 0;
                         boxes[node.parent.agentRow][node.parent.agentCol] = box;
 
-                        if(node.c.getNumber() == 5)
+                        if(node.c.getNumber() == 8)
                         {
                             System.err.println("Current box pos: " + boxRow + ":" + boxCol);
                             System.err.println("New Box pos: " + node.parent.agentRow + ":" + node.parent.agentCol);
@@ -157,9 +225,8 @@ public class ConflictDetector {
 
                     }else
                         return new Conflict(ConflictTypes.Pull,agents,boxes);
-                }else
-                    return new Conflict(ConflictTypes.Pull,agents,boxes);
-                //else if (node.action.actionType == Command.Type.NoOp)
+                        */
+
             }
         }
 

@@ -70,13 +70,12 @@ public class ConflictHandler {
 
                         if (!ConflictWithPlan) {
 
-                            result = node;
+                            result = node.Copy();
 
                             joinPlan.get(cP).clear();
                             cP.SetInitialState(result);
                             joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
                             //System.err.println("Node: " + node.agentRow + node.agentCol);
-
                             step1Succes = true;
                             break;
                         }
@@ -270,6 +269,7 @@ public class ConflictHandler {
                     solution.addFirst(centralPlanner.CreateNoOp(result.parent));
                 }
                 result = solution.removeFirst();
+                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
 
                 joinPlan.put(cP,solution);
                 break;
@@ -318,7 +318,7 @@ public class ConflictHandler {
                 if(conflictT.IsConflict())
                 {
                     solution.addFirst(result);
-                    solution.addFirst(centralPlanner.CreateNoOp(result.parent));
+                    solution.addFirst(centralPlanner.CreateNoOp(cP.currentState));
                 }
                 result = solution.removeFirst();
                 /*

@@ -5,6 +5,7 @@ package multiagent;
  */
 public class Conflict {
     ConflictTypes type;
+    public Command action = null;
     Client conflictingAgent;
     public char[][] agents;
     public char[][] boxes;

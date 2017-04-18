@@ -15,8 +15,11 @@ public class ConflictHandler {
             case AgentsBlockEachother:
                 Client conflictingAgent = conflict.conflictingAgent;
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
-
                 // Check if conflicting agent has finished his goals and tell him to get the fuck away.
+
+//                System.err.println(conflictingAgent.goalStack.size());
+
+                planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                 if(planForConflictingAgent.size() == 0 && conflictingAgent.goalStack.size() == 0)
                 {
                     LinkedList<Node> planForAgent = joinPlan.get(cP);
@@ -277,6 +280,7 @@ public class ConflictHandler {
             case Push:
                 actions.remove(n);
                 System.err.println("Enter push conflict handling");
+                System.err.println(n.action.actionType);
                 int newBoxRow = n.agentRow + Command.dirToRowChange(n.action.dir2);
                 int newBoxCol = n.agentCol + Command.dirToColChange(n.action.dir2);
                 System.err.println("Current State");
@@ -313,6 +317,8 @@ public class ConflictHandler {
                 solution = centralPlanner.GetPlanFromAgent(cP);
                 //centralPlanner.CopyBoxes(tmpWalls,cP.walls);
                 result = solution.removeFirst();
+
+                /*
                 actions.add(result);
                 conflictT = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
                 if(conflictT.IsConflict())
@@ -321,6 +327,7 @@ public class ConflictHandler {
                     solution.addFirst(centralPlanner.CreateNoOp(cP.currentState));
                 }
                 result = solution.removeFirst();
+                */
                 /*
                 while(){
                     System.err.println("Adding Walls");

@@ -153,6 +153,7 @@ public class CentralPlanner {
                     //agent.calculateFromThisState = initialNode;
                     agent.UpdateCurrentState(agent.initialState);
                     System.err.println("COL " + agent.color);
+                    clients.put(agent.getNumber(), agent);
                     agentList.add(agent);
                 }
             }
@@ -774,11 +775,14 @@ public class CentralPlanner {
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 if (conflict.IsConflict()) {
                     System.err.println("Conflict type: " + conflict.type);
+
                     actions.remove(n);
                     // Find New Action
                     n = ConflictHandler.HandleConflict(conflict, n, this, cmdForClients, cP, joinPlan, actions);
                 }
 
+                actions.remove(n);
+                actions.add(n);
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());

@@ -169,6 +169,10 @@ public class CentralPlanner {
     }
 
     public Boolean CheckIfAgentIsBoxedIn(Client client) {
+
+        if(client.goalStack.size() == 0)
+            return false;
+
         char[][] previousBoxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
 
         CopyBoxes(client.initialState.boxes, previousBoxes);
@@ -200,6 +204,101 @@ public class CentralPlanner {
 
     }
 
+
+
+    public void DivideGoals2(List<Client> agentList){
+
+        // Find closest reachable box to the goal!
+        HashMap<Goal,Character> goals = new HashMap<>();
+        Client c = new Client();
+        c.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        CopyBoxes(walls, c.walls);
+
+        for (int i = 0; i < MAX_ROW; i++)
+            for (int j = 0; j < MAX_COL; j++)
+                if (CentralPlanner.goals[i][j] != 0) {
+                    Goal goal = new Goal(i,j);
+                    goal.goal = GoalTypes.MoveToCell;
+                    goal.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                    goal.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                    goals.put(goal, CentralPlanner.goals[i][j]);
+                }
+
+        for (Goal g : goals.keySet()) {
+            int distance = Integer.MAX_VALUE;
+            int boxRow = -1;
+            int boxCol = -1;
+            for (int i = 0; i < MAX_ROW; i++)
+                for (int j = 0; j < MAX_COL; j++)
+                    if(Character.toLowerCase(boxes[i][j]) == goals.get(g)){
+                        Node n = new Node(null,c);
+                        n.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        n.agentRow = i;
+                        n.agentCol = j;
+                        c.SetInitialState(n);
+                        g.goal = GoalTypes.MoveToCell;
+                        c.addGoal(g);
+                        c.goalStack.peek().UpdateBoxes();
+
+                        LinkedList<Node> solution = GetPlanFromAgent(c);
+                        if(solution.size() > 0 && solution.size() < distance){
+                            distance = solution.size();
+                            boxRow = i;
+                            boxCol = j;
+                        }
+                    }
+
+            // Find closes reachable agent to the box
+            distance = Integer.MAX_VALUE;
+            Goal agent_box = new Goal(boxRow,boxCol);
+            agent_box.goal = GoalTypes.MoveToCell;
+            Client winner = null;
+            for(Client agent : agentList){
+                if(!agent.color.equals(colors.get(boxes[boxRow][boxCol])))
+                    continue;
+
+                agent.addGoal(agent_box);
+
+                LinkedList<Node> solution = GetPlanFromAgent(agent);
+                agent.goalStack.pop();
+                if(solution == null){
+
+                    continue;
+
+                }
+
+                if(solution.size() > 0 && solution.size() < distance){
+
+                    distance = solution.size();
+                    winner = agent;
+                }
+            }
+
+            winner.initialState.boxes[boxRow][boxCol] = boxes[boxRow][boxCol];
+            winner.goals[g.agentRow][g.agentCol] = this.goals[g.agentRow][g.agentCol];
+            char[][] aBoxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+            char[][] aGoals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+            aBoxes[boxRow][boxCol] = boxes[boxRow][boxCol];
+            aGoals[g.agentRow][g.agentCol] = this.goals[g.agentRow][g.agentCol];
+
+            Goal goal = new Goal(aGoals,aBoxes);
+            goal.goal = GoalTypes.BoxOnGoal;
+            goal.boxRow = boxRow;
+            goal.boxCol = boxCol;
+            goal.goalRow = g.agentRow;
+            goal.goalCol = g.agentCol;
+            winner.addGoal(goal);
+            winner.UpdateCurrentState(winner.initialState);
+        }
+
+        for (Client agent: agentList)
+        {
+            System.err.println("size of goal stack: " +agent.getNumber()+ " : "  +agent.goalStack.size() );
+        }
+
+
+    }
+
     public void DivideGoals(List<Client> agentList) {
         int agentsNumber = agentList.size();
         List<char[][]> list = new ArrayList();
@@ -224,7 +323,6 @@ public class CentralPlanner {
                                     savedRow = bx;
                                     savedColumn = by;
                                 }
-
                             }
                         }
 
@@ -546,12 +644,20 @@ public class CentralPlanner {
         HashMap<Client, LinkedList<Node>> joinPlan = new HashMap<>();
 
         for (Client agent : agentList) {
-            // One agent
-            CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
-            CopyBoxes(agent.goalStack.peek().goals, agent.goals);
 
-            LinkedList<Node> solution = GetPlanFromAgent(agent);
-            joinPlan.put(agent, solution);
+            if(agent.goalStack.size() > 0) {
+                // One agent
+                CopyBoxes(agent.goalStack.peek().boxes, agent.initialState.boxes);
+                CopyBoxes(agent.goalStack.peek().goals, agent.goals);
+
+                LinkedList<Node> solution = GetPlanFromAgent(agent);
+                joinPlan.put(agent, solution);
+            }
+            else{
+                LinkedList<Node> solution = new LinkedList<>();
+                solution.add(CreateNoOp(agent.currentState));
+                joinPlan.put(agent,solution);
+            }
         }
 
         return joinPlan;
@@ -579,8 +685,8 @@ public class CentralPlanner {
             }
 
             // Get closes goal
-            if (cP.goalStack.size()>1)
-                cP.getBestGoal();
+         //   if (cP.goalStack.size()>1)
+           //     cP.getBestGoal();
 
 
             System.err.println("Starting: " + cP.goalStack.peek().goal);
@@ -633,14 +739,14 @@ public class CentralPlanner {
         agentList = createAgentList();
 
         // Divide start goals
-        DivideGoals(agentList);
+        DivideGoals2(agentList);
 
 
 
 
-        for (Client cP : agentList) {
-            if (cP.goalStack.size() > 1) cP.getBestGoal();
-        }
+       // for (Client cP : agentList) {
+         //   if (cP.goalStack.size() > 1) cP.getBestGoal();
+        //}
         // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
 

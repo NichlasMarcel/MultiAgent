@@ -44,8 +44,9 @@ public class Goal {
                     return false;
             case MoveToEmptyCell:
                 for(Node node : path){
-                    if(node.agentCol == n.agentCol && node.agentRow == n.agentRow)
+                    if(node.agentCol == n.agentCol && node.agentRow == n.agentRow || boxes[node.agentRow][node.agentCol] != 0)
                         return false;
+
                 }
                 return true;
             case FreeAgent:
@@ -110,6 +111,8 @@ public class Goal {
             }
         }
 
+        System.err.println("Row " + row);
+        System.err.println("Col " + col);
 
         boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
         boxes[row][col] = CentralPlanner.boxes[row][col];

@@ -1,5 +1,6 @@
 package multiagent;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -34,10 +35,55 @@ public class GoalCell {
     }
 
     public GoalCell findGoalBefore(GoalCell g)
+    {   System.err.println(goalsBefore);
+
+//        if (goalsBefore.size()>0)
+//            for (GoalCell k : goalsBefore)
+//                if (k.surrounded()==3)
+//                return k;
+//        return g;
+        if (goalsBefore.size()>0){
+
+
+        ArrayList<GoalCell> l = new ArrayList<>();
+        l.add(g);
+        l= AddNeighbourGoals(l,g);
+        System.err.println("L size: " + l.size() + " Goals: "  + l);
+
+      for(GoalCell i: l)
+        if (i.surrounded()==3)
+            return i;
+        }
+      return g;
+
+    }
+
+    public ArrayList<GoalCell> AddNeighbourGoals(ArrayList<GoalCell> list, GoalCell go)
     {
-        if (goalsBefore.size()>0)
-        return goalsBefore.get(0);
-        return g;
+        boolean k = false;
+        for (GoalCell n : go.goalsBefore)
+        {
+            if(list.size()!=0)
+            {
+                boolean t= true;
+                for (GoalCell g: list)
+                {
+                    if(g.x == n.x && g.y == n.y)
+                        t=false;
+
+                }
+                if (t) {
+                    System.err.println("adding "  + n );
+                    list.add(n);
+                    k = true;
+                }
+            }
+            if(k)
+                list = AddNeighbourGoals(list,n);
+
+        }
+
+        return list;
 
     }
 

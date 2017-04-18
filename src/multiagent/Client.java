@@ -10,7 +10,7 @@ import java.util.*;
  */
 public class Client {
     private BufferedReader in = new BufferedReader( new InputStreamReader( System.in ) );
-
+    public ArrayList<GoalCell> temporaryWalls = new ArrayList<>();
     //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
     public Node currentState;
@@ -40,13 +40,22 @@ public class Client {
 
     public void addWall(int row, int col){
         walls[row][col] = true;
+
+        temporaryWalls.add(new GoalCell(row,col,'c'));
+
     }
 
     public void removeWall(int row, int col){
         walls[row][col] = false;
     }
 
-
+    public void removeAllWalls()
+    {
+        for (GoalCell g: temporaryWalls)
+        {
+            removeWall(g.x,g.y);
+        }
+    }
     public Goal getBestGoal()
     {   double minDistance = Double.MAX_VALUE;
         Goal bestGoal = null;
@@ -91,20 +100,22 @@ public class Client {
         }
 
 
-//        GoalCell g = CentralPlanner.goalsMap[bestGoal.goalRow][bestGoal.goalCol];
-//        GoalCell goalBefore = g.findGoalBefore(g);
-//
-//                    for (Goal go: goalStack)
-//                    {
-//                        if ((go.goalRow==goalBefore.x) && (go.goalCol == goalBefore.y)) {
-//                            bestGoal = go;
-//                            System.err.println("Last Goal");
-//                            break;
-//                        }
-//
-//
-//
-//        }
+        GoalCell g = CentralPlanner.goalsMap[bestGoal.goalRow][bestGoal.goalCol];
+        GoalCell goalBefore = g.findGoalBefore(g);
+
+                    for (Goal go: goalStack)
+                    {
+                        if ((go.goalRow==goalBefore.x) && (go.goalCol == goalBefore.y)) {
+                            bestGoal = go;
+                            System.err.println("Last Goal");
+                            break;
+                        }
+
+
+
+        }
+
+
         if (goalStack.size()>1) {
             goalStack.remove(bestGoal);
             goalStack.push(bestGoal);

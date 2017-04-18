@@ -68,7 +68,7 @@ public class CentralPlanner {
             max_row++;
         }
 
-        in.readLine();
+//        in.readLine();
         MAX_COL = max_col + 1;
         MAX_ROW = max_row + 1;
         goalsMap = new GoalCell[MAX_ROW][MAX_COL];
@@ -387,7 +387,7 @@ public class CentralPlanner {
             System.err.println("Found solution of length " + solution.size());
             System.err.println(strategy.searchStatus());
         }
-//
+
 //        Iterator lit = solution.listIterator();
 //        System.err.println("Forward Iterations");
 //        Node n = null;
@@ -398,6 +398,8 @@ public class CentralPlanner {
 //            if (IsBox(n.agentRow,n.agentCol)) {
 //                System.err.println("Cell not free at ");
 //                System.err.println(n);
+//                error =true;
+//                distance = (int)CalculateMathDistance(n.agentRow,n.agentCol, agent.goalStack.peek().boxRow, agent.goalStack.peek().boxCol) + 2;
 //                break;
 //
 //

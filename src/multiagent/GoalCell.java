@@ -45,16 +45,16 @@ public class GoalCell {
         if (goalsBefore.size()>0){
 
 
-        ArrayList<GoalCell> l = new ArrayList<>();
-        l.add(g);
-        l= AddNeighbourGoals(l,g);
-        System.err.println("L size: " + l.size() + " Goals: "  + l);
+            ArrayList<GoalCell> l = new ArrayList<>();
+            l.add(g);
+            l= AddNeighbourGoals(l,g);
+            System.err.println("L size: " + l.size() + " Goals: "  + l);
 
-      for(GoalCell i: l)
-        if (i.surrounded()==3)
-            return i;
+            for(GoalCell i: l)
+                if (i.surrounded()==3)
+                    return i;
         }
-      return g;
+        return g;
 
     }
 
@@ -102,13 +102,13 @@ public class GoalCell {
             s++;
 
         return s;
-}
+    }
 
 
     public ArrayList<GoalCell> getSurroundingGoals()
     {
         GoalCell[][] goals = CentralPlanner.goalsMap;
-            ArrayList<GoalCell> surroundingGoalCells = new ArrayList<>();
+        ArrayList<GoalCell> surroundingGoalCells = new ArrayList<>();
 
         if (goals[x+1][y]!=null)
             surroundingGoalCells.add(goals[x+1][y]);

@@ -193,6 +193,14 @@ public class ConflictDetector {
                     return new Conflict(ConflictTypes.Pull,agents,boxes);
                 }
 
+                char agent = agents[node.parent.agentRow][node.parent.agentCol];
+                if(IncludeNegativeEffect)
+                    agents[node.parent.agentRow][node.parent.agentCol] = ' ';
+                agents[node.agentRow][node.agentCol] = agent;
+
+                char box = boxes[boxRow][boxCol];
+                //boxes[boxRow][boxCol] = 0;
+                boxes[node.parent.agentRow][node.parent.agentCol] = box;
 
                 // Cell is free where agent is going
                 /*

@@ -68,7 +68,7 @@ public class CentralPlanner {
             max_row++;
         }
 
-        in.readLine();
+        //in.readLine();
         MAX_COL = max_col + 1;
         MAX_ROW = max_row + 1;
         goalsMap = new GoalCell[MAX_ROW][MAX_COL];

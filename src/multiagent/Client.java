@@ -41,12 +41,29 @@ public class Client {
     public void addWall(int row, int col){
         walls[row][col] = true;
 
-        temporaryWalls.add(new GoalCell(row,col,'c'));
+
 
     }
 
+
+
+    public void addTemporraryWall(int row, int col)
+    {
+        walls[row][col] = true;
+        temporaryWalls.add(new GoalCell(row,col,'c'));
+    }
+
+
     public void removeWall(int row, int col){
         walls[row][col] = false;
+    }
+
+    public void AddTemporarryWalls()
+    {
+        for (GoalCell g: temporaryWalls)
+        {
+            addWall(g.x,g.y);
+        }
     }
 
     public void removeAllWalls()

@@ -455,17 +455,22 @@ public class CentralPlanner {
                     CopyBoxes(agent.goalStack.peek().goals, agent.goals);
                 }
 
-               if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal){
-                   System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
-                   System.err.println("Agent InitialState");
-                   System.err.println(agent.initialState);
-                   System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
-                   strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
-
-               }
-               else
-                    strategy = new Strategy.StrategyBFS();
-
+                switch (agent.goalStack.peek().goal){
+                    case BoxOnGoal:
+                        System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
+                        System.err.println("Agent InitialState");
+                        System.err.println(agent.initialState);
+                        System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
+                        strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+                        break;
+                    case MoveToCell:
+                        strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+                        break;
+                    default:
+                        strategy = new Strategy.StrategyBFS();
+                        break;
+                }
+                System.err.println("Finding solution for: " + agent.goalStack.peek().goal);
                 solution = agent.Search(strategy, agent.initialState);
             }
 

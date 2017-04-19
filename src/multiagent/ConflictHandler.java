@@ -279,7 +279,7 @@ public class ConflictHandler {
                         }
 
                         for (int i = 0; i < count; i++) {
-                            joinPlan.get(trappedAgent).addFirst(centralPlanner.CreateNoOp(joinPlan.get(trappedAgent).getFirst()));
+                            joinPlan.get(trappedAgent).addFirst(centralPlanner.CreateNoOp(trappedAgent.currentState));
                         }
 
                         for (int i = 0; i < count2; i++) {
@@ -387,6 +387,17 @@ public class ConflictHandler {
 
                 solution = centralPlanner.GetPlanFromAgent(cP);
                 centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+
+                if(solution == null){
+                    Conflict trapped = new Conflict(ConflictTypes.TrappedAgent, cP);
+                    solution = centralPlanner.GetPlanFromAgent(cP);
+                    joinPlan.put(cP,solution);
+                    System.err.println(cP.goalStack.peek().goal);
+                    System.err.println("Trapped Agent Plan");
+                    System.err.println(solution);
+
+                    ConflictHandler.HandleConflict(trapped,null,centralPlanner,null,null,joinPlan,null);
+                }
                 result = solution.removeFirst();
                 if (result.action.actionType == Command.Type.Push) {
                     System.err.println("Adding Wall: " + (result.agentRow + Command.dirToRowChange(result.action.dir2)) + ":" + (result.agentCol + Command.dirToColChange(result.action.dir2)));

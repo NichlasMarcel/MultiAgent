@@ -470,7 +470,7 @@ public class CentralPlanner {
                         strategy = new Strategy.StrategyBFS();
                         break;
                 }
-                System.err.println("Finding solution for: " + agent.goalStack.peek().goal);
+                System.err.println("Finding solution for agent: " + agent.getNumber() + " for goal " + agent.goalStack.peek().goal);
                 solution = agent.Search(strategy, agent.initialState);
             }
 
@@ -676,7 +676,7 @@ public class CentralPlanner {
             joinPlan.get(cP).add(h);
         } else {
 
-            System.err.println("Finished: " + cP.goalStack.peek().goal);
+            System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
             for (Client c: agentList) {
                 c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
 
@@ -690,17 +690,24 @@ public class CentralPlanner {
                 return;
             }
 
+            System.err.println("Starting: " + cP.goalStack.peek().goal);
+
             // Get closes goal
          //   if (cP.goalStack.size()>1)
            //     cP.getBestGoal();
 
 
-            System.err.println("Starting: " + cP.goalStack.peek().goal);
+
             cP.goalStack.peek().UpdateBoxes();
             CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
-            System.err.println("FINALLY");
-            //System.err.println("Walls in the map : " + cP.walls.toString());
-            System.err.println("Initial state or rather just a state : ");
+
+            if(cP.currentState.isGoalState()){
+                System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
+                cP.goalStack.pop();
+                AddNewPlanToAgent(cP, joinPlan);
+            }
+
+            System.err.println(cP.currentState);
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             cP.SetInitialState(cP.currentState);
 

@@ -43,6 +43,7 @@ public class ConflictHandler {
 
                 }
                 */
+                Client conflictingAgent = conflict.conflictingAgent;
                 Conflict test;
                 boolean[][] tmpWalls;
                 tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
@@ -68,26 +69,46 @@ public class ConflictHandler {
                     actions.remove(children);
                 }
 
-
+                cP.SetInitialState(cP.currentState);
                 LinkedList<Node> solution = centralPlanner.GetPlanFromAgent(cP);
                 if(solution == null){
+                    // At this point it is not possible to calculate a new path.
+                    // Tell the conflicting agent to get the fuck away.
                     result = cP.currentState.Copy();
                     result.action = new Command();
                     centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+                    cP.SetInitialState(cP.currentState);
                     solution = centralPlanner.GetPlanFromAgent(cP);
+
+                    Goal freepath = new Goal();
+                    freepath.path = new LinkedList<>();
+                    freepath.path.addAll(solution);
+                    freepath.goal = GoalTypes.MoveToEmptyCell;
+                    // Fix this later with boxes of multiple colors and etc.
+                    freepath.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                    conflictingAgent.addGoal(freepath);
+                    conflictingAgent.addWall(cP.currentState.agentRow,cP.currentState.agentCol);
+                    conflictingAgent.SetInitialState(conflictingAgent.currentState);
+                    CentralPlanner.CopyBoxes(conflictingAgent.currentState.boxes,freepath.boxes);
+                    System.err.println("ConflictingAgent: Start State");
+                    System.err.println(conflictingAgent.initialState);
+                    LinkedList<Node> replan = centralPlanner.GetPlanFromAgent(conflictingAgent);
+                    conflictingAgent.removeWall(cP.currentState.agentRow,cP.currentState.agentCol);
+
+                    joinPlan.put(conflictingAgent,replan);
+                    System.err.println("Plan Found");
+                    System.err.println(replan);
+                    for (int i = 0; i < (solution.size() - replan.size()) + 2; i++) {
+                        joinPlan.get(conflictingAgent).addLast(centralPlanner.CreateNoOp(joinPlan.get(conflictingAgent).getLast()));
+                    }
+                    if(cmdForClients.containsKey(conflictingAgent)){
+                        cmdForClients.put(conflictingAgent,joinPlan.get(conflictingAgent).removeFirst());
+                    }
                 }else{
                     result = solution.removeFirst();
                 }
 
                 centralPlanner.CopyBoxes(tmpWalls, cP.walls);
-
-                if (result.action.actionType == Command.Type.Push) {
-                    System.err.println("Adding Wall: " + (result.agentRow + Command.dirToRowChange(result.action.dir2)) + ":" + (result.agentCol + Command.dirToColChange(result.action.dir2)));
-//                    cP.addWall(n.agentRow + Command.dirToRowChange(n.action.dir2), n.agentCol + Command.dirToColChange(n.action.dir2));
-                } else {
-                    System.err.println("Adding Wall: " + result.agentRow + ":" + result.agentCol);
-//                    cP.addWall(n.agentRow,n.agentCol);
-                }
                 joinPlan.put(cP, solution);
 /*
                 boolean step1Succes = false;

@@ -13,6 +13,7 @@ public class ConflictHandler {
         LinkedList<Node> planForConflictingAgent;
         switch (conflict.type) {
             case AgentsBlockEachother:
+                /*
                 Client conflictingAgent = conflict.conflictingAgent;
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                 // Check if conflicting agent has finished his goals and tell him to get the fuck away.
@@ -41,10 +42,56 @@ public class ConflictHandler {
                     //return joinPlan.get(conflictingAgent).removeFirst();
 
                 }
+                */
+                Conflict test;
+                boolean[][] tmpWalls;
+                tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                centralPlanner.CopyBoxes(cP.walls, tmpWalls);
+                System.err.println("Agent: " + cP.getNumber());
+                cP.goalStack.peek().UpdateBoxes();
+                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
 
 
+                cP.SetInitialState(cP.currentState);
+                for (Node children : cP.initialState.getExpandedNodes()) {
+                    actions.add(children);
+                    test = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
+                    if (test.IsConflict()) {
+                        if (children.action.actionType == Command.Type.Push) {
+//                            System.err.println("Adding Wall: " + (n.agentRow + Command.dirToRowChange(n.action.dir2)) + ":" + (n.agentCol + Command.dirToColChange(n.action.dir2)));
+                            cP.addWall(children.agentRow + Command.dirToRowChange(children.action.dir2), children.agentCol + Command.dirToColChange(children.action.dir2));
+                        } else {
+//                            System.err.println("Adding Wall: " + n.agentRow + ":" + n.agentCol);
+                            cP.addWall(children.agentRow, children.agentCol);
+                        }
+                    }
+                    actions.remove(children);
+                }
+
+
+                LinkedList<Node> solution = centralPlanner.GetPlanFromAgent(cP);
+                if(solution == null){
+                    result = cP.currentState.Copy();
+                    result.action = new Command();
+                    centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+                    solution = centralPlanner.GetPlanFromAgent(cP);
+                }else{
+                    result = solution.removeFirst();
+                }
+
+                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+
+                if (result.action.actionType == Command.Type.Push) {
+                    System.err.println("Adding Wall: " + (result.agentRow + Command.dirToRowChange(result.action.dir2)) + ":" + (result.agentCol + Command.dirToColChange(result.action.dir2)));
+//                    cP.addWall(n.agentRow + Command.dirToRowChange(n.action.dir2), n.agentCol + Command.dirToColChange(n.action.dir2));
+                } else {
+                    System.err.println("Adding Wall: " + result.agentRow + ":" + result.agentCol);
+//                    cP.addWall(n.agentRow,n.agentCol);
+                }
+                joinPlan.put(cP, solution);
+/*
                 boolean step1Succes = false;
-                System.err.println("Conflict: " + conflictingAgent.color + " A: " + cP.color);
+                System.err.println("Conflict: " + conflictingAgent.getNumber() + " A: " + cP.getNumber());
                 for (int i = 0; i < centralPlanner.agents.length; i++)
                     for (int j = 0; j < centralPlanner.agents[i].length; j++) {
                         if (('0' <= centralPlanner.agents[i][j] && centralPlanner.agents[i][j] <= '9')) {
@@ -53,7 +100,7 @@ public class ConflictHandler {
                     }
                 System.err.println("Current Agents: Row " + n.parent.agentRow + " Col " + n.parent.agentCol + "Agent: " + centralPlanner.agents[n.parent.agentRow][n.parent.agentCol]);
                 // 1
-                for (Node node : n.parent.getExpandedNodes()) {
+                for (Node node : cP.currentState.getExpandedNodes()) {
 
                     actions.add(node);
                     conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
@@ -75,7 +122,7 @@ public class ConflictHandler {
 
                             joinPlan.get(cP).clear();
                             cP.SetInitialState(result);
-                            joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                            joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
                             //System.err.println("Node: " + node.agentRow + node.agentCol);
                             step1Succes = true;
                             break;
@@ -103,18 +150,22 @@ public class ConflictHandler {
                 //System.err.println(planForConflictingAgent);
 
                 moveToEmptyCell.goal = GoalTypes.MoveToEmptyCell;
+                //CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, moveToEmptyCell.boxes);
                 cP.addGoal(moveToEmptyCell);
-                cP.addWall(n.agentRow, n.agentCol);
-                cP.SetInitialState(n.parent);
 
+                cP.addWall(n.agentRow, n.agentCol);
+                cP.SetInitialState(cP.currentState);
+                System.err.println("CurrentState!!!");
+                System.err.println(cP.initialState.agentRow + ":" + cP.initialState.agentCol);
+                System.err.println(cP.currentState);
                 System.err.println("Check initial state");
                 System.err.println(cP.initialState);
-                LinkedList<Node> solution = cP.Search(new Strategy.StrategyBFS(), cP.initialState);
+                LinkedList<Node> solution = centralPlanner.GetPlanFromAgent(cP);
                 System.err.println("Solution");
                 System.err.println(solution);
 
 
-                joinPlan.put(cP, cP.Search(new Strategy.StrategyBFS(), cP.initialState));
+                joinPlan.put(cP, solution);
 
                 cP.removeWall(n.agentRow, n.agentCol);
                 System.err.println("Plan of Agent: " + joinPlan.get(cP).size());
@@ -124,7 +175,6 @@ public class ConflictHandler {
 
 
                 for (int i = joinPlan.get(cP).size(); i < planForConflictingAgent.size(); i++) {
-
                     joinPlan.get(cP).addLast(centralPlanner.CreateNoOp(joinPlan.get(cP).getLast()));
                 }
                 System.err.println("After");
@@ -160,7 +210,7 @@ public class ConflictHandler {
 
 
                 }
-
+*/
                 break;
 
             case TrappedAgent:
@@ -290,12 +340,13 @@ public class ConflictHandler {
             case Push:
             default:
                 System.err.println("Enter push conflict handling");
-                Conflict test;
-                boolean[][] tmpWalls;
                 tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                 centralPlanner.CopyBoxes(cP.walls, tmpWalls);
+                System.err.println("Agent: " + cP.getNumber());
                 cP.goalStack.peek().UpdateBoxes();
                 CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
+
+
                 cP.SetInitialState(cP.currentState);
                 for (Node children : cP.initialState.getExpandedNodes()) {
                     actions.add(children);

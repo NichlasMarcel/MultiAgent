@@ -68,6 +68,8 @@ public class ConflictDetector {
 
                 if(('0' <= agents[row][col] && agents[row][col] <= '9')){
                     System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
+                    System.err.println("Move");
+                    System.err.println("Numeric value of agent: " + Character.getNumericValue(agents[row][col]));
                     return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                 }
 
@@ -110,13 +112,14 @@ public class ConflictDetector {
                     int col = newBoxCol;
                     if(('0' <= agents[newBoxRow][newBoxCol] && agents[newBoxRow][newBoxCol] <= '9')) {
                         System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
+                        System.err.println("Push");
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                     }
 
                     if(boxes[newBoxRow][newBoxCol] != 0){
-                        int c_row = node.agentRow;
-                        int c_col = node.agentCol;
-
+                        int c_row = newBoxRow;
+                        int c_col = newBoxCol;
+/*
                         if(row+1 <= CentralPlanner.MAX_ROW &&!(c_row == row+1 && c_col == col) && ('0' <= agents[row+1][col] && agents[row+1][col] <= '9')){
                             System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
                             return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
@@ -131,8 +134,8 @@ public class ConflictDetector {
                             System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                             return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                         }
-
-
+*/
+                        //System.err.println("Last node: " + nodes.get(nodes.size()-1).action.actionType);
 
                         return new Conflict(ConflictTypes.Push,agents,boxes);
                     }
@@ -161,6 +164,7 @@ public class ConflictDetector {
 
                 if(('0' <= agents[node.agentRow][node.agentCol] && agents[node.agentRow][node.agentCol] <= '9')) {
                     System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
+                    System.err.println("Pull");
                     return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[node.agentRow][node.agentCol])));
                 }
 
@@ -172,7 +176,7 @@ public class ConflictDetector {
                 if(boxes[node.agentRow][node.agentCol] != 0){
                     int c_row = node.agentRow;
                     int c_col = node.agentCol;
-
+/*
                     if(row+1 <= CentralPlanner.MAX_ROW &&!(c_row == row+1 && c_col == col) && ('0' <= agents[row+1][col] && agents[row+1][col] <= '9')){
                         System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row+1][col]+"")));}
@@ -187,8 +191,8 @@ public class ConflictDetector {
                         System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                     }
-
-
+*/
+                    //System.err.println("Pull Conflict: Box " + boxes[node.agentRow][node.agentCol] + " - " + node.agentRow + ":" + node.agentCol);
 
                     return new Conflict(ConflictTypes.Pull,agents,boxes);
                 }

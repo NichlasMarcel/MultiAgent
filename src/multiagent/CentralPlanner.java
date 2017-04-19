@@ -17,7 +17,7 @@ public class CentralPlanner {
     public GoalCell[] temporarryWalls;
     //private List< Agent > agents = new ArrayList< Agent >();
     public static char[][] goals; // Taget fra node
-    public char[][] agents; // Taget fra node
+    public static char[][] agents; // Taget fra node
     public static char[][] boxes;
     public static boolean[][] walls; // Taget fra node
     public static int MAX_ROW;
@@ -153,6 +153,7 @@ public class CentralPlanner {
                     //agent.calculateFromThisState = initialNode;
                     agent.UpdateCurrentState(agent.initialState);
                     System.err.println("COL " + agent.color);
+                    clients.put(agent.getNumber(), agent);
                     agentList.add(agent);
                 }
             }
@@ -454,17 +455,22 @@ public class CentralPlanner {
                     CopyBoxes(agent.goalStack.peek().goals, agent.goals);
                 }
 
-               if(agent.goalStack.peek().goal == GoalTypes.BoxOnGoal){
-                   System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
-                   System.err.println("Agent InitialState");
-                   System.err.println(agent.initialState);
-                   System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
-                   strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
-
-               }
-               else
-                    strategy = new Strategy.StrategyBFS();
-
+                switch (agent.goalStack.peek().goal){
+                    case BoxOnGoal:
+                        System.err.println("Goal row: " + agent.goalStack.peek().goalRow + " col: " + agent.goalStack.peek().goalCol);
+                        System.err.println("Agent InitialState");
+                        System.err.println(agent.initialState);
+                        System.err.println("Agent row: " + agent.initialState.agentRow + " col: " + agent.initialState.agentCol);
+                        strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+                        break;
+                    case MoveToCell:
+                        strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+                        break;
+                    default:
+                        strategy = new Strategy.StrategyBFS();
+                        break;
+                }
+                System.err.println("Finding solution for: " + agent.goalStack.peek().goal);
                 solution = agent.Search(strategy, agent.initialState);
             }
 
@@ -760,7 +766,7 @@ public class CentralPlanner {
         while (true) {
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
-
+            int count = 1;
             for (Client cP : agentList) {
                 // Check if agent has satisfied all or some of his goal
                 if (HaveAgentFinishedHisGoals(cP, joinPlan)) {
@@ -776,11 +782,19 @@ public class CentralPlanner {
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 if (conflict.IsConflict()) {
                     System.err.println("Conflict type: " + conflict.type);
+                    System.err.println("count: " + count);
+                    System.err.println("Agent: " + cP.getNumber());
+                    System.err.println("Node " + n.agentRow + ":" + n.agentCol);
+                    System.err.println("ParentNode " + n.parent.agentRow + ":" + n.parent.agentCol);
+
+                    System.err.println(n.action.actionType);
                     actions.remove(n);
                     // Find New Action
                     n = ConflictHandler.HandleConflict(conflict, n, this, cmdForClients, cP, joinPlan, actions);
                 }
 
+                actions.remove(n);
+                actions.add(n);
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
@@ -788,7 +802,7 @@ public class CentralPlanner {
                     System.err.println(l.size());
                 }
                 cmdForClients.put(cP, n);
-
+                count++;
             }
 
             //PlanGenerator.FillWithNoOp(joinPlan);
@@ -945,6 +959,15 @@ public class CentralPlanner {
         n.agentCol = node.agentCol;
         CopyBoxes(node.boxes, n.boxes);
         return n;
+    }
+
+    static public void CreateWallsAtAgentPosition(Client cp){
+        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                if(agents[i][j] != 0)
+                    cp.addWall(i,j);
+            }
+        }
     }
 
     public static String PrintNode(Node node) {

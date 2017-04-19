@@ -135,7 +135,7 @@ public class ConflictDetector {
                             return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                         }
 */
-                        System.err.println("Last node: " + nodes.get(nodes.size()-1).action.actionType);
+                        //System.err.println("Last node: " + nodes.get(nodes.size()-1).action.actionType);
 
                         return new Conflict(ConflictTypes.Push,agents,boxes);
                     }
@@ -192,7 +192,7 @@ public class ConflictDetector {
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                     }
 */
-
+                    //System.err.println("Pull Conflict: Box " + boxes[node.agentRow][node.agentCol] + " - " + node.agentRow + ":" + node.agentCol);
 
                     return new Conflict(ConflictTypes.Pull,agents,boxes);
                 }

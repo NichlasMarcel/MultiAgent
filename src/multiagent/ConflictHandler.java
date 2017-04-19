@@ -20,8 +20,7 @@ public class ConflictHandler {
 //                System.err.println(conflictingAgent.goalStack.size());
 
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
-                if(planForConflictingAgent.size() == 0 && conflictingAgent.goalStack.size() == 0)
-                {
+                if (planForConflictingAgent.size() == 0 && conflictingAgent.goalStack.size() == 0) {
                     LinkedList<Node> planForAgent = joinPlan.get(cP);
                     planForAgent.addFirst(n);
                     System.err.println("Plan for the agent");
@@ -42,7 +41,6 @@ public class ConflictHandler {
                     //return joinPlan.get(conflictingAgent).removeFirst();
 
                 }
-
 
 
                 boolean step1Succes = false;
@@ -194,16 +192,16 @@ public class ConflictHandler {
                         joinPlan.put(client, centralPlanner.GetPlanFromAgent(client));
                         client.removeWall(trappedAgent.currentState.agentRow, trappedAgent.currentState.agentCol);
                         int count = 1;
-                        for(Node node : joinPlan.get(client)){
-                            if(node.boxes[row][col] == 0){
+                        for (Node node : joinPlan.get(client)) {
+                            if (node.boxes[row][col] == 0) {
                                 break;
                             }
                             count++;
                         }
 
                         int count2 = 2;
-                        for(Node node : joinPlan.get(trappedAgent)){
-                            if(node.agentRow == row && node.agentCol == col){
+                        for (Node node : joinPlan.get(trappedAgent)) {
+                            if (node.agentRow == row && node.agentCol == col) {
                                 break;
                             }
                             count2++;
@@ -223,17 +221,37 @@ public class ConflictHandler {
                 }
 
                 break;
-
+/*
             case Pull:
                 System.err.println("Enter pull conflict handling");
-                actions.remove(n);
-                System.err.println("Current State");
-                System.err.println(cP.currentState);
-                cP.SetInitialState(cP.currentState);
-                cP.goalStack.peek().UpdateBoxes();
-                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
+                Conflict test;
                 boolean[][] tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
                 centralPlanner.CopyBoxes(cP.walls,tmpWalls);
+                cP.goalStack.peek().UpdateBoxes();
+                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
+                cP.SetInitialState(cP.currentState);
+                for(Node children : cP.initialState.getExpandedNodes()){
+                    actions.add(children);
+                    test = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
+                    if(test.IsConflict()){
+                        if(children.action.actionType == Command.Type.Push){
+//                            System.err.println("Adding Wall: " + (n.agentRow + Command.dirToRowChange(n.action.dir2)) + ":" + (n.agentCol + Command.dirToColChange(n.action.dir2)));
+                            cP.addWall(n.agentRow + Command.dirToRowChange(n.action.dir2), n.agentCol + Command.dirToColChange(n.action.dir2));
+                        }else{
+//                            System.err.println("Adding Wall: " + n.agentRow + ":" + n.agentCol);
+                            cP.addWall(n.agentRow,n.agentCol);
+                        }
+                    }
+                    actions.remove(children);
+                }
+
+
+
+
+                solution = centralPlanner.GetPlanFromAgent(cP);
+                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
+                result = solution.removeFirst();
+                joinPlan.put(cP,solution);
 
 
 /*
@@ -253,16 +271,8 @@ public class ConflictHandler {
                 wallCol = n.parent.agentCol - 1;
                 if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && Character.toLowerCase(CentralPlanner.boxes[wallRow][wallCol]) != CentralPlanner.goals[n.c.goalStack.peek().goalRow][n.c.goalStack.peek().goalCol])
                     cP.addWall(wallRow,wallCol);
-*/
-                System.err.println("Check here");
 
 
-                cP.addWall(n.agentRow,n.agentCol);
-
-                solution = centralPlanner.GetPlanFromAgent(cP);
-                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
-                //cP.removeWall(n.agentRow,n.agentCol);
-                result = solution.removeFirst();
 
                 actions.add(result);
                 Conflict conflictT = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
@@ -272,87 +282,50 @@ public class ConflictHandler {
                     solution.addFirst(centralPlanner.CreateNoOp(result.parent));
                 }
                 result = solution.removeFirst();
-                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
 
-                joinPlan.put(cP,solution);
                 break;
+              */
 
+            case Pull:
             case Push:
-                actions.remove(n);
+            default:
                 System.err.println("Enter push conflict handling");
-                System.err.println(n.action.actionType);
-                int newBoxRow = n.agentRow + Command.dirToRowChange(n.action.dir2);
-                int newBoxCol = n.agentCol + Command.dirToColChange(n.action.dir2);
-                System.err.println("Current State");
-                System.err.println(cP.currentState);
-                cP.SetInitialState(cP.currentState);
+                Conflict test;
+                boolean[][] tmpWalls;
+                tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                centralPlanner.CopyBoxes(cP.walls, tmpWalls);
                 cP.goalStack.peek().UpdateBoxes();
                 CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
-                tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-                centralPlanner.CopyBoxes(cP.walls,tmpWalls);
+                cP.SetInitialState(cP.currentState);
+                for (Node children : cP.initialState.getExpandedNodes()) {
+                    actions.add(children);
+                    test = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
+                    if (test.IsConflict()) {
+                        if (children.action.actionType == Command.Type.Push) {
+//                            System.err.println("Adding Wall: " + (n.agentRow + Command.dirToRowChange(n.action.dir2)) + ":" + (n.agentCol + Command.dirToColChange(n.action.dir2)));
+                            cP.addWall(children.agentRow + Command.dirToRowChange(children.action.dir2), children.agentCol + Command.dirToColChange(children.action.dir2));
+                        } else {
+//                            System.err.println("Adding Wall: " + n.agentRow + ":" + n.agentCol);
+                            cP.addWall(children.agentRow, children.agentCol);
+                        }
+                    }
+                    actions.remove(children);
+                }
 
-
-/*
-                wallRow = n.agentRow + 1;
-                wallCol = n.agentCol;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && n.c.getNumber() != Character.getNumericValue(conflict.agents[wallRow][wallCol]))
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.agentRow;
-                wallCol = n.agentCol + 1;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && n.c.getNumber() != Character.getNumericValue(conflict.agents[wallRow][wallCol]))
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.agentRow - 1;
-                wallCol = n.agentCol;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && n.c.getNumber() != Character.getNumericValue(conflict.agents[wallRow][wallCol]))
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.agentRow;
-                wallCol = n.agentCol - 1;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && n.c.getNumber() != Character.getNumericValue(conflict.agents[wallRow][wallCol]))
-                    cP.addWall(wallRow,wallCol);
-*/
-
-
-                cP.addWall(newBoxRow,newBoxCol);
 
                 solution = centralPlanner.GetPlanFromAgent(cP);
-                //centralPlanner.CopyBoxes(tmpWalls,cP.walls);
+                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
                 result = solution.removeFirst();
-
-                /*
-                actions.add(result);
-                conflictT = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
-                if(conflictT.IsConflict())
-                {
-                    solution.addFirst(result);
-                    solution.addFirst(centralPlanner.CreateNoOp(cP.currentState));
+                if (result.action.actionType == Command.Type.Push) {
+                    System.err.println("Adding Wall: " + (result.agentRow + Command.dirToRowChange(result.action.dir2)) + ":" + (result.agentCol + Command.dirToColChange(result.action.dir2)));
+//                    cP.addWall(n.agentRow + Command.dirToRowChange(n.action.dir2), n.agentCol + Command.dirToColChange(n.action.dir2));
+                } else {
+                    System.err.println("Adding Wall: " + result.agentRow + ":" + result.agentCol);
+//                    cP.addWall(n.agentRow,n.agentCol);
                 }
-                result = solution.removeFirst();
-                */
-                /*
-                while(){
-                    System.err.println("Adding Walls");
-                    System.err.println(cP.currentState);
-                    if(result.action.actionType == Command.Type.Push){
-                        newBoxRow = result.agentRow + Command.dirToRowChange(result.action.dir2);
-                        newBoxCol = result.agentCol + Command.dirToColChange(result.action.dir2);
-                        cP.addWall(newBoxRow,newBoxCol);
-                    }
-                    else{
-                        cP.addWall(result.agentRow,result.agentCol);
-                    }
-
-                    solution = centralPlanner.GetPlanFromAgent(cP);
-                    actions.remove(result);
-                    result = solution.removeFirst();
-                    actions.add(result);
-                }*/
-
-                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
-
-
-                joinPlan.put(cP,solution);
+                joinPlan.put(cP, solution);
                 break;
-
+            /*
             default:
                 System.err.println("Enter default conflict handling");
                 actions.remove(n);
@@ -369,7 +342,11 @@ public class ConflictHandler {
                 result = solution.removeFirst();
                 joinPlan.put(cP,solution);
                 break;
+                */
+
         }
+
         return result;
+
     }
 }

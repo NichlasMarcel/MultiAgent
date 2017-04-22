@@ -44,7 +44,7 @@ public class Goal {
                     return false;
             case MoveToEmptyCell:
                 for(Node node : path){
-                    if(node.agentCol == n.agentCol && node.agentRow == n.agentRow || boxes[node.agentRow][node.agentCol] != 0)
+                    if(node.agentCol == n.agentCol && node.agentRow == n.agentRow || n.boxes[node.agentRow][node.agentCol] != 0)
                         return false;
 
                 }

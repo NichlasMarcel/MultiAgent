@@ -69,7 +69,7 @@ public class ConflictDetector {
                 if(('0' <= agents[row][col] && agents[row][col] <= '9')){
                     System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
                     System.err.println("Move");
-                    System.err.println("Numeric value of agent: " + Character.getNumericValue(agents[row][col]));
+                    System.err.println("Numeric value of agent: " + agents[row][col]);
                     return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                 }
 
@@ -113,6 +113,10 @@ public class ConflictDetector {
                     if(('0' <= agents[newBoxRow][newBoxCol] && agents[newBoxRow][newBoxCol] <= '9')) {
                         System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
                         System.err.println("Push");
+                        System.err.println("Current Agent: " + node.c.getNumber());
+                        System.err.println("Number of Agent on Box position!!!!: " + agents[row][col]);
+                        System.err.println("Number of Agent!!!!: " + agents[node.agentRow][node.agentCol]);
+
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                     }
 

@@ -196,7 +196,7 @@ public class Node {
                 } else if (c.walls[row][col]) {
                     s.append("+");
                 } else if (row == this.agentRow && col == this.agentCol) {
-                    s.append('0');
+                    s.append(c.getNumber());
                 } else {
                     s.append(" ");
                 }

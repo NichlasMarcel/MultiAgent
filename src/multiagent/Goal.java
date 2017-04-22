@@ -116,8 +116,11 @@ public class Goal {
 
         System.err.println("BoxRow " + row);
         System.err.println("BoxCol " + col);
-
-        boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-        boxes[row][col] = CentralPlanner.boxes[row][col];
+        if(row!=-1) {
+            boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+            boxes[row][col] = CentralPlanner.boxes[row][col];
+        }
+       // boxRow = row;
+      //  boxCol= col;
     }
 }

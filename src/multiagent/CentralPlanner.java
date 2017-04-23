@@ -697,7 +697,8 @@ public class CentralPlanner {
            //     cP.getBestGoal();
 
 
-
+            System.err.println("New goal initialState: " );
+            System.err.println(cP.currentState);
             cP.goalStack.peek().UpdateBoxes();
             CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
 
@@ -861,6 +862,14 @@ public class CentralPlanner {
         return ('0' <= this.agents[row][col] && this.agents[row][col] <= '9');
     }
 
+    static public Boolean BlockedPath(LinkedList<Node> path, Node n){
+        for(Node node : path){
+            if(node.agentCol == n.agentCol && node.agentRow == n.agentRow || n.boxes[node.agentRow][node.agentCol] != 0)
+                return true;
+
+        }
+        return false;
+    }
 
     public void ApplyAction(HashMap<Client, Node> cmds) {
 

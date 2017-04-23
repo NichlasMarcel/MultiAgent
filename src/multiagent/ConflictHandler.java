@@ -52,7 +52,7 @@ public class ConflictHandler {
                 cP.goalStack.peek().UpdateBoxes();
                 CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
 
-
+                // Add walls on the cells which is conflicting.
                 cP.SetInitialState(cP.currentState);
                 for (Node children : cP.initialState.getExpandedNodes()) {
                     actions.add(children);
@@ -104,6 +104,60 @@ public class ConflictHandler {
                     if(cmdForClients.containsKey(conflictingAgent)){
                         cmdForClients.put(conflictingAgent,joinPlan.get(conflictingAgent).removeFirst());
                     }
+
+                    // Find empty cell which is not blocking with conflicting agent path to his 2nd goal
+
+                    // Conflicting Agents 2nd path
+                    System.err.println("LastNode: " + joinPlan.get(conflictingAgent).getLast());
+                    conflictingAgent.SetInitialState(joinPlan.get(conflictingAgent).getLast());
+                    // First goal of conflictingAgent
+                    Goal originalGoal = conflictingAgent.goalStack.pop();
+                    CentralPlanner.CopyBoxes(joinPlan.get(conflictingAgent).getLast().boxes,conflictingAgent.goalStack.peek().boxes);
+                    System.err.println("InitialNode: " +  conflictingAgent.initialState);
+                    // Check if path of conflicting agents 2nd goal will conflict with the end position of non-conflicting agent.
+                    System.err.println("Calculating path for conflicting Agents 2nd goal");
+                    LinkedList<Node> cAgentGoal2 = centralPlanner.GetPlanFromAgent(conflictingAgent);
+                    System.err.println("Solution lastNode: ");
+                    System.err.println(solution.getLast());
+
+                    System.err.println("Goal 2 solution");
+                    System.err.println(cAgentGoal2);
+                    if(CentralPlanner.BlockedPath(cAgentGoal2,solution.getLast())){
+                        Goal move = new Goal(cAgentGoal2);
+                        move.goal = GoalTypes.MoveToEmptyCell;
+                        cP.addWall(cAgentGoal2.getFirst().agentRow,cAgentGoal2.getFirst().agentCol);
+                        CentralPlanner.CopyBoxes(solution.getLast().boxes,move.boxes);
+                        cP.goalStack.push(move);
+                        cP.SetInitialState(solution.getLast());
+                        System.err.println("Find empty cell which is not blocking for conflicting agents 2nd goal");
+                        Node endNode = centralPlanner.GetPlanFromAgent(cP).getLast();
+                        System.err.println(endNode);
+                        cP.goalStack.peek().UpdateBoxes();
+                        char[][] goalsForGoal = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+                            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                                if(endNode.boxes[i][j] != 0){
+                                    System.err.println("Move box to row: " + i + " col: " + j);
+                                    goalsForGoal[i][j] = Character.toLowerCase(endNode.boxes[i][j]);
+                                    break;
+                                }
+
+                            }
+                        }
+                        cP.removeWall(cAgentGoal2.getFirst().agentRow,cAgentGoal2.getFirst().agentCol);
+                        cP.goalStack.remove(move);
+                        Goal positionForAgent = new Goal(goalsForGoal, cP.goalStack.peek().boxes);
+                        positionForAgent.goal = GoalTypes.BoxOnGoal;
+                        cP.goalStack.push(positionForAgent);
+                        cP.SetInitialState(cP.currentState);
+                        solution = centralPlanner.GetPlanFromAgent(cP);
+                        result = solution.removeFirst();
+
+                    }
+
+                    conflictingAgent.SetInitialState(conflictingAgent.currentState);
+                    conflictingAgent.goalStack.push(originalGoal);
+
                 }else{
                     result = solution.removeFirst();
                 }

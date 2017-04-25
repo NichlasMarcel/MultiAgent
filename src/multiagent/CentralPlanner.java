@@ -3,9 +3,7 @@ package multiagent;
 import pathfinding.*;
 import sun.awt.image.ImageWatched;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.*;
 import java.util.Map;
 
@@ -24,11 +22,13 @@ public class CentralPlanner {
     public static int MAX_ROW;
     public static int MAX_COL;
     public List<Client> agentList;
+    String response ="";
     HashMap<Client, LinkedList<Node>> joinPlan;
     static Map<Character, String> colors = new HashMap<Character, String>();
     static Map<Integer, Client> clients = new HashMap<>();
     static Boolean sameColor = false;
     static GoalCell[][] goalsMap ;
+    static PrintWriter writer;
     ArrayList<GoalCell> goalsArray  = new ArrayList<>();
     static Map<String, List<ExampleNode>> allPaths = new HashMap<>();
     public CentralPlanner(BufferedReader serverMessages) {
@@ -200,7 +200,26 @@ public class CentralPlanner {
         System.err.println("2");
         c.LoadMap();
         System.err.println("3");
+        //System.err.println(args);
+
+        if (args.length>0)
+        {
+            System.setErr(new PrintStream(new OutputStream() {
+                public void write(int b) {
+                }
+            }));
+
+            try{
+                writer= new PrintWriter(args[0] +".txt", "UTF-8");
+
+            } catch (IOException e) {
+                // do something
+            }
+        }
+
         c.Run();
+        writer.close();
+
     }
 
     public List<Client> createAgentList() {
@@ -1048,16 +1067,16 @@ public class CentralPlanner {
         } else {
 
             System.err.println("Finished: " + cP.goalStack.peek().goal);
-            if(cP.goalStack.peek().goal==GoalTypes.BoxOnGoal)
+            if(cP.goalStack.peek().goal==GoalTypes.BoxOnGoal) {
                 System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
 
-            for (Client c: agentList) {
-                c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
-                for (Goal go:cP.goalStack)
-                {
-                    go.UpdateBoxes();
+                for (Client c : agentList) {
+                    c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
+                    for (Goal go : cP.goalStack) {
+                        go.UpdateBoxes();
+                    }
+                    System.err.println("ADDING WALL: " + c.initialState);
                 }
-                System.err.println("ADDING WALL: " + c.initialState);
             }
 
             Goal g= cP.goalStack.pop();
@@ -1101,9 +1120,8 @@ public class CentralPlanner {
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             cP.SetInitialState(cP.currentState);
 
-            //PrioritizeGoals();
+       //     PrioritizeGoals();
             System.err.println("Current goal: " + cP.goalStack.peek().goal);
-            PrioritizeGoals();
             LinkedList<Node> solution = GetPlanFromAgent(cP);
 
 
@@ -1141,6 +1159,8 @@ public class CentralPlanner {
         return (IsBox(x, y) && b.surroundedWallsAndBoxes()>=2);
     }
     public void Run() {
+
+
         // Use stderr to print to console
         System.err.println("SearchClient initializing. I am sending this using the error output stream.");
 
@@ -1150,7 +1170,7 @@ public class CentralPlanner {
         // Divide start goals
         DivideGoals2(agentList);
 
-       PrioritizeGoals();
+//    PrioritizeGoals();
 
 
        // for (Client cP : agentList) {
@@ -1166,7 +1186,7 @@ public class CentralPlanner {
         //PlanGenerator.FillWithNoOp(joinPlan);
 
         // Execute plans from agents
-        while (true) {
+        while (!response.contains("sucess")) {
             HashMap<Client, Node> cmdForClients = new HashMap<>();
             List<Node> actions = new ArrayList<>();
             int count = 1;
@@ -1226,18 +1246,25 @@ public class CentralPlanner {
 
             System.err.println(joinedAction);
             System.out.println(joinedAction);
+            if(writer!=null){
+            writer.write(joinedAction+"\n");
+            writer.flush();}
+            System.out.flush();
 
             try {
-                String response = in.readLine();
+                response = in.readLine();
                 if (response.contains("false")) {
                     System.err.format("Server responsed with %s to the inapplicable action: %s\n", response, joinedAction);
                     break;
                 }
+
             } catch (Exception e) {
 
             }
 
         }
+
+        System.err.println("Finished");
     }
 
     public boolean IsCellFree(int row, int col) {

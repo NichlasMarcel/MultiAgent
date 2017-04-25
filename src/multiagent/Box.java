@@ -49,6 +49,31 @@ public class Box {
         return s;
     }
 
+    public int surroundedWallsAndBoxes()
+    {
+        int s = 0;
+
+        if (CentralPlanner.walls[x+1][y])
+            s++;
+        if (CentralPlanner.walls[x-1][y])
+            s++;
+        if (CentralPlanner.walls[x][y+1])
+            s++;
+        if (CentralPlanner.walls[x][y-1])
+            s++;
+
+        if (CentralPlanner.boxes[x+1][y]>0)
+            s++;
+        if (CentralPlanner.boxes[x-1][y]>0)
+            s++;
+        if (CentralPlanner.boxes[x][y+1]>0)
+            s++;
+        if (CentralPlanner.boxes[x][y-1]>0)
+            s++;
+
+        return s;
+    }
+
     public ArrayList<Box> getSurroundingBoxes(char[][] boxes)
     {
         ArrayList<Box> surroundingBoxes = new ArrayList<>();

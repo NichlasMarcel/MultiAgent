@@ -1,5 +1,6 @@
 package multiagent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,13 +14,11 @@ public class ConflictHandler {
         LinkedList<Node> planForConflictingAgent;
         switch (conflict.type) {
             case AgentsBlockEachother:
-                /*
+
                 Client conflictingAgent = conflict.conflictingAgent;
+
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                 // Check if conflicting agent has finished his goals and tell him to get the fuck away.
-
-//                System.err.println(conflictingAgent.goalStack.size());
-
                 planForConflictingAgent = joinPlan.get(conflict.conflictingAgent);
                 if (planForConflictingAgent.size() == 0 && conflictingAgent.goalStack.size() == 0) {
                     LinkedList<Node> planForAgent = joinPlan.get(cP);
@@ -37,13 +36,12 @@ public class ConflictHandler {
                     LinkedList<Node> moveToEmptyCell = centralPlanner.GetPlanFromAgent(conflictingAgent);
                     System.err.println(moveToEmptyCell);
                     joinPlan.put(conflictingAgent, moveToEmptyCell);
-
                     return centralPlanner.CreateNoOp(n.parent);
                     //return joinPlan.get(conflictingAgent).removeFirst();
-
                 }
-                */
-                Client conflictingAgent = conflict.conflictingAgent;
+
+
+
                 Conflict test;
                 boolean[][] tmpWalls;
                 tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
@@ -51,8 +49,7 @@ public class ConflictHandler {
                 System.err.println("Agent: " + cP.getNumber());
                 cP.goalStack.peek().UpdateBoxes();
                 CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
-
-
+                // Add walls on the cells which is conflicting.
                 cP.SetInitialState(cP.currentState);
                 for (Node children : cP.initialState.getExpandedNodes()) {
                     actions.add(children);
@@ -70,16 +67,53 @@ public class ConflictHandler {
                 }
 
                 cP.SetInitialState(cP.currentState);
+                System.err.println(cP.initialState);
                 LinkedList<Node> solution = centralPlanner.GetPlanFromAgent(cP);
+
                 if(solution == null){
                     // At this point it is not possible to calculate a new path.
+                    // Check if the agent can wait it out ;-D
+                    Node nCA = joinPlan.get(conflictingAgent).getFirst();
+                    for(Node node : joinPlan.get(cP)) {
+                        if(node.action.actionType == nCA.action.actionType &&
+                                node.agentRow == nCA.agentRow &&
+                                node.agentCol == nCA.agentCol &&
+                                node.action.dir1 == nCA.action.dir1){
+                                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+                                joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
+                                return centralPlanner.CreateNoOp(cP.currentState);
+                        }
+
+                    }
+
+//                        Node check = null;
+//                        if(cmdForClients.containsKey(conflictingAgent)){
+//                            if(!ConflictDetector.CheckIfTwoNodesConflict(cmdForClients.get(conflictingAgent),n)){
+//                                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+//                                joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
+//                                return centralPlanner.CreateNoOp(cP.currentState);
+//                            }
+//                        }
+//
+//                        for(Node node : joinPlan.get(conflictingAgent)){
+//                            if(!ConflictDetector.CheckIfTwoNodesConflict(node,n)){
+//                                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+//                                joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
+//                                return centralPlanner.CreateNoOp(cP.currentState);
+//                            }
+//                        }
+
+
+
+
+
+
                     // Tell the conflicting agent to get the fuck away.
                     result = cP.currentState.Copy();
                     result.action = new Command();
                     centralPlanner.CopyBoxes(tmpWalls, cP.walls);
                     cP.SetInitialState(cP.currentState);
                     solution = centralPlanner.GetPlanFromAgent(cP);
-
                     Goal freepath = new Goal();
                     freepath.path = new LinkedList<>();
                     freepath.path.addAll(solution);
@@ -104,6 +138,60 @@ public class ConflictHandler {
                     if(cmdForClients.containsKey(conflictingAgent)){
                         cmdForClients.put(conflictingAgent,joinPlan.get(conflictingAgent).removeFirst());
                     }
+
+                    // Find empty cell which is not blocking with conflicting agent path to his 2nd goal
+
+                    // Conflicting Agents 2nd path
+                    System.err.println("LastNode: " + joinPlan.get(conflictingAgent).getLast());
+                    conflictingAgent.SetInitialState(joinPlan.get(conflictingAgent).getLast());
+                    // First goal of conflictingAgent
+                    Goal originalGoal = conflictingAgent.goalStack.pop();
+                    CentralPlanner.CopyBoxes(joinPlan.get(conflictingAgent).getLast().boxes,conflictingAgent.goalStack.peek().boxes);
+                    System.err.println("InitialNode: " +  conflictingAgent.initialState);
+                    // Check if path of conflicting agents 2nd goal will conflict with the end position of non-conflicting agent.
+                    System.err.println("Calculating path for conflicting Agents 2nd goal");
+                    LinkedList<Node> cAgentGoal2 = centralPlanner.GetPlanFromAgent(conflictingAgent);
+                    System.err.println("Solution lastNode: ");
+                    System.err.println(solution.getLast());
+
+                    System.err.println("Goal 2 solution");
+                    System.err.println(cAgentGoal2);
+                    if(CentralPlanner.BlockedPath(cAgentGoal2,solution.getLast())){
+                        Goal move = new Goal(cAgentGoal2);
+                        move.goal = GoalTypes.MoveToEmptyCell;
+                        cP.addWall(cAgentGoal2.getFirst().agentRow,cAgentGoal2.getFirst().agentCol);
+                        CentralPlanner.CopyBoxes(solution.getLast().boxes,move.boxes);
+                        cP.goalStack.push(move);
+                        cP.SetInitialState(solution.getLast());
+                        System.err.println("Find empty cell which is not blocking for conflicting agents 2nd goal");
+                        Node endNode = centralPlanner.GetPlanFromAgent(cP).getLast();
+                        System.err.println(endNode);
+                        cP.goalStack.peek().UpdateBoxes();
+                        char[][] goalsForGoal = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+                            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                                if(endNode.boxes[i][j] != 0){
+                                    System.err.println("Move box to row: " + i + " col: " + j);
+                                    goalsForGoal[i][j] = Character.toLowerCase(endNode.boxes[i][j]);
+                                    break;
+                                }
+
+                            }
+                        }
+                        cP.removeWall(cAgentGoal2.getFirst().agentRow,cAgentGoal2.getFirst().agentCol);
+                        cP.goalStack.remove(move);
+                        Goal positionForAgent = new Goal(goalsForGoal, cP.goalStack.peek().boxes);
+                        positionForAgent.goal = GoalTypes.BoxOnGoal;
+                        cP.goalStack.push(positionForAgent);
+                        cP.SetInitialState(cP.currentState);
+                        solution = centralPlanner.GetPlanFromAgent(cP);
+                        result = solution.removeFirst();
+
+                    }
+
+                    conflictingAgent.SetInitialState(conflictingAgent.currentState);
+                    conflictingAgent.goalStack.push(originalGoal);
+
                 }else{
                     result = solution.removeFirst();
                 }

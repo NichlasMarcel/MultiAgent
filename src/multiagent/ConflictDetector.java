@@ -249,4 +249,56 @@ public class ConflictDetector {
         return new Conflict(ConflictTypes.NoConflict);
 
     }
+
+    public static Boolean CheckIfTwoNodesConflict(Node... nodes){
+        char[][] agents = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+
+        for(Node n : nodes){
+            Command c = n.action;
+            if (c.actionType == Command.Type.NoOp) {
+                agents[n.agentRow][n.agentCol] = '2';
+                continue;
+            }
+
+            if (c.actionType == Command.Type.Move) {
+                // Check if there's a wall or box on the cell to which the agent is moving
+                if (cellIsFree(agents,boxes,n.agentRow, n.agentCol)) {
+                    agents[n.agentRow][n.agentCol] = '2';
+                    continue;
+                }
+                return true;
+            } else if (c.actionType == Command.Type.Push) {
+                // Make sure that there's actually a box to move
+                int newBoxRow = n.agentRow + Command.dirToRowChange(c.dir2);
+                int newBoxCol = n.agentCol + Command.dirToColChange(c.dir2);
+                // .. and that new cell of box is free
+                if (cellIsFree(agents,boxes,newBoxRow, newBoxCol)) {
+                    agents[n.agentRow][n.agentCol] = '2';
+                    boxes[newBoxRow][newBoxCol] = 'B';
+                    continue;
+                }
+                return true;
+            } else if (c.actionType == Command.Type.Pull) {
+                // Cell is free where agent is going
+                if (cellIsFree(agents,boxes,n.agentRow, n.agentCol)) {
+                    int boxRow = n.agentRow + Command.dirToRowChange(c.dir2);
+                    int boxCol = n.agentCol + Command.dirToColChange(c.dir2);
+                    boxes[n.agentRow][n.agentCol] = 'B';
+                    continue;
+                }
+                return true;
+            }
+        }
+
+        return false;
+
+    }
+
+    public static Boolean cellIsFree(char[][] agents, char[][] boxes, int row, int col){
+        if(agents[row][col] != 0 || boxes[row][col] != 0)
+            return false;
+
+        return true;
+    }
 }

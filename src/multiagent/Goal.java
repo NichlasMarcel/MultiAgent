@@ -97,6 +97,7 @@ public class Goal {
             }
         }
 
+
         System.err.println("grow: " + grow);
         System.err.println("gcow: " + gcol);
         System.err.println("goal_c: " + goal_c);
@@ -105,6 +106,12 @@ public class Goal {
 
         for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
             for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c  && CentralPlanner.goals[i][j] != goal_c){
+                    row = i;
+                    col = j;
+                    distance = 0;
+                }
+
                 if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c  && CentralPlanner.goals[i][j] != goal_c){
                     if(distance > CentralPlanner.CalculateMathDistance(i,j,grow,gcol))
                         distance = CentralPlanner.CalculateMathDistance(i,j,grow,gcol);

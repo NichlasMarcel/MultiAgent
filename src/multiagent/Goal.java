@@ -83,11 +83,13 @@ public class Goal {
         int gcol = -1;
         int row = -1;
         int col = -1;
+
         for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
             if(finished)
                 break;
             for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
                 if(goals[i][j] != 0){
+                    System.err.println("Hmm");
                     goal_c = goals[i][j];
                     grow = i;
                     gcol = j;

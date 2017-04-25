@@ -1004,13 +1004,19 @@ public class CentralPlanner {
             else
                 CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
 
-            if(cP.currentState.isGoalState()){
+            while(cP.goalStack.size() > 0 && cP.currentState.isGoalState()){
                 System.err.println("popping");
                 System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
                 System.err.println(cP.currentState);
                 cP.goalStack.pop();
                 //AddNewPlanToAgent(cP, joinPlan);
             }
+
+            if(cP.goalStack.size() == 0){
+                AddNewPlanToAgent(cP, joinPlan);
+                return;
+            }
+
 
             System.err.println(cP.currentState);
             System.err.println("Agent: " + cP.getNumber());

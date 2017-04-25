@@ -119,8 +119,9 @@ public class Goal {
         if(row!=-1) {
             boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
             boxes[row][col] = CentralPlanner.boxes[row][col];
+            boxRow = row;
+            boxCol= col;
         }
-       // boxRow = row;
-      //  boxCol= col;
+
     }
 }

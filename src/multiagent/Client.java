@@ -24,6 +24,7 @@ public class Client {
     public int getNumber(){
       return number;
     }
+    List<Node> nodesVisited = new ArrayList<>();
     public  Goal currentGoal;
 
 

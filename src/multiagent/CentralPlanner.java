@@ -356,6 +356,9 @@ public class CentralPlanner {
             goal.boxCol = boxCol;
             goal.goalRow = g.agentRow;
             goal.goalCol = g.agentCol;
+            goal.goals = aGoals;
+            goal.boxes = aBoxes;
+
             goal.client= winner;
             winner.addGoal(goal);
             winner.UpdateCurrentState(winner.initialState);
@@ -536,7 +539,7 @@ public class CentralPlanner {
                         strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
                         break;
                     default:
-                        strategy = new Strategy.StrategyBestFirst(new Heuristic.AStar(agent.initialState));
+                        strategy = new Strategy.StrategyBFS();
                         break;
                 }
                 System.err.println("Finding solution for agent: " + agent.getNumber() + " for goal " + agent.goalStack.peek().goal);
@@ -1045,21 +1048,23 @@ public class CentralPlanner {
         } else {
 
             System.err.println("Finished: " + cP.goalStack.peek().goal);
-            if(cP.goalStack.peek().goal==GoalTypes.BoxOnGoal) {
+            if(cP.goalStack.peek().goal==GoalTypes.BoxOnGoal)
                 System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
-                for (Client c : agentList) {
-                    c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
-                    for (Goal go : cP.goalStack) {
-                        go.UpdateBoxes();
-                    }
-                    System.err.println("ADDING WALL: " + c.initialState);
+
+            for (Client c: agentList) {
+                c.addWall(cP.goalStack.peek().goalRow, cP.goalStack.peek().goalCol);
+                for (Goal go:cP.goalStack)
+                {
+                    go.UpdateBoxes();
                 }
+                System.err.println("ADDING WALL: " + c.initialState);
             }
 
             Goal g= cP.goalStack.pop();
 
             System.err.println("Goal fullfilled: "  + g.goals[g.goalRow][g.goalCol] + "- Type: " + g.goal  + "Box:" + g.boxRow +" :" + g.boxCol +" Goal:" + g.goalRow + ": "+ g.goalCol );
-            System.err.println("Goals remmainning");
+            System.err.println("Goals remaining");
+
             for (Goal go: cP.goalStack)
             {
                 System.err.println("Goal:"  + go.goals[go.goalRow][go.goalCol] + "- Type: " + go.goal + "Box:" + go.boxRow +" :" + go.boxCol +" Goal:" + go.goalRow + ": "+ go.goalCol );
@@ -1078,18 +1083,26 @@ public class CentralPlanner {
             System.err.println("New goal initialState: " );
             System.err.println(cP.currentState);
             cP.goalStack.peek().UpdateBoxes();
-            CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
+            if(cP.goalStack.peek().goal == GoalTypes.MoveToEmptyCell)
+                CopyBoxes(cP.currentState.boxes,cP.goalStack.peek().boxes);
+            else
+                CopyBoxes(cP.goalStack.peek().boxes,cP.currentState.boxes);
 
             if(cP.currentState.isGoalState()){
+                System.err.println("popping");
                 System.err.println("Agent: " + cP.getNumber() + " Finished: " + cP.goalStack.peek().goal);
+                System.err.println(cP.currentState);
                 cP.goalStack.pop();
-                AddNewPlanToAgent(cP, joinPlan);
+                //AddNewPlanToAgent(cP, joinPlan);
             }
 
             System.err.println(cP.currentState);
+            System.err.println("Agent: " + cP.getNumber());
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             cP.SetInitialState(cP.currentState);
 
+            //PrioritizeGoals();
+            System.err.println("Current goal: " + cP.goalStack.peek().goal);
             PrioritizeGoals();
             LinkedList<Node> solution = GetPlanFromAgent(cP);
 
@@ -1258,7 +1271,7 @@ public class CentralPlanner {
         for (Client c : cmds.keySet()) {
             Node node = cmds.get(c);
             c.UpdateCurrentState(node);
-
+            c.nodesVisited.add(node);
             if (node.action.actionType == Command.Type.NoOp)
                 continue;
             // Determine applicability of action

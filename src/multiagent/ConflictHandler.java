@@ -1,9 +1,6 @@
 package multiagent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by nipe on 06-04-2017.
@@ -71,6 +68,7 @@ public class ConflictHandler {
                 LinkedList<Node> solution = centralPlanner.GetPlanFromAgent(cP);
 
                 if(solution == null){
+                    System.err.println("It was not possible to calculate a new path, Im boxed in");
                     // At this point it is not possible to calculate a new path.
                     // Check if the agent can wait it out ;-D
                     Node nCA = joinPlan.get(conflictingAgent).getFirst();
@@ -193,6 +191,24 @@ public class ConflictHandler {
                     conflictingAgent.goalStack.push(originalGoal);
 
                 }else{
+
+                    int countVisited = 0;
+                    for(Node node : cP.nodesVisited){
+                        if(node.equals(solution.getFirst())){
+                            countVisited++;
+                            if(countVisited > 2){
+                                Random r = new Random();
+                                Node randomNode = cP.currentState.getExpandedNodes().get(r.nextInt(cP.currentState.getExpandedNodes().size() - 1));
+                                cP.SetInitialState(randomNode);
+                                joinPlan.put(cP,centralPlanner.GetPlanFromAgent(cP));
+                                centralPlanner.CopyBoxes(tmpWalls, cP.walls);
+
+                                return randomNode;
+                            }
+                        }
+
+                    }
+
                     result = solution.removeFirst();
                 }
 

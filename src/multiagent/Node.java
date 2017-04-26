@@ -185,9 +185,6 @@ public class Node {
         StringBuilder s = new StringBuilder();
 
         for (int row = 0; row < CentralPlanner.MAX_ROW; row++) {
-            if (!c.walls[row][0]) {
-                break;
-            }
             for (int col = 0; col < CentralPlanner.MAX_COL; col++) {
                 if (this.boxes[row][col] > 0) {
                     s.append(this.boxes[row][col]);

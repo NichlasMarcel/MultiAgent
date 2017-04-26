@@ -46,6 +46,7 @@ public class Goal {
                 for(Node node : path){
                     if(node.agentCol == n.agentCol && node.agentRow == n.agentRow || n.boxes[node.agentRow][node.agentCol] != 0 )
                         return false;
+
                     if (node.action.actionType == Command.Type.Push) {
                         int row = node.agentRow + Command.dirToRowChange(node.action.dir2);
                         int col = node.agentCol + Command.dirToColChange(node.action.dir2);
@@ -53,6 +54,7 @@ public class Goal {
                             return false;
 //                            System.err.println("Adding Wall: " + (n.agentRow + Command.dirToRowChange(n.action.dir2)) + ":" + (n.agentCol + Command.dirToColChange(n.action.dir2)));
                     }
+
                 }
                 return true;
             case FreeAgent:

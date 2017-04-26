@@ -17,7 +17,7 @@ parser.set_defaults(debug=False, all=False, fosa=False, foma=False, poma=False)
 
 args = parser.parse_args()
 from subprocess import Popen, PIPE, STDOUT
-all_levels = [file for file in glob.glob('levels/*')]
+all_levels = [file for file in glob.glob('checklevels/*')]
 #print glob.glob('levels/*')
 ##print all_levels
 levels = []

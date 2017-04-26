@@ -1307,8 +1307,6 @@ public class CentralPlanner {
                 Node n = joinPlan.get(cP).removeFirst();
                 actions.add(n);
                 // This client action is not possible to apply.
-                // We continue to replan until we get a plan with a first action that can be applied
-                //  System.err.println("THIS IS RETURN OF BARTEK METHOD :" + ConflictDetector.CheckIfActionCanBeApplied(actions, this));
 
                 Conflict conflict = multiagent.ConflictDetector.CheckIfActionCanBeApplied(actions, this);
                 if (conflict.IsConflict()) {

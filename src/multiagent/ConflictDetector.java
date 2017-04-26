@@ -67,9 +67,7 @@ public class ConflictDetector {
                     return new Conflict(ConflictTypes.Wall);
 
                 if(('0' <= agents[row][col] && agents[row][col] <= '9')){
-                    System.err.println("ConflictDetector: " + node.agentRow + "/" + node.agentCol);
-                    System.err.println("Move");
-                    System.err.println("Numeric value of agent: " + agents[row][col]);
+                    System.err.println("Agents blocks: " + Character.getNumericValue(agents[row][col]));
                     return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Character.getNumericValue(agents[row][col])));
                 }
 
@@ -90,6 +88,15 @@ public class ConflictDetector {
                     if(col-1 > 0 && !(c_row == row && c_col == col-1) && ('0' <= agents[row][col-1] && agents[row][col-1] <= '9')){
                         //System.err.println("Number of Agent !!!!: " +CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
                         return new Conflict(ConflictTypes.AgentsBlockEachother,CentralPlanner.clients.get(Integer.parseInt(agents[row][col-1]+"")));
+                    }
+                    System.err.println(nodes.get(nodes.size()-1).c.getNumber() +  " row: " + nodes.get(nodes.size()-1).agentRow + " col: " + nodes.get(nodes.size()-1).agentCol);
+                    System.err.println("Box at row/col: " + boxes[nodes.get(nodes.size()-1).agentRow][nodes.get(nodes.size()-1).agentCol]);
+                    System.err.println("Agents current position: " + " row: " + nodes.get(nodes.size()-1).parent.agentRow + " col: " + nodes.get(nodes.size()-1).parent.agentCol);
+                    for (Node action : nodes){
+                        System.err.println(action.c.getNumber() +  " row: " + action.agentRow + " col: " + action.agentCol);
+
+
+                        System.err.println(action);
                     }
 
                     return new Conflict(ConflictTypes.Move);

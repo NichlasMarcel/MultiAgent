@@ -636,7 +636,7 @@ public class CentralPlanner {
         }
     }
 
-    public LinkedList<Node> GetPlanFromAgent(Client agent) {
+    public static LinkedList<Node> GetPlanFromAgent(Client agent) {
         LinkedList<Node> solution = new LinkedList<>();
 
         //agent.initialState.boxes = agent.goalStack.peek().boxes ;
@@ -1327,9 +1327,9 @@ public class CentralPlanner {
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
-                for (List<Node> l : joinPlan.values()) {
-                    System.err.println(l.size());
-                }
+//                for (List<Node> l : joinPlan.values()) {
+//                    System.err.println(l.size());
+//                }
                 cmdForClients.put(cP, n);
                 count++;
             }
@@ -1539,6 +1539,21 @@ public class CentralPlanner {
             System.err.println("Node toString length: " + s.length());
         }
         return s.toString();
+    }
+
+    public static char[][] GetBoxesOfSpecificColor(Client agent){
+        char[][] boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
+            for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
+                if(CentralPlanner.boxes[i][j] != 0){
+                    if(colors.get(CentralPlanner.boxes[i][j]).equals(agent.color)){
+                        boxes[i][j] = CentralPlanner.boxes[i][j];
+                    }
+                }
+            }
+        }
+
+        return boxes;
     }
 
     @Override

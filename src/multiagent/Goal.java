@@ -97,7 +97,6 @@ public class Goal {
                 break;
             for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
                 if(goals[i][j] != 0){
-                    System.err.println("Hmm");
                     goal_c = goals[i][j];
                     grow = i;
                     gcol = j;
@@ -113,7 +112,8 @@ public class Goal {
         System.err.println("goal_c: " + goal_c);
 
         double distance = Double.MAX_VALUE;
-
+        boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+        outerloop:
         for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
             for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
 //                if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c  && CentralPlanner.goals[i][j] != goal_c){
@@ -123,22 +123,52 @@ public class Goal {
 //                }
 
                 if(Character.toLowerCase(CentralPlanner.boxes[i][j]) == goal_c  && CentralPlanner.goals[i][j] != goal_c){
-                    if(distance > CentralPlanner.CalculateMathDistance(i,j,grow,gcol)){
-                        distance = CentralPlanner.CalculateMathDistance(i,j,grow,gcol);
-                    row = i;
-                    col = j;}
+//                    if(distance > CentralPlanner.CalculateMathDistance(i,j,grow,gcol)){
+//                        distance = CentralPlanner.CalculateMathDistance(i,j,grow,gcol);
+//                    row = i;
+//                    col = j;}
+
+                        Goal goal = new Goal(grow,gcol);
+                        goal.goal = GoalTypes.MoveToCell;
+                        goal.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        goal.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+
+
+                        Client c = new Client();
+                        c.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        CentralPlanner.CopyBoxes(CentralPlanner.walls, c.walls);
+                        Node n = new Node(null,c);
+                        n.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
+                        n.agentRow = i;
+                        n.agentCol = j;
+                        c.SetInitialState(n);
+                        c.addGoal(goal);
+
+                        //c.goalStack.peek().UpdateBoxes();
+
+                        LinkedList<Node> solution = CentralPlanner.GetPlanFromAgent(c);
+
+                        if(solution == null)
+                            continue;
+
+                        if(solution.size() > 0){
+                            boxes[i][j] = CentralPlanner.boxes[i][j];
+                            break outerloop;
+                        }
+                    }
+
                 }
             }
         }
 
-        System.err.println("BoxRow " + row);
-        System.err.println("BoxCol " + col);
-        if(row!=-1) {
-            boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-            boxes[row][col] = CentralPlanner.boxes[row][col];
-            boxRow = row;
-            boxCol= col;
-        }
+//        System.err.println("BoxRow " + row);
+//        System.err.println("BoxCol " + col);
+//        if(row!=-1) {
+//
+//
+//            boxRow = row;
+//            boxCol= col;
+//        }
 
     }
-}
+

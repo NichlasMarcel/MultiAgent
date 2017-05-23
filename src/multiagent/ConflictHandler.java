@@ -365,70 +365,6 @@ public class ConflictHandler {
                 }
 
                 break;
-/*
-            case Pull:
-                System.err.println("Enter pull conflict handling");
-                Conflict test;
-                boolean[][] tmpWalls = new boolean[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-                centralPlanner.CopyBoxes(cP.walls,tmpWalls);
-                cP.goalStack.peek().UpdateBoxes();
-                CentralPlanner.CopyBoxes(cP.goalStack.peek().boxes, cP.currentState.boxes);
-                cP.SetInitialState(cP.currentState);
-                for(Node children : cP.initialState.getExpandedNodes()){
-                    actions.add(children);
-                    test = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
-                    if(test.IsConflict()){
-                        if(children.action.actionType == Command.Type.Push){
-//                            System.err.println("Adding Wall: " + (n.agentRow + Command.dirToRowChange(n.action.dir2)) + ":" + (n.agentCol + Command.dirToColChange(n.action.dir2)));
-                            cP.addWall(n.agentRow + Command.dirToRowChange(n.action.dir2), n.agentCol + Command.dirToColChange(n.action.dir2));
-                        }else{
-//                            System.err.println("Adding Wall: " + n.agentRow + ":" + n.agentCol);
-                            cP.addWall(n.agentRow,n.agentCol);
-                        }
-                    }
-                    actions.remove(children);
-                }
-
-
-
-
-                solution = centralPlanner.GetPlanFromAgent(cP);
-                centralPlanner.CopyBoxes(tmpWalls,cP.walls);
-                result = solution.removeFirst();
-                joinPlan.put(cP,solution);
-
-
-/*
-                int wallRow = n.parent.agentRow + 1;
-                int wallCol = n.parent.agentCol;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && Character.toLowerCase(CentralPlanner.boxes[wallRow][wallCol]) != CentralPlanner.goals[n.c.goalStack.peek().goalRow][n.c.goalStack.peek().goalCol])
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.parent.agentRow;
-                wallCol = n.parent.agentCol + 1;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && Character.toLowerCase(CentralPlanner.boxes[wallRow][wallCol]) != CentralPlanner.goals[n.c.goalStack.peek().goalRow][n.c.goalStack.peek().goalCol])
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.parent.agentRow - 1;
-                wallCol = n.parent.agentCol;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && Character.toLowerCase(CentralPlanner.boxes[wallRow][wallCol]) != CentralPlanner.goals[n.c.goalStack.peek().goalRow][n.c.goalStack.peek().goalCol])
-                    cP.addWall(wallRow,wallCol);
-                wallRow = n.parent.agentRow;
-                wallCol = n.parent.agentCol - 1;
-                if(!ConflictDetector.IsCellFree(wallRow, wallCol, conflict.agents, conflict.boxes) && Character.toLowerCase(CentralPlanner.boxes[wallRow][wallCol]) != CentralPlanner.goals[n.c.goalStack.peek().goalRow][n.c.goalStack.peek().goalCol])
-                    cP.addWall(wallRow,wallCol);
-
-
-
-                actions.add(result);
-                Conflict conflictT = ConflictDetector.CheckIfActionCanBeApplied(actions,centralPlanner);
-                if(conflictT.IsConflict())
-                {
-                    solution.addFirst(result);
-                    solution.addFirst(centralPlanner.CreateNoOp(result.parent));
-                }
-                result = solution.removeFirst();
-
-                break;
-              */
 
             case Pull:
             case Push:
@@ -491,7 +427,7 @@ public class ConflictHandler {
                         }
                         actions.remove(children);
                     }
-
+/*
                     Conflict trapped = new Conflict(ConflictTypes.TrappedAgent, cP);
                     solution = centralPlanner.GetPlanFromAgent(cP);
                     joinPlan.put(cP,solution);
@@ -499,10 +435,42 @@ public class ConflictHandler {
                     System.err.println("Trapped Agent Plan");
                     System.err.println(solution);
                     ConflictHandler.HandleConflict(trapped,null,centralPlanner,null,null,joinPlan,null);
+*/
+                    Node doThis = null;
+                    cP.SetInitialState(cP.currentState);
+                    cP.initialState.boxes = CentralPlanner.GetBoxesOfSpecificColor(cP);
+                    for (Node children : cP.initialState.getExpandedNodes()) {
+                        actions.add(children);
+                        test = ConflictDetector.CheckIfActionCanBeApplied(actions, centralPlanner);
+                        if (test.IsConflict() || children.action.actionType == Command.Type.NoOp) {
+                            continue;
+                        }
+                        actions.remove(children);
 
+                        doThis = children;
+                        break;
+                    }
+                    if(doThis != null){
+                        System.err.println("Do this");
+                        System.err.println(doThis);
+                        cP.SetInitialState(doThis);
+                        CentralPlanner.CopyBoxes(doThis.boxes,cP.goalStack.peek().boxes);
+                        joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
+                        return doThis;
+                    }
                 }
-                result = solution.removeFirst();
+/*
+                Conflict trapped = new Conflict(ConflictTypes.TrappedAgent, cP);
+                solution = centralPlanner.GetPlanFromAgent(cP);
+                joinPlan.put(cP,solution);
+                System.err.println(cP.goalStack.peek().goal);
+                System.err.println("Trapped Agent Plan");
+                System.err.println(solution);
+                ConflictHandler.HandleConflict(trapped,null,centralPlanner,null,null,joinPlan,null);
+*/
                 joinPlan.put(cP, solution);
+                result = solution.removeFirst();
+
                 break;
         }
 

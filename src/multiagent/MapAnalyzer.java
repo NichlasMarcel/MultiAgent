@@ -3,9 +3,6 @@ package multiagent;
 import java.util.ArrayDeque;
 import java.util.HashSet;
 
-/**
- * Created by Dan on 3/29/2017.
- */
 public class MapAnalyzer {
 
     public static class StrategyBFS extends Strategy {

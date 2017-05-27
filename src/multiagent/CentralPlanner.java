@@ -7,14 +7,9 @@ import java.io.*;
 import java.util.*;
 import java.util.Map;
 
-
-/**
- * Created by Nichlas on 21-03-2017.
- */
 public class CentralPlanner {
     private BufferedReader in;
     public GoalCell[] temporarryWalls;
-    //private List< Agent > agents = new ArrayList< Agent >();
     public static char[][] goals; // Taget fra node
     public static char[][] agents; // Taget fra node
     public static char[][] boxes;
@@ -121,23 +116,7 @@ public class CentralPlanner {
             }
         };
         thread1.start();
-        //calculateAllPaths();
 
-
-
-
-
-
-
-/*
-        for(int j = 0; j < agents.length; j++){
-            for (int i = 0; i< agents[j].length; i++){
-                if(agents[j][i] !=  '\u0000')
-                    System.err.println("x: " + j + "y: " + i + "agent: " + agents[j][i] + "color: " + colors.get(agents[j][i]));
-            }
-
-        }
-        */
     }
 
 
@@ -151,7 +130,6 @@ public class CentralPlanner {
         long startTime = System.currentTimeMillis();
 
         List<ExampleNode> path ;
-//        System.err.println(path);
 
 
 
@@ -167,7 +145,6 @@ public class CentralPlanner {
                                 for (int k=1; k<path.size(); k++)
                                 {
                                     path = path.subList(1,path.size()-1);
-//                                System.err.println(path);
                                     if(path.size()>0 )
 
                                             allPaths.putIfAbsent(createKey(path.get(0).getxPosition(), path.get(0).getyPosition(), i2, j2), path);
@@ -395,9 +372,7 @@ public class CentralPlanner {
 
         // Find closest reachable box to the goal!
         HashMap<Goal,Character> goals = new HashMap<>();
-//        Client c = new Client();
-//        c.goals = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-//        CopyBoxes(walls, c.walls);
+
 
         for (int i = 0; i < MAX_ROW; i++)
             for (int j = 0; j < MAX_COL; j++)
@@ -417,15 +392,7 @@ public class CentralPlanner {
             for (int i = 0; i < MAX_ROW; i++)
                 for (int j = 0; j < MAX_COL; j++)
                     if(Character.toLowerCase(boxes[i][j]) == goals.get(g)){
-//                        Node n = new Node(null,c);
-//                        n.boxes = new char[CentralPlanner.MAX_ROW][CentralPlanner.MAX_COL];
-//                        n.agentRow = i;
-//                        n.agentCol = j;
-//                        c.SetInitialState(n);
-//                        g.goal = GoalTypes.MoveToCell;
-//                        c.addGoal(g);
-//
-//                        c.goalStack.peek().UpdateBoxes();
+
 
                         List<ExampleNode> solution = getPath(i,j, g.agentRow,g.agentCol) ;
                         if(solution!=null)
@@ -445,10 +412,6 @@ public class CentralPlanner {
                 if(!agent.color.equals(colors.get(boxes[boxRow][boxCol])))
                     continue;
 
-//                agent.addGoal(agent_box);
-//
-//                LinkedList<Node> solution = GetPlanFromAgent(agent);
-//                agent.goalStack.pop();
 
                 List<ExampleNode> solution = getPath(agent.initialState.agentRow,agent.initialState.agentCol, boxRow,boxCol);
                 if(solution == null){
@@ -503,7 +466,7 @@ public class CentralPlanner {
             for (int j = 0; j < MAX_COL; j++)
                 if (CentralPlanner.goals[i][j] != 0)
                 {
-                   // System.err.println("------------------\n\n" + boxes[i][j] + ":" +  i + ":" + j );
+
                     double minimumDistance = Double.MAX_VALUE;
                     int savedRow = 0, savedColumn = 0;
 
@@ -540,9 +503,7 @@ public class CentralPlanner {
 
 
                     if (savedClient != null) {
-//                        savedClient.initialState.boxes[i][j]
-//                                = boxes[i][j];
-//                        savedClient.goals[savedRow][savedColumn] = goals[savedRow][savedColumn];
+
                         char[][] aBoxes = new char[MAX_ROW][MAX_COL];
                         char[][] aGoals = new char[MAX_ROW][MAX_COL];
                         aBoxes[savedRow][savedColumn]
@@ -576,18 +537,7 @@ public class CentralPlanner {
         }
 
         System.err.println("Boxes and goals");
-//        for (Client agent : agentList)
-//        {   System.err.println("Agent: " + agent.getNumber());
-//        System.err.println("STack size of the agent: " + agent.goalStack.size());
-//            for (Goal g: agent.goalStack) {
-//                    Node n = new Node(null, agent);
-//                    n.boxes = g.boxes;
-//                    n.c.goals = g.goals;
-//
-//                    System.err.println(n);
-//                    }
-//                    System.err.println();
-//                }
+
 
 
     }
@@ -638,8 +588,6 @@ public class CentralPlanner {
 
     public static LinkedList<Node> GetPlanFromAgent(Client agent) {
         LinkedList<Node> solution = new LinkedList<>();
-
-        //agent.initialState.boxes = agent.goalStack.peek().boxes ;
         Strategy strategy = null;
         try {
             if (agent.goalStack.size()!=0) {
@@ -684,94 +632,6 @@ public class CentralPlanner {
             System.err.println("Found solution of length " + solution.size());
             System.err.println(strategy.searchStatus());
         }
-
-//        Iterator lit = solution.listIterator();
-//        System.err.println("Forward Iterations");
-//        Node n = null;
-//        boolean error = false;
-//        int distance=0;
-//        while(lit.hasNext()){
-//            n = (Node)lit.next();
-//            if (IsBox(n.agentRow,n.agentCol)) {
-//                System.err.println("Cell not free at ");
-//                System.err.println(n);
-//                error =true;
-//                distance = (int)CalculateMathDistance(n.agentRow,n.agentCol, agent.goalStack.peek().boxRow, agent.goalStack.peek().boxCol) + 2;
-//                break;
-//
-//
-//
-//            }
-//
-//
-//
-//
-//
-//        }
-//
-//        if (error)
-//        {
-//
-//            LinkedList<Node> halfSolution = new LinkedList<>();
-//            lit = solution.listIterator();
-//            boolean t =false;
-//            System.err.println(agent.goalStack.peek().boxRow + " : " + agent.goalStack.peek().boxCol);
-//            while(lit.hasNext()){
-//                Node a = (Node)lit.next();
-//                System.err.println(a.agentRow + " - " + a.agentCol);
-//                if (AreNeighbours(a.agentRow,a.agentCol,agent.goalStack.peek().boxRow,agent.goalStack.peek().boxCol ))
-//                    t=true;
-//                if (t)
-//                    halfSolution.add(a);
-//
-//
-//            }
-//
-//            System.err.println("Half solution  +" + halfSolution);
-//
-//            System.err.println("errorrrrrrrr");
-//            lit = solution.listIterator();
-//            Node h = (Node)lit.next();
-//            LinkedList<Node> visited = new LinkedList<>();
-//            Node found = getFreeCell(h,distance,halfSolution,visited);
-//            while(lit.hasNext() && found==null ){
-//               Node k =  (Node)lit.next();
-////               System.err.println("------------------------------------------Node tried" + k);
-//               found= getFreeCell(k, distance-1,halfSolution,visited);
-//               if(found!=null)
-//                   break;
-//            }
-//
-//            System.err.println(found);
-//            System.err.println("second");
-//            char[][] aBoxes = new char[MAX_ROW][MAX_COL];
-//            char[][] aGoals = new char[MAX_ROW][MAX_COL];
-//            aBoxes[n.agentRow][n.agentCol]
-//                    = boxes[n.agentRow][n.agentCol];
-//
-//            aGoals[found.agentRow][found.agentCol]  = Character.toLowerCase(boxes[n.agentRow][n.agentCol]);
-//            Goal goal = new Goal(aGoals, aBoxes);
-//            goal.boxRow = n.agentRow;
-//            goal.boxCol = n.agentCol;
-//            goal.goalRow = found.agentRow;
-//            goal.goalCol = found.agentCol;
-//            goal.goal = GoalTypes.BoxOnGoal;
-//
-//            agent.addGoal(goal);
-//            //agent.removeAllWalls();
-//            solution = GetPlanFromAgent(agent);
-//
-//
-//            System.err.println("Agent initial state before:" + agent.initialState);
-//            System.err.println("Final solution: " + solution);
-//        }
-
-
-
-
-
-
-
 
         return solution;
     }
@@ -857,9 +717,8 @@ public class CentralPlanner {
 
             for (Node node : n.getExpandedNodes())
             {
-//                System.err.println("expanded: " + node);
                 if (!IsBox(node.agentRow,node.agentCol)&& NotPartOfSolution(node,solution) && NotPartOfSolution(node,visited))
-                {  // System.err.println(node);
+                {
                     LinkedList<Node> newVisited = new LinkedList<>(visited);
                     newVisited.add(node);
                     Node found =  getSurroundedCell(node, solution, newVisited);
@@ -951,13 +810,12 @@ public class CentralPlanner {
             if(solutions.get(goal)!=null)
                 savedGoal = goal;
         }
-//            System.err.println("Collisions: " + goals[goal.goalRow][goal.goalCol]  +":" +collisions.get(goal));
+
         }
 
         Queue<ExampleNode> queue =  new LinkedList<>();
         if(min==0)
         {   savedGoal.UpdateBoxes();
-//            System.err.println("This is the node: " +   savedGoal.goals[savedGoal.goalRow ][savedGoal.goalCol]);
         }
         if (savedGoal!=null) {
             HashMap<String, String> checkIfAdded = new HashMap<>();
@@ -972,18 +830,14 @@ public class CentralPlanner {
                     }
                 }
             }
-//            System.err.println("Queue size" + queue.size() + " : " + collisions.get(savedGoal));
-//            System.err.println("solutionE: " + solutions.get(savedGoal));
             if(savedGoal.client.goalStack.size()>0)
                 if (queue.size() > 0  ) {
 
                     int counter = 0;
 
-//                    System.err.println("Queue size" + queue.size() +" Colissions size:"+ collisions.size());
                     ExampleNode n = queue.poll();
                     counter++;
-//                    System.err.println("Counter: " + counter);
-//                    System.err.println(n);
+
                     int distance = queue.size() + 4;
                     Client agent = savedGoal.client;
                     //LinkedList<Node> halfSolution = new LinkedList<>();
@@ -1010,28 +864,6 @@ public class CentralPlanner {
                         halfSolution.add(b);
                     }
 
-//                    boolean t = false;
-//                    lit = solution.listIterator();
-//                    //System.err.println(savedGoal.client.goalStack.peek().boxRow + " : " + savedGoal.client.goalStack.peek().boxCol);
-//                    while (lit.hasNext()) {
-//                        Node a = (Node) lit.next();
-//                       // System.err.println(a.agentRow + " - " + a.agentCol);
-//                        if (AreNeighbours(a.agentRow, a.agentCol, agent.goalStack.peek().boxRow, agent.goalStack.peek().boxCol))
-//                            t = true;
-//                        if (t) {
-//                            Node b = new Node(null,agent);
-//                            b.agentRow  = a.agentRow;
-//                            b.agentCol = a.agentCol;
-//                            halfSolution.add(b);
-//                        }
-//
-//
-//                    }
-
-//                    System.err.println("Half solution  +" + halfSolution);
-
-//                    System.err.println("errorrrrrrrr");
-
                     lit = solution.listIterator();
 
                     Node h= (Node)lit.next();
@@ -1041,7 +873,6 @@ public class CentralPlanner {
                     Node found = getFreeCell(h, distance, halfSolution, visited);
                     while (lit.hasNext() && found == null) {
                         Node k = (Node) lit.next();
-//               System.err.println("------------------------------------------Node tried" + k);
                         found = getFreeCell(k, distance - 1, halfSolution, visited);
                         if (found != null)
                             break;
@@ -1060,8 +891,6 @@ public class CentralPlanner {
                     }
 
                     if(found!=null) {
-//                        System.err.println(found);
-//                        System.err.println("second");
                         char[][] aBoxes = new char[MAX_ROW][MAX_COL];
                         char[][] aGoals = new char[MAX_ROW][MAX_COL];
                         aBoxes[n.getxPosition()][n.getyPosition()]
@@ -1076,22 +905,7 @@ public class CentralPlanner {
                         goal.goal = GoalTypes.BoxOnCell;
 
                         agent.addGoal(goal);
-//                    System.err.println("Adding last goal compared to others:"  + goal.goals[goal.goalRow][goal.goalCol] + "- Type: " + goal.goal + "Box:" + goal.boxRow +" :" + goal.boxCol +" Goal:" + goal.goalRow + ": "+ goal.goalCol );
-//                    for(Goal g: agent.goalStack)
-//                    {
-//                        System.err.println("Goal:"  + g.goals[g.goalRow][g.goalCol] + "- Type: " + g.goal + "Box:" + g.boxRow +" :" + g.boxCol +" Goal:" + g.goalRow + ": "+ g.goalCol );
-//                        if(g==goal)
-//                            continue;
-//                        if(g.goalCol == goal.goalCol && g.goalRow==goal.goalRow  )
-//                            agent.goalStack.remove(g);
-//                    }
-//                    System.err.println("adding goal: " + goal.goal + " : " + goal.boxes[goal.boxRow][goal.boxCol]);
-                        //agent.removeAllWalls();
-                        //solution = GetPlanFromAgent(agent);
 
-
-//                        System.err.println("Agent initial state before:" + agent.initialState);
-//                        System.err.println("Final solution: " + solution);
                     }
                 }
                 else
@@ -1114,11 +928,6 @@ public class CentralPlanner {
 
 
         }
-
-
-
-
-
 
 
     }
@@ -1196,9 +1005,6 @@ public class CentralPlanner {
                 return;
             }
 
-            // Get closes goal
-         //   if (cP.goalStack.size()>1)
-           //     cP.getBestGoal();
 
 
             System.err.println("New goal initialState: " );
@@ -1228,12 +1034,10 @@ public class CentralPlanner {
             System.err.println("Agent Row: " + cP.currentState.agentRow + " Col: " + cP.currentState.agentCol);
             cP.SetInitialState(cP.currentState);
 
-       //     PrioritizeGoals();
             System.err.println("Current goal: " + cP.goalStack.peek().goal);
             LinkedList<Node> solution = GetPlanFromAgent(cP);
 
 
-            //check if the plan is ok
 
 
             System.err.println(solution);
@@ -1278,20 +1082,11 @@ public class CentralPlanner {
         // Divide start goals
         DivideGoals3(agentList);
 
-//    PrioritizeGoals();
-
-
-       // for (Client cP : agentList) {
-         //   if (cP.goalStack.size() > 1) cP.getBestGoal();
-        //}
-        // Get plans from agents
         joinPlan = GetPlansFromAgents(agentList);
 
 
         // Check If Agents are blocked in
         ReleaseAgents();
-
-        //PlanGenerator.FillWithNoOp(joinPlan);
 
         // Execute plans from agents
         while (!response.contains("sucess")) {
@@ -1327,14 +1122,11 @@ public class CentralPlanner {
 
                 System.err.println();
                 System.err.println("Clients: " + joinPlan.keySet().size());
-//                for (List<Node> l : joinPlan.values()) {
-//                    System.err.println(l.size());
-//                }
+
                 cmdForClients.put(cP, n);
                 count++;
             }
 
-            //PlanGenerator.FillWithNoOp(joinPlan);
 
             String joinedAction = "[";
 
@@ -1412,26 +1204,16 @@ public class CentralPlanner {
             int newAgentCol = node.agentCol + Command.dirToColChange(node.action.dir1);
 
             if (node.action.actionType == Command.Type.Move) {
-                //if(node.parent.agentRow == 1 && node.parent.agentCol == 13){
-                //    System.err.println("Agent found! " + agents[node.agentRow][node.agentCol]);
-                //}
-                // Check if there's a wall or box on the cell to which the agent is moving
+
                 if (IsCellFree(node.agentRow, node.agentCol)) {
-                    // System.err.println("Row: " + node.agentRow);
-                    //System.err.println("Col: " + node.agentCol);
 
 
                     char agent = agents[node.parent.agentRow][node.parent.agentCol];
                     agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                     agents[node.agentRow][node.agentCol] = agent;
-                    //System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
 
-                    //System.err.println("AGE " + agent);
-                    //System.err.println("NRow: " + newAgentRow);
-                    //System.err.println("NCol: " + newAgentCol);
                 }
-                //else
-                //System.err.println(this);
+
             } else if (node.action.actionType == Command.Type.Push) {
                 // Make sure that there's actually a box to move
                 if (boxAt(node.agentRow, node.agentCol)) {
@@ -1447,23 +1229,16 @@ public class CentralPlanner {
 
                         agents[node.parent.agentRow][node.parent.agentCol] = ' ';
                         boxes[node.agentRow][node.agentCol] = 0;
-/*
-                        System.err.println("agent: " + agents[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);
-                        System.err.println("box: " + boxes[newBoxRow][newBoxCol] + " Row: " + newBoxRow + " Col: " + newBoxCol);
-                        System.err.println("Oldbox: " + boxes[node.agentRow][node.agentCol] + " Row: " + node.agentRow + " Col: " + node.agentCol);                        boxes[newBoxRow][newBoxCol] = box;
-*/
 
                     }
                 }
             }
-            //
-            // Check this code;
+
             else if (node.action.actionType == Command.Type.Pull) {
                 // Cell is free where agent is going
                 if (IsCellFree(node.agentRow, node.agentCol)) {
                     int boxRow = node.parent.agentRow + Command.dirToRowChange(node.action.dir2);
                     int boxCol = node.parent.agentCol + Command.dirToColChange(node.action.dir2);
-                    // .. and there's a box in "dir2" of the agent
                     if (boxAt(boxRow, boxCol)) {
                         char agent = agents[node.parent.agentRow][node.parent.agentCol];
                         agents[node.parent.agentRow][node.parent.agentCol] = ' ';
@@ -1474,7 +1249,7 @@ public class CentralPlanner {
                         boxes[node.parent.agentRow][node.parent.agentCol] = box;
                     }
                 }
-                //else if (node.action.actionType == Command.Type.NoOp)
+
             }
         }
     }
@@ -1483,7 +1258,6 @@ public class CentralPlanner {
         for (int i = 0; i < boxesToCopy.length; i++)
             for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];
-                //receiver[i][j] =  boxesToCopy[i][j];
             }
     }
 
@@ -1491,7 +1265,6 @@ public class CentralPlanner {
         for (int i = 0; i < boxesToCopy.length; i++)
             for (int j = 0; j < boxesToCopy[i].length; j++) {
                 receiver[i][j] = boxesToCopy[i][j];
-                //receiver[i][j] =  boxesToCopy[i][j];
             }
     }
 

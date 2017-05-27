@@ -11,11 +11,6 @@ public abstract class Heuristic implements Comparator<Node> {
 		this.initialState = initialState;
 	}
 
-
-
-
-
-
 	public int h(Node n) {
 
 		for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
@@ -34,41 +29,6 @@ public abstract class Heuristic implements Comparator<Node> {
 
 
 		return Integer.MAX_VALUE;
-
-/*
-		boolean finished = false;
-		int grow = -1;
-		int gcol = -1;
-		int row = -1;
-		int col = -1;
-
-		for (int i = 0; i < CentralPlanner.MAX_ROW; i++) {
-			if(finished)
-				break;
-			for (int j = 0; j < CentralPlanner.MAX_COL; j++) {
-				if(n.c.goalStack.peek().goals[i][j] != 0){
-
-					grow = i;
-					gcol = j;
-					finished = true;
-					break;
-				}
-
-				if(n.boxes[i][j] != 0)
-				{
-					row = i;
-					col = j;
-				}
-			}
-
-
-		}
-
-
-		double distance = CentralPlanner.CalculateMathDistance(row,col, grow,gcol) + CentralPlanner.CalculateMathDistance(row,col,n.agentRow,n.agentCol);
-		//System.err.println("Distance: " + distance);
-		return (int)distance;
-*/
 
 	}
 

@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by Nichlas on 22-03-2017.
- */
 public class PlanGenerator {
 
     public static Node getNewStateForClient(CentralPlanner centralPlanner, Client c){
@@ -26,18 +23,10 @@ public class PlanGenerator {
         for (LinkedList<Node> p : joinPlan.values())
             maximumLength = Integer.max(maximumLength, p.size());
 
-        //for (LinkedList<Node> p : joinPlan.values()){
         for (Client client : joinPlan.keySet()){
             LinkedList<Node> p = joinPlan.get(client);
             int s = p.size();
-            //System.err.println("max: " + maximumLength + "p: " + p.size());
-            /*if(p.size() == 0){
-                Node n = new Node(null,client);
-                Command c = new Command();
-                n.action = c;
-                p.addLast(n);
-            }*/
-            //else
+
                 {
                 while (p.size() < maximumLength){
                     Node copy = null;

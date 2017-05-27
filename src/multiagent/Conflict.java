@@ -1,8 +1,5 @@
 package multiagent;
 
-/**
- * Created by Nichlas on 01-04-2017.
- */
 public class Conflict {
     ConflictTypes type;
     public Command action = null;

@@ -31,7 +31,8 @@ public abstract class Strategy {
 	}
 
 	public String searchStatus() {
-		return String.format("#Explored: %6d, #Frontier: %6d, #Generated: %6d, Time: %3.2f s \t%s", this.countExplored(), this.countFrontier(), this.countExplored()+this.countFrontier(), this.timeSpent(), Memory.stringRep());
+		return "";
+		//return String.format("#Explored: %6d, #Frontier: %6d, #Generated: %6d, Time: %3.2f s \t%s", this.countExplored(), this.countFrontier(), this.countExplored()+this.countFrontier(), this.timeSpent());
 	}
 
 	public float timeSpent() {

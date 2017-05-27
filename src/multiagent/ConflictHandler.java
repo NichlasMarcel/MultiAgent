@@ -450,6 +450,7 @@ public class ConflictHandler {
                         doThis = children;
                         break;
                     }
+
                     if(doThis != null){
                         System.err.println("Do this");
                         System.err.println(doThis);
@@ -458,6 +459,7 @@ public class ConflictHandler {
                         joinPlan.put(cP, centralPlanner.GetPlanFromAgent(cP));
                         return doThis;
                     }
+
                 }
 /*
                 Conflict trapped = new Conflict(ConflictTypes.TrappedAgent, cP);
@@ -472,6 +474,7 @@ public class ConflictHandler {
                 result = solution.removeFirst();
 
                 break;
+
         }
 
         return result;

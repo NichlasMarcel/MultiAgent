@@ -2,9 +2,6 @@ package multiagent;
 
 import java.util.LinkedList;
 
-/**
- * Created by Nichlas on 01-04-2017.
- */
 public class Goal {
     GoalTypes goal;
 

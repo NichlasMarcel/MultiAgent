@@ -3,9 +3,6 @@ package multiagent;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-/**
- * Created by Dan on 4/1/2017.
- */
 public class GoalCell {
 
     int x,y;
@@ -37,11 +34,7 @@ public class GoalCell {
     public GoalCell findGoalBefore(GoalCell g)
     {   System.err.println(goalsBefore);
 
-//        if (goalsBefore.size()>0)
-//            for (GoalCell k : goalsBefore)
-//                if (k.surrounded()==3)
-//                return k;
-//        return g;
+
         if (goalsBefore.size()>0){
 
 

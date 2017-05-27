@@ -4,20 +4,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-
-/**
- * Created by Nichlas on 14-03-2017.
- */
 public class Client {
     private BufferedReader in = new BufferedReader( new InputStreamReader( System.in ) );
     public ArrayList<GoalCell> temporaryWalls = new ArrayList<>();
-    //private List< Agent > agents = new ArrayList< Agent >();
     public Node initialState;
     public Node currentState;
     public char[][] goals; // Taget fra node
     public boolean[][] walls;
-   /* public static int MAX_ROW;
-    public static int MAX_COL;*/
+
     public String color;
     static Map< Character, String > colors = new HashMap< Character, String >();
     public int number;
